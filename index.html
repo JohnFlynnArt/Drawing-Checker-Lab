@@ -543,9 +543,15 @@ function applyLockedFrame(ratio){
 
 function resetCropFrame(){
   const stage=$("#crop-stage").getBoundingClientRect();
-  if(!stage.width||!stage.height)return;
+  if(!stage.width||!stage.height||!cropState.image)return;
 
-  const margin=Math.max(20,Math.min(stage.width,stage.height)*0.07);
+  const rotated=Math.abs(cropState.rotation%180)===90;
+  const imageW=rotated ? cropState.image.naturalHeight : cropState.image.naturalWidth;
+  const imageH=rotated ? cropState.image.naturalWidth : cropState.image.naturalHeight;
+
+  const fit=Math.min(stage.width/imageW,stage.height/imageH);
+  const displayW=imageW*fit;
+  const displayH=imageH*fit;
 
   if(cropState.locked){
     const ratio=ratioValue(cropState.ratioKey) || originalCropRatio();
@@ -554,10 +560,10 @@ function resetCropFrame(){
   }
 
   cropState.frame={
-    x:margin,
-    y:margin,
-    w:Math.max(100,stage.width-margin*2),
-    h:Math.max(100,stage.height-margin*2)
+    x:(stage.width-displayW)/2,
+    y:(stage.height-displayH)/2,
+    w:displayW,
+    h:displayH
   };
 }
 
