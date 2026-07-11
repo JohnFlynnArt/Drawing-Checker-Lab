@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio v2.0.0 Alpha 1 — Image Preparation + Free Form</title>
+<title>Drawing Checker Studio v2.1.0 — UX Foundation</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -133,6 +133,28 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-controls button.active{background:var(--blue);border-color:#60a5fa}
 .crop-note{font-size:11px;color:var(--muted);text-align:center}
 
+
+/* ASPECT RATIO CHOOSER */
+.ratio-sheet{position:absolute;inset:0;z-index:12;display:none;align-items:flex-end;background:rgba(0,0,0,.38);backdrop-filter:blur(2px)}
+.ratio-sheet.open{display:flex}
+.ratio-panel{width:100%;max-height:74%;overflow:auto;background:rgba(28,28,32,.97);border-top:1px solid rgba(255,255,255,.14);border-radius:18px 18px 0 0;padding:10px 12px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -18px 44px rgba(0,0,0,.45)}
+.ratio-handle{width:44px;height:4px;border-radius:99px;background:rgba(255,255,255,.25);margin:0 auto 10px}
+.ratio-title{font-size:12px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.ratio-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ratio-option{min-height:44px;border-radius:10px;justify-content:flex-start;padding-left:14px;font-size:13px}
+.ratio-option.active{background:var(--blue);border-color:#60a5fa;color:#fff}
+.ratio-option[disabled]{display:none}
+
+/* PRECISION POINT PLACEMENT */
+.precision-overlay{position:absolute;inset:0;z-index:110;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 52px,rgba(0,0,0,.18) 53px 100%)}
+.precision-overlay.active{display:block}
+.precision-crosshair{position:absolute;left:50%;top:50%;width:58px;height:58px;transform:translate(-50%,-50%)}
+.precision-crosshair::before,.precision-crosshair::after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000,0 0 6px rgba(0,0,0,.8)}
+.precision-crosshair::before{left:50%;top:0;width:1px;height:100%}
+.precision-crosshair::after{top:50%;left:0;height:1px;width:100%}
+.precision-dot{position:absolute;left:50%;top:50%;width:7px;height:7px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 3px #000}
+.precision-label{position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.72);font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
+
 </style>
 </head>
 <body>
@@ -198,6 +220,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       <div id="world" class="world">
         <img id="ref-image" class="layer" alt="Reference">
         <img id="draw-image" class="layer" alt="Drawing">
+      </div>
+      <div id="precision-overlay" class="precision-overlay" aria-hidden="true">
+        <div class="precision-crosshair"><span class="precision-dot"></span></div>
+        <div class="precision-label">Release to place point</div>
       </div>
     </div>
     <div class="desktop-help">
@@ -277,8 +303,8 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     </div>
     <div class="crop-controls">
       <div class="crop-row two">
-        <button id="crop-free" class="active">Free Crop</button>
-        <button id="crop-lock">Lock Ratio</button>
+        <button id="crop-ratio">Aspect Ratio: Free</button>
+        <button id="crop-reset-frame">Reset Crop</button>
       </div>
       <div class="crop-row">
         <button id="crop-zoom-out">Zoom −</button>
@@ -290,6 +316,26 @@ input[type=range]{width:100%;accent-color:var(--blue)}
         <button id="crop-use" class="btn-primary">Use Crop</button>
       </div>
       <div id="crop-note" class="crop-note">Free Crop: drag the corner handles to resize the crop frame.</div>
+    </div>
+    <div id="ratio-sheet" class="ratio-sheet" aria-hidden="true">
+      <div class="ratio-panel">
+        <div class="ratio-handle"></div>
+        <div class="ratio-title">Aspect Ratio</div>
+        <div class="ratio-list">
+          <button class="ratio-option active" data-ratio="free">Free</button>
+          <button class="ratio-option" data-ratio="original">Original Ratio</button>
+          <button id="ratio-reference" class="ratio-option" data-ratio="reference">Match Reference</button>
+          <button class="ratio-option" data-ratio="1:1">1 : 1</button>
+          <button class="ratio-option" data-ratio="4:5">4 : 5</button>
+          <button class="ratio-option" data-ratio="8.5:11">8.5 : 11</button>
+          <button class="ratio-option" data-ratio="5:7">5 : 7</button>
+          <button class="ratio-option" data-ratio="2:3">2 : 3</button>
+          <button class="ratio-option" data-ratio="3:4">3 : 4</button>
+          <button class="ratio-option" data-ratio="3:5">3 : 5</button>
+          <button class="ratio-option" data-ratio="16:9">16 : 9</button>
+          <button id="ratio-close" class="ratio-option">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -357,7 +403,7 @@ function beginNewMobileSession(){
 const cropState={
   kind:null,file:null,url:null,image:null,
   x:0,y:0,scale:1,rotation:0,
-  locked:false,ratio:1,
+  locked:false,ratio:1,ratioKey:"free",
   frame:{x:0,y:0,w:100,h:100},
   drag:null
 };
@@ -393,10 +439,12 @@ function openCropEditor(){
   editor.classList.add("open");
   editor.setAttribute("aria-hidden","false");
   $("#crop-title").textContent=cropState.kind==="ref" ? "Prepare Reference" : "Prepare Drawing";
-  $("#crop-free").classList.add("active");
-  $("#crop-lock").classList.remove("active");
+  cropState.ratioKey="free";
+  cropState.locked=false;
   $("#crop-frame").classList.remove("locked");
+  $("#crop-ratio").textContent="Aspect Ratio: Free";
   $("#crop-note").textContent="Free Crop: drag the corner handles to resize the crop frame.";
+  closeRatioSheet();
 
   requestAnimationFrame(()=>{
     resetCropFrame();
@@ -411,77 +459,60 @@ function closeCropEditor(){
   cropState.drag=null;
 }
 
-function cropLockRatio(){
-  if(cropState.kind==="draw"&&hasRef()){
-    return refImg.naturalWidth/refImg.naturalHeight;
-  }
+function originalCropRatio(){
   const img=cropState.image;
   const rotated=Math.abs(cropState.rotation%180)===90;
   return rotated ? img.naturalHeight/img.naturalWidth : img.naturalWidth/img.naturalHeight;
 }
 
-function resetCropFrame(){
-  const r=$("#crop-stage").getBoundingClientRect();
-  const margin=Math.max(24,Math.min(r.width,r.height)*.08);
-  cropState.frame={x:margin,y:margin,w:Math.max(100,r.width-margin*2),h:Math.max(100,r.height-margin*2)};
-  if(cropState.locked)applyLockedFrame(cropLockRatio());
+function ratioValue(key){
+  if(key==="original")return originalCropRatio();
+  if(key==="reference"&&hasRef())return refImg.naturalWidth/refImg.naturalHeight;
+  if(key.includes(":")){
+    const [a,b]=key.split(":").map(Number);
+    return a/b;
+  }
+  return null;
 }
 
-function applyLockedFrame(ratio){
-  const stage=$("#crop-stage").getBoundingClientRect();
-  const margin=Math.max(24,Math.min(stage.width,stage.height)*.08);
-  let w=stage.width-margin*2;
-  let h=w/ratio;
-  if(h>stage.height-margin*2){h=stage.height-margin*2;w=h*ratio}
-  cropState.frame={x:(stage.width-w)/2,y:(stage.height-h)/2,w,h};
+function ratioLabel(key){
+  if(key==="free")return "Free";
+  if(key==="original")return "Original";
+  if(key==="reference")return "Reference";
+  return key.replace(":"," : ");
 }
 
-function fitCropImage(){
-  const img=cropState.image;
-  if(!img)return;
-  const rotated=Math.abs(cropState.rotation%180)===90;
-  const iw=rotated?img.naturalHeight:img.naturalWidth;
-  const ih=rotated?img.naturalWidth:img.naturalHeight;
-  cropState.scale=Math.max(cropState.frame.w/iw,cropState.frame.h/ih);
-  cropState.x=0;
-  cropState.y=0;
+function openRatioSheet(){
+  $("#ratio-reference").disabled=!(cropState.kind==="draw"&&hasRef());
+  document.querySelectorAll(".ratio-option[data-ratio]").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.ratio===cropState.ratioKey);
+  });
+  $("#ratio-sheet").classList.add("open");
+  $("#ratio-sheet").setAttribute("aria-hidden","false");
 }
 
-function clampCropFrame(){
-  const stage=$("#crop-stage").getBoundingClientRect();
-  const f=cropState.frame;
-  const min=80;
-  f.w=Math.max(min,Math.min(f.w,stage.width-f.x));
-  f.h=Math.max(min,Math.min(f.h,stage.height-f.y));
-  f.x=Math.max(0,Math.min(f.x,stage.width-f.w));
-  f.y=Math.max(0,Math.min(f.y,stage.height-f.h));
+function closeRatioSheet(){
+  const sheet=$("#ratio-sheet");
+  if(!sheet)return;
+  sheet.classList.remove("open");
+  sheet.setAttribute("aria-hidden","true");
 }
 
-function renderCrop(){
-  const stage=$("#crop-stage").getBoundingClientRect();
-  const f=cropState.frame;
-  $("#crop-preview").style.transform=
-    `translate(-50%,-50%) translate(${cropState.x}px,${cropState.y}px) rotate(${cropState.rotation}deg) scale(${cropState.scale})`;
+function chooseRatio(key){
+  cropState.ratioKey=key;
+  cropState.locked=key!=="free";
+  $("#crop-ratio").textContent=`Aspect Ratio: ${ratioLabel(key)}`;
+  $("#crop-frame").classList.toggle("locked",cropState.locked);
 
-  const frame=$("#crop-frame");
-  Object.assign(frame.style,{left:f.x+"px",top:f.y+"px",width:f.w+"px",height:f.h+"px"});
-  frame.classList.toggle("locked",cropState.locked);
+  if(cropState.locked){
+    applyLockedFrame(ratioValue(key));
+    $("#crop-note").textContent=`${ratioLabel(key)} ratio selected. Drag and pinch the image inside the frame.`;
+  }else{
+    $("#crop-note").textContent="Free Crop: drag the corner handles to resize the crop frame.";
+  }
 
-  Object.assign($("#crop-shade-top").style,{left:"0px",top:"0px",width:stage.width+"px",height:f.y+"px"});
-  Object.assign($("#crop-shade-bottom").style,{left:"0px",top:(f.y+f.h)+"px",width:stage.width+"px",height:Math.max(0,stage.height-f.y-f.h)+"px"});
-  Object.assign($("#crop-shade-left").style,{left:"0px",top:f.y+"px",width:f.x+"px",height:f.h+"px"});
-  Object.assign($("#crop-shade-right").style,{left:(f.x+f.w)+"px",top:f.y+"px",width:Math.max(0,stage.width-f.x-f.w)+"px",height:f.h+"px"});
-}
-
-function setCropLock(locked){
-  cropState.locked=locked;
-  $("#crop-free").classList.toggle("active",!locked);
-  $("#crop-lock").classList.toggle("active",locked);
-  $("#crop-note").textContent=locked
-    ? (cropState.kind==="draw"&&hasRef() ? "Ratio locked to the reference image." : "Ratio locked to the selected image.")
-    : "Free Crop: drag the corner handles to resize the crop frame.";
-  if(locked)applyLockedFrame(cropLockRatio());
   fitCropImage();
+  closeRatioSheet();
   renderCrop();
 }
 
@@ -698,9 +729,8 @@ function addMarker(pt,kind,index){
   m.textContent=index;
   world.appendChild(m);
 }
-function placePoint(clientX,clientY){
+function commitPoint(pt){
   if(state.alignment!=="two")return;
-  const pt=worldPoint(clientX,clientY);
   if(state.phase==="point-ref"&&state.points.ref.length<2){
     state.points.ref.push(pt);
     addMarker(pt,"ref",state.points.ref.length);
@@ -710,6 +740,11 @@ function placePoint(clientX,clientY){
   }
   render();
 }
+
+function placePoint(clientX,clientY){
+  commitPoint(worldPoint(clientX,clientY));
+}
+
 function computeTwoPoint(){
   if(state.points.ref.length<2||state.points.draw.length<2)return;
   const [R1,R2]=state.points.ref,[D1,D2]=state.points.draw;
@@ -785,8 +820,8 @@ function statusText(){
   if(state.loadingKind==="draw")return"Loading drawing…";
   if(!hasRef())return"Load a reference to begin.";
   if(!hasDraw())return"Reference loaded. Add the current drawing.";
-  if(state.phase==="point-ref")return`Tap ${2-state.points.ref.length} reference point${2-state.points.ref.length===1?"":"s"}. Pinch and drag still move the locked workspace.`;
-  if(state.phase==="point-draw")return`Tap ${2-state.points.draw.length} matching drawing point${2-state.points.draw.length===1?"":"s"}.`;
+  if(state.phase==="point-ref")return`Tap to place a reference point, or press and hold for Precision Placement.`;
+  if(state.phase==="point-draw")return`Tap to place a drawing point, or press and hold for Precision Placement.`;
   if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Pins ready. Compute alignment.";
   if(state.phase==="adjust")return`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`;
   if(state.alignment==="free")return"Free Form: manually align the selected layer with drag, pinch, and twist.";
@@ -1058,13 +1093,18 @@ $("#mobile-opacity").oninput=e=>{
 $("#crop-cancel").onclick=cancelCrop;
 $("#crop-cancel-top").onclick=cancelCrop;
 $("#crop-use").onclick=commitCrop;
-$("#crop-free").onclick=()=>setCropLock(false);
-$("#crop-lock").onclick=()=>setCropLock(true);
+$("#crop-ratio").onclick=openRatioSheet;
+$("#crop-reset-frame").onclick=()=>{resetCropFrame();fitCropImage();renderCrop()};
+$("#ratio-close").onclick=closeRatioSheet;
+$("#ratio-sheet").onclick=e=>{if(e.target===$("#ratio-sheet"))closeRatioSheet()};
+document.querySelectorAll(".ratio-option[data-ratio]").forEach(btn=>{
+  btn.onclick=()=>chooseRatio(btn.dataset.ratio);
+});
 $("#crop-zoom-out").onclick=()=>{cropState.scale=Math.max(.01,cropState.scale*.94);renderCrop()};
 $("#crop-zoom-in").onclick=()=>{cropState.scale*=1.06;renderCrop()};
 $("#crop-rotate").onclick=()=>{
   cropState.rotation=(cropState.rotation+90)%360;
-  if(cropState.locked)applyLockedFrame(cropLockRatio());
+  if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));
   fitCropImage();renderCrop();
 };
 
@@ -1189,11 +1229,39 @@ const dist=(a,b)=>Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY);
 const angle=(a,b)=>Math.atan2(b.clientY-a.clientY,b.clientX-a.clientX);
 const center=(a,b)=>({x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2});
 
+function beginPrecisionPlacement(){
+  if(!gesture||gesture.kind!=="point-pending")return;
+  gesture.precision=true;
+  gesture.savedWorkspace={...state.workspace};
+  const pt=worldPoint(gesture.x,gesture.y);
+  const r=viewport.getBoundingClientRect();
+  const targetZoom=Math.min(8,state.workspace.zoom*1.5);
+  state.workspace.zoom=targetZoom;
+  state.workspace.x=-(pt.x*targetZoom);
+  state.workspace.y=-(pt.y*targetZoom);
+  $("#precision-overlay").classList.add("active");
+  $("#precision-overlay").setAttribute("aria-hidden","false");
+  renderVisuals();
+}
+
+function endPrecisionPlacement(place=true){
+  if(!gesture||!gesture.precision)return;
+  const r=viewport.getBoundingClientRect();
+  const pt=worldPoint(r.left+r.width/2,r.top+r.height/2);
+  state.workspace={...gesture.savedWorkspace};
+  $("#precision-overlay").classList.remove("active");
+  $("#precision-overlay").setAttribute("aria-hidden","true");
+  renderVisuals();
+  if(place)commitPoint(pt);
+}
+
 viewport.addEventListener("touchstart",e=>{
   e.preventDefault();
 
   if((state.phase==="point-ref"||state.phase==="point-draw")&&e.touches.length===1){
-    gesture={kind:"tap",x:e.touches[0].clientX,y:e.touches[0].clientY,moved:false};
+    const t=e.touches[0];
+    gesture={kind:"point-pending",x:t.clientX,y:t.clientY,lastX:t.clientX,lastY:t.clientY,moved:false,precision:false,timer:null,savedWorkspace:null};
+    gesture.timer=setTimeout(()=>beginPrecisionPlacement(),350);
     return;
   }
 
@@ -1219,8 +1287,19 @@ viewport.addEventListener("touchmove",e=>{
   e.preventDefault();
   if(!gesture)return;
 
-  if(gesture.kind==="tap"){
-    gesture.moved=true;
+  if(gesture.kind==="point-pending"&&e.touches.length===1){
+    const t=e.touches[0];
+    const dx=t.clientX-gesture.lastX,dy=t.clientY-gesture.lastY;
+    gesture.lastX=t.clientX;gesture.lastY=t.clientY;
+    if(Math.hypot(t.clientX-gesture.x,t.clientY-gesture.y)>10)gesture.moved=true;
+
+    if(gesture.precision){
+      state.workspace.x+=dx;
+      state.workspace.y+=dy;
+      renderVisuals();
+    }else if(gesture.moved){
+      clearTimeout(gesture.timer);
+    }
     return;
   }
 
@@ -1263,7 +1342,12 @@ viewport.addEventListener("touchmove",e=>{
 },{passive:false});
 
 viewport.addEventListener("touchend",()=>{
-  if(gesture&&gesture.kind==="tap"&&!gesture.moved)placePoint(gesture.x,gesture.y);
+  if(!gesture)return;
+  if(gesture.timer)clearTimeout(gesture.timer);
+  if(gesture.kind==="point-pending"){
+    if(gesture.precision)endPrecisionPlacement(true);
+    else if(!gesture.moved)placePoint(gesture.x,gesture.y);
+  }
   gesture=null;
 },{passive:false});
 
