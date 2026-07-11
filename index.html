@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio v2.2.2 — Calm Image Preparation</title>
+<title>Drawing Checker Studio v2.2.3 — Guided Two-Point Workflow</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -223,7 +223,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       </div>
       <div id="precision-overlay" class="precision-overlay" aria-hidden="true">
         <div class="precision-crosshair"><span class="precision-dot"></span></div>
-        <div class="precision-label">Release to place point</div>
+        <div class="precision-label">Move image under crosshair • Release to place</div>
       </div>
     </div>
     <div class="desktop-help">
@@ -694,6 +694,9 @@ function beginPointPhase(kind){
   state.layers.draw.z=kind==="draw"?2:1;
   state.markersHidden=false;
   state.returnPhase=state.phase;
+  // Each placement layer opens fitted and centered. Temporary point-placement
+  // magnification never carries from the Reference into the Drawing.
+  resetWorkspace();
   render();
 }
 function undoLastPoint(){
@@ -814,8 +817,8 @@ function statusText(){
   if(state.loadingKind==="draw")return"Loading drawing…";
   if(!hasRef())return"Load a reference to begin.";
   if(!hasDraw())return"Reference loaded. Add the current drawing.";
-  if(state.phase==="point-ref")return`Reference Point ${state.points.ref.length+1} of 2 — tap, or press and hold for Precision Placement.`;
-  if(state.phase==="point-draw")return`Drawing Point ${state.points.draw.length+1} of 2 — tap, or press and hold for Precision Placement.`;
+  if(state.phase==="point-ref")return`Reference Point ${state.points.ref.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`;
+  if(state.phase==="point-draw")return`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`;
   if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Points ready. Execute Match.";
   if(state.phase==="adjust")return`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`;
   if(state.alignment==="free")return"Free Form: manually align the selected layer with drag, pinch, and twist.";
@@ -1186,7 +1189,7 @@ viewport.addEventListener("touchstart",e=>{
   if((state.phase==="point-ref"||state.phase==="point-draw")&&e.touches.length===1){
     const t=e.touches[0];
     gesture={kind:"point-pending",x:t.clientX,y:t.clientY,lastX:t.clientX,lastY:t.clientY,moved:false,precision:false,timer:null,savedWorkspace:null};
-    gesture.timer=setTimeout(()=>beginPrecisionPlacement(),350);
+    gesture.timer=setTimeout(()=>beginPrecisionPlacement(),400);
     return;
   }
 
@@ -1270,8 +1273,9 @@ viewport.addEventListener("touchend",()=>{
   if(!gesture)return;
   if(gesture.timer)clearTimeout(gesture.timer);
   if(gesture.kind==="point-pending"){
+    // v2.2.3: a quick tap never places a point. Point placement requires
+    // an intentional press-and-hold followed by release.
     if(gesture.precision)endPrecisionPlacement(true);
-    else if(!gesture.moved)placePoint(gesture.x,gesture.y);
   }
   gesture=null;
 },{passive:false});
