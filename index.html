@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio v2.2.1 — Calm Image Preparation</title>
+<title>Drawing Checker Studio v2.2.2 — Calm Image Preparation</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -65,6 +65,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .mobile-toolbar{position:absolute;left:0;right:0;bottom:0;z-index:25;background:rgba(18,18,20,.94);border-top:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px);padding:7px 8px calc(7px + env(safe-area-inset-bottom));display:none;flex-direction:column;gap:6px}
 .mobile-next{display:none;width:100%;min-height:44px;border-radius:11px;background:var(--blue);border-color:#60a5fa;color:#fff;font-size:13px;font-weight:800}
 .mobile-next.show{display:flex}
+.mobile-next.secondary{background:transparent;border-color:var(--border);color:var(--text)}
 .mobile-toolbar-row{display:flex;gap:6px;align-items:center;width:100%}
 .mobile-layer-controls{display:none;width:100%;align-items:center;gap:7px;padding:2px 0 5px}
 .mobile-layer-controls.show{display:flex}
@@ -188,7 +189,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
           <button id="desktop-clear-ref">Clear Ref</button>
           <button id="desktop-clear-draw">Clear Draw</button>
         </div>
-        <button id="desktop-compute" class="btn-primary" disabled>Compute Alignment</button>
+        <button id="desktop-compute" class="btn-primary" disabled>Execute Match</button>
       </section>
 
       <section class="card">
@@ -251,6 +252,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
   <div id="mobile-toolbar" class="mobile-ui mobile-toolbar">
     <button id="mobile-next-action" class="mobile-next"></button>
+    <button id="mobile-undo-point" class="mobile-next secondary">Undo Last Point</button>
 
     <div id="mobile-layer-controls" class="mobile-layer-controls">
       <div class="mobile-layer-buttons">
@@ -680,14 +682,52 @@ function addMarker(pt,kind,index){
   m.textContent=index;
   world.appendChild(m);
 }
+function rebuildMarkers(){
+  document.querySelectorAll(".marker").forEach(n=>n.remove());
+  state.points.ref.forEach((pt,i)=>addMarker(pt,"ref",i+1));
+  state.points.draw.forEach((pt,i)=>addMarker(pt,"draw",i+1));
+}
+function beginPointPhase(kind){
+  state.phase=kind==="ref"?"point-ref":"point-draw";
+  state.target=kind;
+  state.layers.ref.z=kind==="ref"?2:1;
+  state.layers.draw.z=kind==="draw"?2:1;
+  state.markersHidden=false;
+  state.returnPhase=state.phase;
+  render();
+}
+function undoLastPoint(){
+  if(state.alignment!=="two")return;
+  if(state.points.draw.length){
+    state.points.draw.pop();
+    state.aligned=false;
+    beginPointPhase("draw");
+  }else if(state.points.ref.length){
+    state.points.ref.pop();
+    state.aligned=false;
+    beginPointPhase("ref");
+  }else{
+    return;
+  }
+  rebuildMarkers();
+  render();
+}
 function commitPoint(pt){
   if(state.alignment!=="two")return;
   if(state.phase==="point-ref"&&state.points.ref.length<2){
     state.points.ref.push(pt);
     addMarker(pt,"ref",state.points.ref.length);
+    if(state.points.ref.length===2){
+      beginPointPhase("draw");
+      return;
+    }
   }else if(state.phase==="point-draw"&&state.points.draw.length<2){
     state.points.draw.push(pt);
     addMarker(pt,"draw",state.points.draw.length);
+    if(state.points.draw.length===2){
+      state.phase="workspace";
+      state.returnPhase="workspace";
+    }
   }
   render();
 }
@@ -711,8 +751,11 @@ function computeTwoPoint(){
   d.y=R1.y-((D1.x*sin+D1.y*cos)*scale);
   state.aligned=true;
   state.returnPhase="workspace";
-  state.phase="adjust";
+  state.phase="workspace";
+  state.target="draw";
+  state.layers.ref.z=1;state.layers.draw.z=2;
   state.markersHidden=true;
+  resetWorkspace();
   render();
 }
 function nudge(dir){
@@ -771,9 +814,9 @@ function statusText(){
   if(state.loadingKind==="draw")return"Loading drawing…";
   if(!hasRef())return"Load a reference to begin.";
   if(!hasDraw())return"Reference loaded. Add the current drawing.";
-  if(state.phase==="point-ref")return`Tap to place a reference point, or press and hold for Precision Placement.`;
-  if(state.phase==="point-draw")return`Tap to place a drawing point, or press and hold for Precision Placement.`;
-  if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Pins ready. Compute alignment.";
+  if(state.phase==="point-ref")return`Reference Point ${state.points.ref.length+1} of 2 — tap, or press and hold for Precision Placement.`;
+  if(state.phase==="point-draw")return`Drawing Point ${state.points.draw.length+1} of 2 — tap, or press and hold for Precision Placement.`;
+  if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Points ready. Execute Match.";
   if(state.phase==="adjust")return`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`;
   if(state.alignment==="free")return"Free Form: manually align the selected layer with drag, pinch, and twist.";
   if(state.alignment==="sight"&&state.aspectMismatch)return"Aspect ratios differ. Try 2-Point, Free Form, or manual adjustment.";
@@ -844,9 +887,14 @@ function renderStart(){
 }
 function renderMobileWorkflow(){
   const next=$("#mobile-next-action");
+  const undoPoint=$("#mobile-undo-point");
   if(!next)return;
 
   next.classList.remove("show");
+  if(undoPoint){
+    undoPoint.classList.remove("show");
+    undoPoint.onclick=undoLastPoint;
+  }
   next.disabled=false;
   next.onclick=null;
 
@@ -883,22 +931,24 @@ function renderMobileWorkflow(){
     return;
   }
 
+  if(undoPoint&&(state.points.ref.length||state.points.draw.length))undoPoint.classList.add("show");
+
   if(state.points.ref.length<2){
     next.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
     next.classList.add("show");
-    next.onclick=()=>setPhase("point-ref");
+    next.onclick=()=>beginPointPhase("ref");
     return;
   }
 
   if(state.points.draw.length<2){
     next.textContent=`Set Drawing Points (${state.points.draw.length}/2)`;
     next.classList.add("show");
-    next.onclick=()=>setPhase("point-draw");
+    next.onclick=()=>beginPointPhase("draw");
     return;
   }
 
   if(!state.aligned){
-    next.textContent="Compute Alignment";
+    next.textContent="Execute Match";
     next.classList.add("show");
     next.onclick=computeTwoPoint;
     return;
@@ -961,10 +1011,10 @@ function render(){
 $("#desktop-free").onclick=()=>setAlignment("free");
 $("#desktop-sight").onclick=()=>setAlignment("sight");
 $("#desktop-two").onclick=()=>setAlignment("two");
-$("#desktop-ref-pins").onclick=()=>setPhase(state.phase==="point-ref"?"workspace":"point-ref");
-$("#desktop-draw-pins").onclick=()=>setPhase(state.phase==="point-draw"?"workspace":"point-draw");
-$("#desktop-clear-ref").onclick=()=>{state.markersHidden=false;removeMarkers("ref");render()};
-$("#desktop-clear-draw").onclick=()=>{state.markersHidden=false;removeMarkers("draw");render()};
+$("#desktop-ref-pins").onclick=()=>state.phase==="point-ref"?setPhase("workspace"):beginPointPhase("ref");
+$("#desktop-draw-pins").onclick=()=>state.phase==="point-draw"?setPhase("workspace"):beginPointPhase("draw");
+$("#desktop-clear-ref").onclick=()=>{state.markersHidden=false;removeMarkers("ref");state.aligned=false;rebuildMarkers();beginPointPhase("ref")};
+$("#desktop-clear-draw").onclick=()=>{state.markersHidden=false;removeMarkers("draw");state.aligned=false;rebuildMarkers();beginPointPhase("draw")};
 $("#desktop-compute").onclick=computeTwoPoint;
 $("#desktop-overlay").onclick=()=>setCompare("overlay");
 $("#desktop-blink").onclick=()=>setCompare("blink");
