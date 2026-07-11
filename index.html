@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio v2.1.0 — UX Foundation</title>
+<title>Drawing Checker Studio v2.1.1 — Image Preparation Fix</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -118,15 +118,15 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-header span{font-size:11px;color:var(--muted)}
 .crop-stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;background:repeating-conic-gradient(#111 0 25%,#151515 0 50%) 50%/24px 24px}
 .crop-preview{position:absolute;left:50%;top:50%;transform-origin:center center;user-select:none;-webkit-user-drag:none;pointer-events:none;max-width:none;max-height:none}
-.crop-shade{position:absolute;background:rgba(0,0,0,.58);pointer-events:none}
-.crop-frame{position:absolute;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.65);touch-action:none}
+.crop-shade{z-index:4;position:absolute;background:rgba(0,0,0,.58);pointer-events:none}
+.crop-frame{z-index:5;position:absolute;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.65);touch-action:none}
 .crop-frame::before,.crop-frame::after{content:"";position:absolute;pointer-events:none}
 .crop-frame::before{left:33.333%;top:0;bottom:0;width:33.333%;border-left:1px solid rgba(255,255,255,.45);border-right:1px solid rgba(255,255,255,.45)}
 .crop-frame::after{top:33.333%;left:0;right:0;height:33.333%;border-top:1px solid rgba(255,255,255,.45);border-bottom:1px solid rgba(255,255,255,.45)}
 .crop-handle{position:absolute;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--blue);transform:translate(-50%,-50%);z-index:3}
 .crop-handle.nw{left:0;top:0}.crop-handle.ne{left:100%;top:0}.crop-handle.sw{left:0;top:100%}.crop-handle.se{left:100%;top:100%}
 .crop-frame.locked .crop-handle{display:none}
-.crop-controls{flex:0 0 auto;background:#17171b;border-top:1px solid var(--border);padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.crop-controls{position:relative;z-index:20;flex:0 0 auto;background:#17171b;border-top:1px solid var(--border);padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
 .crop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .crop-row.two{grid-template-columns:1fr 1fr}
 .crop-controls button{min-height:42px;border-radius:10px}
@@ -514,6 +514,146 @@ function chooseRatio(key){
   fitCropImage();
   closeRatioSheet();
   renderCrop();
+}
+
+
+function applyLockedFrame(ratio){
+  const stage=$("#crop-stage").getBoundingClientRect();
+  if(!stage.width||!stage.height)return;
+
+  const margin=Math.max(20,Math.min(stage.width,stage.height)*0.07);
+  const availableW=Math.max(100,stage.width-margin*2);
+  const availableH=Math.max(100,stage.height-margin*2);
+
+  let w=availableW;
+  let h=w/ratio;
+
+  if(h>availableH){
+    h=availableH;
+    w=h*ratio;
+  }
+
+  cropState.frame={
+    x:(stage.width-w)/2,
+    y:(stage.height-h)/2,
+    w,
+    h
+  };
+}
+
+function resetCropFrame(){
+  const stage=$("#crop-stage").getBoundingClientRect();
+  if(!stage.width||!stage.height)return;
+
+  const margin=Math.max(20,Math.min(stage.width,stage.height)*0.07);
+
+  if(cropState.locked){
+    const ratio=ratioValue(cropState.ratioKey) || originalCropRatio();
+    applyLockedFrame(ratio);
+    return;
+  }
+
+  cropState.frame={
+    x:margin,
+    y:margin,
+    w:Math.max(100,stage.width-margin*2),
+    h:Math.max(100,stage.height-margin*2)
+  };
+}
+
+function fitCropImage(){
+  const img=cropState.image;
+  if(!img||!img.naturalWidth||!img.naturalHeight)return;
+
+  const rotated=Math.abs(cropState.rotation%180)===90;
+  const imageW=rotated ? img.naturalHeight : img.naturalWidth;
+  const imageH=rotated ? img.naturalWidth : img.naturalHeight;
+
+  const frame=cropState.frame;
+  if(!frame.w||!frame.h)return;
+
+  // Cover the entire crop frame while preserving image proportions.
+  cropState.scale=Math.max(frame.w/imageW,frame.h/imageH);
+  cropState.x=0;
+  cropState.y=0;
+}
+
+function clampCropFrame(){
+  const stage=$("#crop-stage").getBoundingClientRect();
+  const frame=cropState.frame;
+  const minSize=80;
+
+  frame.w=Math.max(minSize,frame.w);
+  frame.h=Math.max(minSize,frame.h);
+
+  if(frame.x<0){
+    frame.w+=frame.x;
+    frame.x=0;
+  }
+  if(frame.y<0){
+    frame.h+=frame.y;
+    frame.y=0;
+  }
+
+  if(frame.x+frame.w>stage.width){
+    frame.w=stage.width-frame.x;
+  }
+  if(frame.y+frame.h>stage.height){
+    frame.h=stage.height-frame.y;
+  }
+
+  frame.w=Math.max(minSize,frame.w);
+  frame.h=Math.max(minSize,frame.h);
+  frame.x=Math.max(0,Math.min(frame.x,stage.width-frame.w));
+  frame.y=Math.max(0,Math.min(frame.y,stage.height-frame.h));
+}
+
+function renderCrop(){
+  const stage=$("#crop-stage").getBoundingClientRect();
+  const frame=cropState.frame;
+  const preview=$("#crop-preview");
+
+  if(!stage.width||!stage.height||!preview)return;
+
+  preview.style.width=cropState.image.naturalWidth+"px";
+  preview.style.height=cropState.image.naturalHeight+"px";
+  preview.style.transform=
+    `translate(-50%,-50%) translate(${cropState.x}px,${cropState.y}px) rotate(${cropState.rotation}deg) scale(${cropState.scale})`;
+
+  const cropFrame=$("#crop-frame");
+  cropFrame.style.left=frame.x+"px";
+  cropFrame.style.top=frame.y+"px";
+  cropFrame.style.width=frame.w+"px";
+  cropFrame.style.height=frame.h+"px";
+  cropFrame.classList.toggle("locked",cropState.locked);
+
+  Object.assign($("#crop-shade-top").style,{
+    left:"0px",
+    top:"0px",
+    width:stage.width+"px",
+    height:Math.max(0,frame.y)+"px"
+  });
+
+  Object.assign($("#crop-shade-bottom").style,{
+    left:"0px",
+    top:(frame.y+frame.h)+"px",
+    width:stage.width+"px",
+    height:Math.max(0,stage.height-frame.y-frame.h)+"px"
+  });
+
+  Object.assign($("#crop-shade-left").style,{
+    left:"0px",
+    top:frame.y+"px",
+    width:Math.max(0,frame.x)+"px",
+    height:frame.h+"px"
+  });
+
+  Object.assign($("#crop-shade-right").style,{
+    left:(frame.x+frame.w)+"px",
+    top:frame.y+"px",
+    width:Math.max(0,stage.width-frame.x-frame.w)+"px",
+    height:frame.h+"px"
+  });
 }
 
 function cancelCrop(){
