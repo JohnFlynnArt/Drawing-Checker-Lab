@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio v3.0.2 — Observation First
-     Sight-Size preparation correction: locked composition crop first, optional four-corner skew correction. -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio v3.0.2 — Observation First</title>
+<title>Drawing Checker Studio v2.2.3 — Guided Two-Point Workflow</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -52,7 +50,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .world{position:absolute;inset:0;transform-origin:center center;pointer-events:none}
 .layer{display:none;position:absolute;top:50%;left:50%;max-width:90%;max-height:90%;transform-origin:center center;pointer-events:none;user-select:none;-webkit-user-drag:none}
 .layer.loaded{display:block}
-.marker{position:absolute;width:14px;height:14px;border-radius:50%;border:1px solid white;transform:translate(-50%,-50%) scale(var(--marker-scale,1));transform-origin:center;z-index:100;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:white;box-shadow:0 0 5px rgba(0,0,0,.7)}
+.marker{position:absolute;width:14px;height:14px;border-radius:50%;border:1px solid white;transform:translate(-50%,-50%);z-index:100;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:white;box-shadow:0 0 5px rgba(0,0,0,.7)}
 .marker.ref{background:var(--red)}
 .marker.draw{background:var(--blue)}
 .world.hide-markers .marker{display:none!important}
@@ -129,13 +127,13 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-frame::after{top:33.333%;left:0;right:0;height:33.333%;border-top:1px solid rgba(255,255,255,.22);border-bottom:1px solid rgba(255,255,255,.22)}
 .crop-handle{position:absolute;width:16px;height:16px;border-radius:50%;background:#cbd5e1;border:2px solid #2563eb;transform:translate(-50%,-50%);z-index:3;box-shadow:0 1px 5px rgba(0,0,0,.55)}
 .crop-handle.nw{left:0;top:0}.crop-handle.ne{left:100%;top:0}.crop-handle.sw{left:0;top:100%}.crop-handle.se{left:100%;top:100%}
-.crop-frame.locked .crop-handle{display:block}.crop-frame.hidden{display:none}
+.crop-frame.locked .crop-handle{display:none}.crop-frame.hidden{display:none}
 .crop-controls{position:relative;z-index:20;flex:0 0 auto;background:#17171b;border-top:1px solid var(--border);padding:8px 10px calc(9px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px}
 .crop-format-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.crop-format-head strong{font-size:11px}.crop-format-head span{font-size:10px;color:var(--muted)}
 .ratio-strip{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding:1px 1px 4px}
 .ratio-strip::-webkit-scrollbar{display:none}.ratio-option{flex:0 0 auto;min-width:72px;min-height:38px;border-radius:9px;padding:5px 10px;font-size:11px;scroll-snap-align:start}
 .ratio-option.active{background:var(--blue);border-color:#60a5fa;color:#fff}.ratio-option[disabled]{display:none}
-.crop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}#crop-tools{grid-template-columns:repeat(4,1fr)}.crop-row.two{grid-template-columns:1fr 1fr}.crop-controls button{min-height:40px;border-radius:9px}
+.crop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.crop-row.two{grid-template-columns:1fr 1fr}.crop-controls button{min-height:40px;border-radius:9px}
 .crop-note{font-size:10px;color:var(--muted);text-align:center;min-height:14px}
 .canvas-status{display:none;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border:1px solid rgba(16,185,129,.35);background:rgba(16,185,129,.08);border-radius:9px}
 .canvas-status.show{display:flex}.canvas-status-text{font-size:11px;font-weight:750;color:#9ae6c8}.canvas-status button{min-height:32px;padding:5px 9px;font-size:10px;background:transparent}
@@ -145,30 +143,8 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .corner-help{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:6px 10px;border-radius:999px;background:rgba(10,10,12,.78);border:1px solid rgba(255,255,255,.1);font-size:10px;color:#fff;white-space:nowrap}
 .corner-actions{display:none;grid-template-columns:1fr 1fr;gap:7px}.corner-actions.show{display:grid}
 .crop-main-actions.hidden,.crop-format.hidden,.crop-tools.hidden{display:none}
-@media(max-width:768px){
-  .crop-editor{height:100dvh;max-height:100dvh}
-  .crop-header{padding:7px 10px}
-  .crop-stage{flex:1 1 auto;min-height:180px}
-  .crop-stage::before{inset:4%}
-  .crop-controls{flex:0 0 auto;max-height:38dvh;overflow-y:auto;padding:6px 8px calc(7px + env(safe-area-inset-bottom));gap:5px}
-  .crop-controls button{min-height:36px;padding:6px 7px}
-  .crop-handle{width:22px;height:22px}
-  .corner-handle{width:32px;height:32px}
-  .ratio-option{min-width:78px;min-height:34px}
-  .crop-note{font-size:9px;min-height:12px}
-  .canvas-status{position:absolute;left:12px;right:12px;top:56px;z-index:40;pointer-events:none}
-}
-.crop-precision-overlay{position:absolute;inset:0;z-index:30;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 64px,rgba(0,0,0,.24) 65px 100%)}
-.crop-precision-overlay.active{display:block}.crop-precision-crosshair{position:absolute;left:50%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%)}
-.crop-precision-crosshair::before,.crop-precision-crosshair::after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}.crop-precision-crosshair::before{left:50%;top:0;width:1px;height:100%}.crop-precision-crosshair::after{top:50%;left:0;height:1px;width:100%}
-.crop-precision-label{position:absolute;left:50%;top:calc(50% + 48px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.76);font-size:10px;font-weight:700;white-space:nowrap}
+@media(max-width:768px){.crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:78px}}
 
-
-.corner-loupe{position:absolute;z-index:35;display:none;width:126px;height:126px;border-radius:14px;overflow:hidden;border:2px solid rgba(255,255,255,.9);background:#111;box-shadow:0 8px 26px rgba(0,0,0,.65);pointer-events:none}
-.corner-loupe.show{display:block}.corner-loupe canvas{width:100%;height:100%;display:block;image-rendering:auto}
-.corner-loupe::before,.corner-loupe::after{content:"";position:absolute;background:rgba(255,255,255,.95);box-shadow:0 0 2px #000}
-.corner-loupe::before{left:50%;top:0;width:1px;height:100%}.corner-loupe::after{top:50%;left:0;height:1px;width:100%}
-.corner-loupe-dot{position:absolute;left:50%;top:50%;width:8px;height:8px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 3px #000}
 /* PRECISION POINT PLACEMENT */
 .precision-overlay{position:absolute;inset:0;z-index:110;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 52px,rgba(0,0,0,.18) 53px 100%)}
 .precision-overlay.active{display:block}
@@ -318,14 +294,12 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       </div>
       <div id="corner-layer" class="corner-layer" aria-hidden="true">
         <svg class="corner-svg"><polygon id="corner-polygon" class="corner-polygon" points="0,0 0,0 0,0 0,0"></polygon></svg>
-        <div class="corner-help">Drag each blue point to a true image corner.</div>
+        <div class="corner-help">Place the four points on the canvas corners.</div>
         <span class="corner-handle" data-corner="0"></span><span class="corner-handle" data-corner="1"></span><span class="corner-handle" data-corner="2"></span><span class="corner-handle" data-corner="3"></span>
       </div>
-      <div id="corner-loupe" class="corner-loupe" aria-hidden="true"><canvas id="corner-loupe-canvas" width="240" height="240"></canvas><span class="corner-loupe-dot"></span></div>
-      <div id="crop-precision-overlay" class="crop-precision-overlay" aria-hidden="true"><div class="crop-precision-crosshair"></div><div class="crop-precision-label">Move slowly • Release to set corner</div></div>
     </div>
     <div class="crop-controls">
-      <div id="canvas-status" class="canvas-status"><span id="canvas-status-text" class="canvas-status-text">✓ Image Ready</span></div>
+      <div id="canvas-status" class="canvas-status"><span id="canvas-status-text" class="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
       <div id="crop-format" class="crop-format">
         <div class="crop-format-head"><strong>Canvas Format</strong><span>Swipe left or right</span></div>
         <div id="ratio-strip" class="ratio-strip">
@@ -333,11 +307,11 @@ input[type=range]{width:100%;accent-color:var(--blue)}
         </div>
       </div>
       <div id="crop-tools" class="crop-row">
-        <button id="crop-zoom-out">Zoom −</button><button id="crop-fine-tune">Unlock Corners</button><button id="crop-rotate">Rotate</button><button id="crop-zoom-in">Zoom +</button>
+        <button id="crop-zoom-out">Zoom −</button><button id="crop-rotate">Rotate</button><button id="crop-zoom-in">Zoom +</button>
       </div>
       <div id="crop-main-actions" class="crop-row two"><button id="crop-reset-frame">Reset</button><button id="crop-use" class="btn-primary">Use Image</button></div>
-      <div id="corner-actions" class="corner-actions"><button id="corner-cancel">Back to Crop</button><button id="corner-apply" class="btn-primary">Straighten & Continue</button></div>
-      <div id="crop-note" class="crop-note">The full image is selected and its format is locked. Drag a corner inward to compose.</div>
+      <div id="corner-actions" class="corner-actions"><button id="corner-cancel">Cancel Adjust</button><button id="corner-apply" class="btn-primary">Align Canvas</button></div>
+      <div id="crop-note" class="crop-note">The full image is selected. Drag a corner inward only when you want to crop.</div>
     </div>
   </div>
 
@@ -405,14 +379,14 @@ function beginNewMobileSession(){
 const cropState={
   kind:null,file:null,url:null,image:null,x:0,y:0,scale:1,rotation:0,
   locked:false,ratioKey:"free",frame:{x:0,y:0,w:100,h:100},drag:null,
-  mode:"crop",corners:[],cornerDrag:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],wheelHistoryTimer:null,precision:null
+  mode:"crop",corners:[],cornerDrag:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],wheelHistoryTimer:null
 };
 
 function beginCrop(kind,file){
   if(!file)return;
   closePopover();
   cropState.ownedUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});
-  Object.assign(cropState,{kind,file,locked:false,ratioKey:"free",rotation:0,x:0,y:0,mode:"crop",drag:null,cornerDrag:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],precision:null});
+  Object.assign(cropState,{kind,file,locked:false,ratioKey:"free",rotation:0,x:0,y:0,mode:"crop",drag:null,cornerDrag:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[]});
   cropState.url=URL.createObjectURL(file);
   cropState.ownedUrls.push(cropState.url);
   const preview=$("#crop-preview");
@@ -426,7 +400,7 @@ function openCropEditor(){
   $("#crop-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing Photo";
   $("#crop-subtitle").textContent=cropState.kind==="ref"?"Choose the composition and canvas format.":"Fit the photo to the actual canvas, then use it for observation.";
   setCornerMode(false);updateRatioButtons();
-  requestAnimationFrame(()=>{fitImageInsideStage();setFrameToVisibleImage();applyDefaultRatio();setCornerMode(false,false);renderCrop();resetCropHistory();setTimeout(()=>{autoDetectCanvas();setCornerMode(false,false);renderCrop()},30)});
+  requestAnimationFrame(()=>{fitImageInsideStage();setFrameToVisibleImage();applyDefaultRatio();renderCrop();if(cropState.kind==="draw")setTimeout(()=>{autoDetectCanvas();resetCropHistory()},30);else resetCropHistory()});
 }
 function closeCropEditor(){$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");cropState.drag=null;cropState.cornerDrag=null}
 function cropSnapshot(){
@@ -461,20 +435,17 @@ function visibleImageBounds(){
 function fitImageInsideStage(){
   const stage=$("#crop-stage").getBoundingClientRect(),img=cropState.image;if(!stage.width||!img?.naturalWidth)return;
   const rotated=Math.abs(cropState.rotation%180)===90,iw=rotated?img.naturalHeight:img.naturalWidth,ih=rotated?img.naturalWidth:img.naturalHeight;
-  const pad=Math.max(24,Math.min(stage.width,stage.height)*.075);
+  const pad=Math.max(14,Math.min(stage.width,stage.height)*.045);
   cropState.scale=Math.min((stage.width-pad*2)/iw,(stage.height-pad*2)/ih);cropState.x=0;cropState.y=0;
 }
 function setFrameToVisibleImage(){const b=visibleImageBounds();cropState.frame={x:b.x,y:b.y,w:b.w,h:b.h};clampCropFrame()}
 function applyDefaultRatio(){
-  // Start with a predictable rectangular crop. Sight-Size drawings inherit the
-  // prepared Reference ratio; all other images begin locked to their own ratio.
-  if(cropState.kind==="draw"&&state.alignment==="sight"&&hasRef()) chooseRatio("reference",false);
-  else chooseRatio("original",false);
+  if(cropState.kind==="draw"&&state.alignment==="sight"&&hasRef()){chooseRatio("reference",false)}else{cropState.ratioKey="free";cropState.locked=false;updateRatioButtons();setFrameToVisibleImage()}
 }
 function chooseRatio(key,refit=true){
   cropState.ratioKey=key;cropState.locked=key!=="free";updateRatioButtons();
   if(cropState.locked)applyLockedFrame(ratioValue(key));else if(refit)setFrameToVisibleImage();
-  $("#crop-note").textContent=cropState.locked?`${ratioLabel(key)} format locked. Drag a corner to compose; use Unlock Corners only to correct skew.`:"Corners unlocked. Adjust freely, then straighten before final composition.";
+  $("#crop-note").textContent=cropState.locked?`${ratioLabel(key)} format selected. Move the image beneath the frame to compose.`:"Free format. Drag crop corners inward only when needed.";
   renderCrop();
 }
 function applyLockedFrame(ratio){
@@ -483,38 +454,8 @@ function applyLockedFrame(ratio){
 }
 function resetCropFrame(){fitImageInsideStage();setFrameToVisibleImage();applyDefaultRatio();renderCrop()}
 function clampCropFrame(){
-  const b=visibleImageBounds(),f=cropState.frame,min=Math.min(60,b.w,b.h);
-  f.w=Math.max(min,Math.min(f.w,b.w));
-  f.h=Math.max(min,Math.min(f.h,b.h));
-  f.x=Math.max(b.x,Math.min(f.x,b.x+b.w-f.w));
-  f.y=Math.max(b.y,Math.min(f.y,b.y+b.h-f.h));
-}
-function resizeCropFromCorner(handle,p,start){
-  const b=visibleImageBounds();
-  const opposite={
-    nw:{x:start.x+start.w,y:start.y+start.h},
-    ne:{x:start.x,y:start.y+start.h},
-    sw:{x:start.x+start.w,y:start.y},
-    se:{x:start.x,y:start.y}
-  }[handle];
-  let px=Math.max(b.x,Math.min(b.x+b.w,p.x));
-  let py=Math.max(b.y,Math.min(b.y+b.h,p.y));
-  let w=Math.abs(px-opposite.x),h=Math.abs(py-opposite.y);
-  const min=50;
-  if(cropState.locked){
-    const r=ratioValue(cropState.ratioKey)||originalCropRatio();
-    if(w/Math.max(1,h)>r) h=w/r; else w=h*r;
-    const maxW=handle.includes("w")?opposite.x-b.x:b.x+b.w-opposite.x;
-    const maxH=handle.includes("n")?opposite.y-b.y:b.y+b.h-opposite.y;
-    const k=Math.min(1,maxW/Math.max(1,w),maxH/Math.max(1,h));w*=k;h*=k;
-  }
-  w=Math.max(min,Math.min(w,b.w));h=Math.max(min,Math.min(h,b.h));
-  cropState.frame={
-    x:handle.includes("w")?opposite.x-w:opposite.x,
-    y:handle.includes("n")?opposite.y-h:opposite.y,
-    w,h
-  };
-  clampCropFrame();
+  const stage=$("#crop-stage").getBoundingClientRect(),f=cropState.frame,min=60;
+  f.w=Math.max(min,Math.min(f.w,stage.width));f.h=Math.max(min,Math.min(f.h,stage.height));f.x=Math.max(0,Math.min(f.x,stage.width-f.w));f.y=Math.max(0,Math.min(f.y,stage.height-f.h));
 }
 function renderCrop(){
   const stage=$("#crop-stage").getBoundingClientRect(),f=cropState.frame,p=$("#crop-preview");if(!stage.width||!p||!cropState.image)return;
@@ -531,7 +472,7 @@ function renderCorners(){
 function setCornerMode(on,announce=true){
   cropState.mode=on?"corners":"crop";$("#corner-layer").classList.toggle("active",on);$("#corner-layer").setAttribute("aria-hidden",on?"false":"true");
   $("#crop-format").classList.toggle("hidden",on);$("#crop-tools").classList.toggle("hidden",on);$("#crop-main-actions").classList.toggle("hidden",on);$("#corner-actions").classList.toggle("show",on);
-  if(announce)$("#crop-note").textContent=on?"Corners unlocked for skew correction. Drag each blue point to the true image corner.":"Format locked. Drag the rectangular crop inward to compose.";renderCrop();
+  if(announce)$("#crop-note").textContent=on?"Drag the blue points to the four true corners of the canvas.":"The full image is selected. Drag a crop corner inward only when needed.";renderCrop();
 }
 function stageToImagePoint(pt){
   const stage=$("#crop-stage").getBoundingClientRect(),cx=stage.width/2+cropState.x,cy=stage.height/2+cropState.y,a=-cropState.rotation*Math.PI/180;
@@ -551,9 +492,7 @@ function autoDetectCanvas(){
   const l=best(col,1,Math.max(2,Math.floor(w*.38))),r=best(col,Math.floor(w*.62),w-2),t=best(row,1,Math.max(2,Math.floor(h*.38))),b=best(row,Math.floor(h*.62),h-2);
   const valid=r-l>w*.28&&b-t>h*.28;const sx=img.naturalWidth/w,sy=img.naturalHeight/h,pad=.02;
   const src=valid?[{x:l*sx,y:t*sy},{x:r*sx,y:t*sy},{x:r*sx,y:b*sy},{x:l*sx,y:b*sy}]:[{x:img.naturalWidth*pad,y:img.naturalHeight*pad},{x:img.naturalWidth*(1-pad),y:img.naturalHeight*pad},{x:img.naturalWidth*(1-pad),y:img.naturalHeight*(1-pad)},{x:img.naturalWidth*pad,y:img.naturalHeight*(1-pad)}];
-  cropState.corners=src.map(imageToStagePoint);cropState.canvasDetected=valid;
-  $("#canvas-status").classList.add("show");$("#canvas-status-text").textContent="✓ Corners Suggested";
-  clearTimeout(cropState.statusTimer);cropState.statusTimer=setTimeout(()=>$("#canvas-status").classList.remove("show"),1400);renderCrop();
+  cropState.corners=src.map(imageToStagePoint);cropState.canvasDetected=valid;$("#canvas-status").classList.add("show");$("#canvas-status-text").textContent=valid?"✓ Canvas Aligned":"Canvas ready to verify";renderCrop();
 }
 function solveLinear(A,b){
   const n=b.length;for(let i=0;i<n;i++){let m=i;for(let j=i+1;j<n;j++)if(Math.abs(A[j][i])>Math.abs(A[m][i]))m=j;[A[i],A[m]]=[A[m],A[i]];[b[i],b[m]]=[b[m],b[i]];const p=A[i][i]||1e-12;for(let j=i;j<n;j++)A[i][j]/=p;b[i]/=p;for(let k=0;k<n;k++)if(k!==i){const q=A[k][i];for(let j=i;j<n;j++)A[k][j]-=q*A[i][j];b[k]-=q*b[i]}}
@@ -566,7 +505,7 @@ function applyCornerCorrection(){
   const q=cropState.corners.map(stageToImagePoint),top=Math.hypot(q[1].x-q[0].x,q[1].y-q[0].y),bottom=Math.hypot(q[2].x-q[3].x,q[2].y-q[3].y),left=Math.hypot(q[3].x-q[0].x,q[3].y-q[0].y),right=Math.hypot(q[2].x-q[1].x,q[2].y-q[1].y);let ow=Math.max(2,Math.round((top+bottom)/2)),oh=Math.max(2,Math.round((left+right)/2));
   const max=1800,k=Math.min(1,max/Math.max(ow,oh));ow=Math.max(2,Math.round(ow*k));oh=Math.max(2,Math.round(oh*k));const H=homographyFromRectToQuad(ow,oh,q),src=document.createElement("canvas"),sctx=src.getContext("2d",{willReadFrequently:true});src.width=cropState.image.naturalWidth;src.height=cropState.image.naturalHeight;sctx.drawImage(cropState.image,0,0);const sd=sctx.getImageData(0,0,src.width,src.height),out=document.createElement("canvas");out.width=ow;out.height=oh;const octx=out.getContext("2d"),od=octx.createImageData(ow,oh),a=H;
   for(let y=0;y<oh;y++)for(let x=0;x<ow;x++){const den=a[6]*x+a[7]*y+1,sx=(a[0]*x+a[1]*y+a[2])/den,sy=(a[3]*x+a[4]*y+a[5])/den,ix=Math.max(0,Math.min(src.width-1,Math.round(sx))),iy=Math.max(0,Math.min(src.height-1,Math.round(sy))),si=(iy*src.width+ix)*4,di=(y*ow+x)*4;od.data[di]=sd.data[si];od.data[di+1]=sd.data[si+1];od.data[di+2]=sd.data[si+2];od.data[di+3]=255}
-  octx.putImageData(od,0,0);out.toBlob(blob=>{if(!blob)return;const nextUrl=URL.createObjectURL(blob);cropState.ownedUrls.push(nextUrl);cropState.url=nextUrl;cropState.image.onload=()=>{cropState.image.onload=null;cropState.rotation=0;cropState.x=0;cropState.y=0;fitImageInsideStage();setFrameToVisibleImage();applyDefaultRatio();setCornerMode(false);$("#canvas-status-text").textContent="✓ Ready to Compare";cropState.fineTuneBaseline=null;renderCrop();updateUndoButton()};cropState.image.src=cropState.url},"image/jpeg",.95)
+  octx.putImageData(od,0,0);out.toBlob(blob=>{if(!blob)return;const nextUrl=URL.createObjectURL(blob);cropState.ownedUrls.push(nextUrl);cropState.url=nextUrl;cropState.image.onload=()=>{cropState.image.onload=null;cropState.rotation=0;cropState.x=0;cropState.y=0;fitImageInsideStage();setFrameToVisibleImage();applyDefaultRatio();setCornerMode(false);$("#canvas-status-text").textContent="✓ Canvas Verified";cropState.fineTuneBaseline=null;renderCrop();updateUndoButton()};cropState.image.src=cropState.url},"image/jpeg",.95)
 }
 function releaseCropUrls(){cropState.ownedUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});cropState.ownedUrls=[];cropState.url=null}
 function cancelCrop(){closeCropEditor();releaseCropUrls()}
@@ -843,7 +782,6 @@ function rotateLayer(delta){
 function renderVisuals(){
   const ws=state.workspace;
   world.style.transform=`translate(${ws.x}px,${ws.y}px) scale(${ws.zoom})`;
-  world.style.setProperty("--marker-scale",String(Math.max(.18,Math.min(1.25,1/ws.zoom))));
 
   for(const k of ["ref","draw"]){
     const l=state.layers[k];
@@ -885,7 +823,6 @@ function statusText(){
   if(state.phase==="adjust")return`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`;
   if(state.alignment==="free")return"Free Form: manually align the selected layer with drag, pinch, and twist.";
   if(state.alignment==="sight"&&state.aspectMismatch)return"Aspect ratios differ. Try 2-Point, Free Form, or manual adjustment.";
-  if(state.aligned)return"✓ Images Registered — Ready to Compare.";
   return"Workspace locked. Drag to pan and pinch to zoom.";
 }
 function renderDesktopSlots(){
@@ -1157,44 +1094,19 @@ $("#mobile-opacity").oninput=e=>{
 
 
 /* IMAGE PREPARATION EVENTS */
-$("#crop-cancel-top").onclick=cancelCrop;$("#crop-undo").onclick=undoCrop;$("#crop-use").onclick=commitCrop;$("#crop-reset-frame").onclick=()=>{pushCropHistory();resetCropFrame();autoDetectCanvas()};
+$("#crop-cancel-top").onclick=cancelCrop;$("#crop-undo").onclick=undoCrop;$("#crop-use").onclick=commitCrop;$("#crop-reset-frame").onclick=()=>{pushCropHistory();resetCropFrame()};
 document.querySelectorAll(".ratio-option[data-ratio]").forEach(btn=>btn.onclick=()=>{pushCropHistory();chooseRatio(btn.dataset.ratio)});
 $("#crop-zoom-out").onclick=()=>{pushCropHistory();cropState.scale=Math.max(.01,cropState.scale*.94);renderCrop()};$("#crop-zoom-in").onclick=()=>{pushCropHistory();cropState.scale*=1.06;renderCrop()};
 $("#crop-rotate").onclick=()=>{pushCropHistory();cropState.rotation=(cropState.rotation+90)%360;fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));if(cropState.kind==="draw")setTimeout(autoDetectCanvas,10);renderCrop()};
-$("#crop-fine-tune").onclick=()=>{pushCropHistory();if(!cropState.corners.length)autoDetectCanvas();cropState.fineTuneBaseline=cropSnapshot();setCornerMode(true);$("#crop-note").textContent="Corners unlocked. Drag each blue point within the image, then choose Straighten & Continue."};
-$("#corner-cancel").onclick=()=>{if(cropState.fineTuneBaseline)restoreCropSnapshot(cropState.fineTuneBaseline);cropState.fineTuneBaseline=null;setCornerMode(false);$("#crop-note").textContent="Returned to the locked rectangular crop."};
-$("#corner-apply").onclick=()=>{pushCropHistory();applyCornerCorrection()};
+$("#canvas-adjust").onclick=()=>{if(!cropState.corners.length)autoDetectCanvas();cropState.fineTuneBaseline=cropSnapshot();setCornerMode(true)};$("#corner-cancel").onclick=()=>{if(cropState.fineTuneBaseline){restoreCropSnapshot({...cropState.fineTuneBaseline,mode:"crop"});cropState.fineTuneBaseline=null}else setCornerMode(false)};$("#corner-apply").onclick=()=>{pushCropHistory();applyCornerCorrection()};
 const cropStage=$("#crop-stage");function cropPointerPosition(e){const r=cropStage.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-function showCornerLoupe(stagePoint){
-  const loupe=$("#corner-loupe"),canvas=$("#corner-loupe-canvas"),ctx=canvas.getContext("2d"),ip=stageToImagePoint(stagePoint),img=cropState.image;
-  const sample=Math.max(30,Math.min(img.naturalWidth,img.naturalHeight)*.08),sx=Math.max(0,Math.min(img.naturalWidth-sample,ip.x-sample/2)),sy=Math.max(0,Math.min(img.naturalHeight-sample,ip.y-sample/2));
-  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,sx,sy,sample,sample,0,0,canvas.width,canvas.height);
-  const stage=cropStage.getBoundingClientRect();loupe.style.left=Math.max(10,Math.min(stage.width-136,stagePoint.x-63))+"px";loupe.style.top=(stagePoint.y>170?12:Math.max(12,stage.height-138))+"px";
-  loupe.classList.add("show");loupe.setAttribute("aria-hidden","false");
-}
-function hideCornerLoupe(){const l=$("#corner-loupe");l.classList.remove("show");l.setAttribute("aria-hidden","true")}
-cropStage.addEventListener("pointerdown",e=>{
-  const corner=e.target?.dataset?.corner,handle=e.target?.dataset?.handle;
-  if(corner!==undefined){e.preventDefault();pushCropHistory();cropStage.setPointerCapture(e.pointerId);cropState.cornerDrag={index:+corner};const p=cropPointerPosition(e);showCornerLoupe(p);return}
-  if(handle&&!cropState.locked){e.preventDefault();pushCropHistory();cropStage.setPointerCapture(e.pointerId);cropState.drag={type:"handle",handle,start:cropPointerPosition(e),frame:{...cropState.frame}};return}
-  if(cropState.mode==="corners")return;
-  e.preventDefault();pushCropHistory();cropStage.setPointerCapture(e.pointerId);const p=cropPointerPosition(e);cropState.drag={type:"image",start:p,x:cropState.x,y:cropState.y};
-});
-cropStage.addEventListener("pointermove",e=>{
-  const p=cropPointerPosition(e);
-  if(cropState.cornerDrag){const b=visibleImageBounds(),i=cropState.cornerDrag.index;cropState.corners[i]={x:Math.max(b.x,Math.min(b.x+b.w,p.x)),y:Math.max(b.y,Math.min(b.y+b.h,p.y))};showCornerLoupe(cropState.corners[i]);renderCrop();return}
-  if(!cropState.drag)return;
-  const dx=p.x-cropState.drag.start.x,dy=p.y-cropState.drag.start.y;
-  if(cropState.drag.type==="image"){cropState.x=cropState.drag.x+dx;cropState.y=cropState.drag.y+dy}
-  else{resizeCropFromCorner(cropState.drag.handle,p,cropState.drag.frame)}
-  renderCrop();
-});
-function finishCropPointer(){cropState.drag=null;cropState.cornerDrag=null;hideCornerLoupe();renderCrop()}
-cropStage.addEventListener("pointerup",finishCropPointer);cropStage.addEventListener("pointercancel",finishCropPointer);
+cropStage.addEventListener("pointerdown",e=>{e.preventDefault();const corner=e.target?.dataset?.corner;pushCropHistory();if(corner!==undefined){cropState.cornerDrag={index:+corner};e.target.setPointerCapture(e.pointerId);return}if(cropState.mode==="corners")return;cropStage.setPointerCapture(e.pointerId);const p=cropPointerPosition(e),handle=e.target?.dataset?.handle;cropState.drag=handle&&!cropState.locked?{type:"handle",handle,start:p,frame:{...cropState.frame}}:{type:"image",start:p,x:cropState.x,y:cropState.y}});
+cropStage.addEventListener("pointermove",e=>{const p=cropPointerPosition(e);if(cropState.cornerDrag){const pad=6,stage=cropStage.getBoundingClientRect();cropState.corners[cropState.cornerDrag.index]={x:Math.max(pad,Math.min(stage.width-pad,p.x)),y:Math.max(pad,Math.min(stage.height-pad,p.y))};renderCrop();return}if(!cropState.drag)return;const dx=p.x-cropState.drag.start.x,dy=p.y-cropState.drag.start.y;if(cropState.drag.type==="image"){cropState.x=cropState.drag.x+dx;cropState.y=cropState.drag.y+dy}else{const f={...cropState.drag.frame},h=cropState.drag.handle;if(h.includes("w")){f.x+=dx;f.w-=dx}if(h.includes("e"))f.w+=dx;if(h.includes("n")){f.y+=dy;f.h-=dy}if(h.includes("s"))f.h+=dy;cropState.frame=f;clampCropFrame()}renderCrop()});
+cropStage.addEventListener("pointerup",()=>{cropState.drag=null;cropState.cornerDrag=null});cropStage.addEventListener("pointercancel",()=>{cropState.drag=null;cropState.cornerDrag=null});
 let cropTouches=null;cropStage.addEventListener("touchstart",e=>{if(cropState.mode==="corners")return;if(e.touches.length===2){e.preventDefault();pushCropHistory();const a=e.touches[0],b=e.touches[1];cropTouches={dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y}}},{passive:false});
 cropStage.addEventListener("touchmove",e=>{if(e.touches.length===2&&cropTouches){e.preventDefault();const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop()}},{passive:false});cropStage.addEventListener("touchend",()=>cropTouches=null,{passive:true});
 cropStage.addEventListener("wheel",e=>{if(cropState.mode==="corners")return;e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
-window.addEventListener("resize",()=>{if($("#crop-editor").classList.contains("open")){fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));autoDetectCanvas();renderCrop()}});
+window.addEventListener("resize",()=>{if($("#crop-editor").classList.contains("open")){fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));if(cropState.kind==="draw")autoDetectCanvas();renderCrop()}});
 
 /* POINTER / TOUCH STATE ENGINE */
 let mousePan=null;
@@ -1355,4 +1267,39 @@ viewport.addEventListener("touchmove",e=>{
     }
     renderVisuals();
   }
-},{pass
+},{passive:false});
+
+viewport.addEventListener("touchend",()=>{
+  if(!gesture)return;
+  if(gesture.timer)clearTimeout(gesture.timer);
+  if(gesture.kind==="point-pending"){
+    // v2.2.3: a quick tap never places a point. Point placement requires
+    // an intentional press-and-hold followed by release.
+    if(gesture.precision)endPrecisionPlacement(true);
+  }
+  gesture=null;
+},{passive:false});
+
+/* KEYBOARD MICRO ADJUST */
+window.addEventListener("keydown",e=>{
+  if(!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key))return;
+  e.preventDefault();
+
+  const map={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};
+
+  if(e.shiftKey){
+    if(e.key==="ArrowUp")scaleLayer(.005);
+    if(e.key==="ArrowDown")scaleLayer(-.005);
+    if(e.key==="ArrowLeft")rotateLayer(-.25);
+    if(e.key==="ArrowRight")rotateLayer(.25);
+  }else{
+    nudge(map[e.key]);
+  }
+});
+
+if(!isMobileLayout()) state.mobileStrategyChosen=true;
+render();
+});
+</script>
+</body>
+</html>
