@@ -516,7 +516,16 @@ function updateRatioFeedback(){
   box.classList.add("show");box.classList.toggle("match",match);label.textContent="Reference vs Drawing";val.textContent=match?"✓ Ratios Match":`Ratios Different · ${pair[0]}:${pair[1]} ${orientationLabel(orientation)}`;
 }
 function originalCropRatio(){const img=cropState.image,rotated=Math.abs(cropState.rotation%180)===90;return rotated?img.naturalHeight/img.naturalWidth:img.naturalWidth/img.naturalHeight}
-function ratioValue(key){if(key==="original")return originalCropRatio();if(key==="reference"&&hasRef())return refImg.naturalWidth/refImg.naturalHeight;if(key.includes(":"))return orientedStandardRatio(key,cropState.orientation);return null}
+function ratioValue(key){
+  if(key==="original")return originalCropRatio();
+  if(key==="reference"&&hasRef()){
+    const base=refImg.naturalWidth/refImg.naturalHeight;
+    const orient=cropState.orientation==="square"?"square":(base>=1?"landscape":"portrait");
+    return orient==="square"?1:(cropState.orientation==="landscape"?Math.max(base,1/base):Math.min(base,1/base));
+  }
+  if(key.includes(":"))return orientedStandardRatio(key,cropState.orientation);
+  return null
+}
 function ratioLabel(key){return key==="free"?"Free Form":key==="original"?cropState.detectedLabel:key==="reference"?"Reference":key.replace(":"," : ")}
 function updateRatioButtons(){
   const ob=$("#ratio-original");if(ob)ob.textContent=cropState.detectedLabel||"Detected";
