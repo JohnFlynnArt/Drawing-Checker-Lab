@@ -1282,4 +1282,260 @@ document.querySelectorAll(".ratio-option[data-ratio]").forEach(btn=>btn.onclick=
 $("#canvas-adjust").onclick=()=>enterFreeForm();$("#corner-clear").onclick=()=>{if(!cropState.corners.length)return;pushCropHistory();cropState.corners=[];renderCrop()};$("#corner-remove").onclick=()=>{if(!cropState.corners.length)return;pushCropHistory();cropState.corners.pop();renderCrop()};$("#corner-cancel").onclick=()=>{if(cropState.fineTuneBaseline){const snap={...cropState.fineTuneBaseline,mode:"crop",ratioKey:cropState.fineTuneBaseline.previousRatioKey||cropState.previousRatioKey||cropState.detectedKey,locked:true};restoreCropSnapshot(snap);cropState.fineTuneBaseline=null}else{cropState.ratioKey=cropState.previousRatioKey||cropState.detectedKey;cropState.locked=true;setCornerMode(false)}};$("#corner-apply").onclick=()=>{if(cropState.corners.length!==4)return;pushCropHistory();applyCornerCorrection()};
 const cropStage=$("#crop-stage");function cropPointerPosition(e){const r=cropStage.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
 // Mouse/pen handling. Touch uses its own gesture engine below to avoid duplicate pointer/touch events.
-cropStage.a
+cropStage.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="touch")return;
+  e.preventDefault();const p=cropPointerPosition(e);
+  if(cropState.mode==="corners"){
+    if(cropState.freePointGesture||!stagePointInsideImage(p))return;
+    const corner=e.target?.dataset?.corner,replaceIndex=corner!==undefined?+corner:null;
+    cropStage.setPointerCapture(e.pointerId);
+    cropState.freePointGesture={active:false,pending:true,pointerId:e.pointerId,start:p,last:p,replaceIndex,timer:setTimeout(()=>{if(!beginFreePointPrecision(p,replaceIndex))cropState.freePointGesture=null},320)};
+    return;
+  }
+  pushCropHistory();cropStage.setPointerCapture(e.pointerId);const handle=e.target?.dataset?.handle;cropState.drag=handle?{type:"locked-handle",handle,start:p,frame:{...cropState.frame}}:{type:"image",start:p,x:cropState.x,y:cropState.y};
+});
+cropStage.addEventListener("pointermove",e=>{
+  if(e.pointerType==="touch")return;
+  const p=cropPointerPosition(e),g=cropState.freePointGesture;
+  if(cropState.mode==="corners"&&g){
+    if(g.pending&&!g.active&&Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){clearTimeout(g.timer);cropState.freePointGesture=null;return}
+    if(g.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}
+    return;
+  }
+  if(!cropState.drag)return;const dx=p.x-cropState.drag.start.x,dy=p.y-cropState.drag.start.y;if(cropState.drag.type==="image"){cropState.x=cropState.drag.x+dx;cropState.y=cropState.drag.y+dy}else if(cropState.drag.type==="locked-handle"){resizeLockedCrop(cropState.drag.handle,p,cropState.drag.frame)}renderCrop();
+});
+function endCropPointer(){const g=cropState.freePointGesture;if(g){if(g.timer)clearTimeout(g.timer);if(g.active)finishFreePointPrecision(true);else cropState.freePointGesture=null;return}cropState.drag=null}
+cropStage.addEventListener("pointerup",endCropPointer);cropStage.addEventListener("pointercancel",()=>{const g=cropState.freePointGesture;if(g?.timer)clearTimeout(g.timer);if(g?.active)finishFreePointPrecision(false);else cropState.freePointGesture=null;cropState.drag=null});
+
+function touchStagePoint(t){const r=cropStage.getBoundingClientRect();return{x:t.clientX-r.left,y:t.clientY-r.top}}
+let cropTouches=null;
+cropStage.addEventListener("touchstart",e=>{
+  if(cropState.mode==="corners"){
+    e.preventDefault();
+    if(e.touches.length===2){
+      const pending=cropState.freeTouchGesture;if(pending?.timer)clearTimeout(pending.timer);if(cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;
+      pushCropHistory();const a=e.touches[0],b=e.touches[1];cropTouches={dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y};return;
+    }
+    if(e.touches.length===1){
+      const t=e.touches[0],p=touchStagePoint(t);if(!stagePointInsideImage(p))return;
+      let replaceIndex=null;const target=document.elementFromPoint(t.clientX,t.clientY);if(target?.dataset?.corner!==undefined)replaceIndex=+target.dataset.corner;
+      cropState.freeTouchGesture={start:p,last:p,moved:false,replaceIndex,timer:setTimeout(()=>{const g=cropState.freeTouchGesture;if(!g)return;if(beginFreePointPrecision(g.start,g.replaceIndex)){g.precision=true;g.last={...g.start}}},350)};
+    }
+    return;
+  }
+  if(e.touches.length===2){e.preventDefault();pushCropHistory();const a=e.touches[0],b=e.touches[1];cropTouches={dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y}}
+},{passive:false});
+cropStage.addEventListener("touchmove",e=>{
+  if(cropState.mode==="corners"){
+    e.preventDefault();
+    if(e.touches.length===2&&cropTouches){const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop();return}
+    const g=cropState.freeTouchGesture;if(e.touches.length===1&&g){const p=touchStagePoint(e.touches[0]);if(g.precision&&cropState.freePointGesture?.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}else if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){g.moved=true;clearTimeout(g.timer)}}return;
+  }
+  if(e.touches.length===2&&cropTouches){e.preventDefault();const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop()}
+},{passive:false});
+cropStage.addEventListener("touchend",e=>{
+  if(cropState.mode==="corners"){
+    if(e.touches.length===0){const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(true);cropState.freeTouchGesture=null;cropTouches=null}
+    return;
+  }
+  cropTouches=null;
+},{passive:false});
+cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;cropTouches=null},{passive:false});
+cropStage.addEventListener("wheel",e=>{e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
+window.addEventListener("resize",()=>{if($("#crop-editor").classList.contains("open")){fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));renderCrop()}});
+
+/* POINTER / TOUCH STATE ENGINE */
+let mousePan=null;
+
+viewport.addEventListener("mousedown",e=>{
+  if(e.button!==0)return;
+  if(state.phase==="point-ref"||state.phase==="point-draw"){
+    placePoint(e.clientX,e.clientY);
+    return;
+  }
+  mousePan={x:e.clientX,y:e.clientY};
+});
+
+window.addEventListener("mousemove",e=>{
+  if(!mousePan)return;
+  const dx=e.clientX-mousePan.x,dy=e.clientY-mousePan.y;
+  mousePan={x:e.clientX,y:e.clientY};
+
+  if(state.phase==="adjust"){
+    const l=state.layers[state.target];
+    l.x+=dx/state.workspace.zoom;
+    l.y+=dy/state.workspace.zoom;
+  }else{
+    state.workspace.x+=dx;
+    state.workspace.y+=dy;
+  }
+  renderVisuals();
+});
+
+window.addEventListener("mouseup",()=>mousePan=null);
+
+viewport.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const r=viewport.getBoundingClientRect();
+  const cx=e.clientX-r.left-r.width/2,cy=e.clientY-r.top-r.height/2;
+  const factor=e.deltaY<0?1.06:.94;
+  const next=Math.max(.1,Math.min(8,state.workspace.zoom*factor));
+  const wx=(cx-state.workspace.x)/state.workspace.zoom;
+  const wy=(cy-state.workspace.y)/state.workspace.zoom;
+  state.workspace.x=cx-wx*next;
+  state.workspace.y=cy-wy*next;
+  state.workspace.zoom=next;
+  renderVisuals();
+},{passive:false});
+
+let gesture=null;
+const dist=(a,b)=>Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY);
+const angle=(a,b)=>Math.atan2(b.clientY-a.clientY,b.clientX-a.clientX);
+const center=(a,b)=>({x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2});
+
+function beginPrecisionPlacement(){
+  if(!gesture||gesture.kind!=="point-pending")return;
+  gesture.precision=true;
+  gesture.savedWorkspace={...state.workspace};
+  const pt=worldPoint(gesture.x,gesture.y);
+  const r=viewport.getBoundingClientRect();
+  const targetZoom=Math.min(8,state.workspace.zoom*1.5);
+  state.workspace.zoom=targetZoom;
+  state.workspace.x=-(pt.x*targetZoom);
+  state.workspace.y=-(pt.y*targetZoom);
+  $("#precision-overlay").classList.add("active");
+  $("#precision-overlay").setAttribute("aria-hidden","false");
+  renderVisuals();
+}
+
+function endPrecisionPlacement(place=true){
+  if(!gesture||!gesture.precision)return;
+  const r=viewport.getBoundingClientRect();
+  const pt=worldPoint(r.left+r.width/2,r.top+r.height/2);
+  state.workspace={...gesture.savedWorkspace};
+  $("#precision-overlay").classList.remove("active");
+  $("#precision-overlay").setAttribute("aria-hidden","true");
+  renderVisuals();
+  if(place)commitPoint(pt);
+}
+
+viewport.addEventListener("touchstart",e=>{
+  e.preventDefault();
+
+  if((state.phase==="point-ref"||state.phase==="point-draw")&&e.touches.length===1){
+    const t=e.touches[0];
+    gesture={kind:"point-pending",x:t.clientX,y:t.clientY,lastX:t.clientX,lastY:t.clientY,moved:false,precision:false,timer:null,savedWorkspace:null};
+    gesture.timer=setTimeout(()=>beginPrecisionPlacement(),400);
+    return;
+  }
+
+  if(e.touches.length===1){
+    const t=e.touches[0];
+    gesture={kind:"drag",x:t.clientX,y:t.clientY};
+  }else if(e.touches.length===2){
+    const a=e.touches[0],b=e.touches[1],c=center(a,b);
+    gesture={
+      kind:"pinch",
+      startDist:dist(a,b),
+      startAngle:angle(a,b),
+      startCenter:c,
+      startZoom:state.workspace.zoom,
+      startWX:state.workspace.x,
+      startWY:state.workspace.y,
+      startLayer:{...state.layers[state.target]}
+    };
+  }
+},{passive:false});
+
+viewport.addEventListener("touchmove",e=>{
+  e.preventDefault();
+  if(!gesture)return;
+
+  if(gesture.kind==="point-pending"&&e.touches.length===1){
+    const t=e.touches[0];
+    const dx=t.clientX-gesture.lastX,dy=t.clientY-gesture.lastY;
+    gesture.lastX=t.clientX;gesture.lastY=t.clientY;
+    if(Math.hypot(t.clientX-gesture.x,t.clientY-gesture.y)>10)gesture.moved=true;
+
+    if(gesture.precision){
+      state.workspace.x+=dx;
+      state.workspace.y+=dy;
+      renderVisuals();
+    }else if(gesture.moved){
+      clearTimeout(gesture.timer);
+    }
+    return;
+  }
+
+  if(gesture.kind==="drag"&&e.touches.length===1){
+    const t=e.touches[0];
+    const dx=t.clientX-gesture.x,dy=t.clientY-gesture.y;
+    gesture.x=t.clientX;gesture.y=t.clientY;
+
+    if(state.phase==="adjust"){
+      const l=state.layers[state.target];
+      l.x+=dx/state.workspace.zoom;
+      l.y+=dy/state.workspace.zoom;
+    }else{
+      state.workspace.x+=dx;
+      state.workspace.y+=dy;
+    }
+    renderVisuals();
+  }else if(gesture.kind==="pinch"&&e.touches.length===2){
+    const a=e.touches[0],b=e.touches[1],c=center(a,b);
+
+    if(state.phase==="adjust"){
+      const l=state.layers[state.target];
+      const ratio=dist(a,b)/Math.max(1,gesture.startDist);
+      l.scale=Math.max(.005,gesture.startLayer.scale*ratio);
+      l.rot=gesture.startLayer.rot+(angle(a,b)-gesture.startAngle)*180/Math.PI;
+      l.x=gesture.startLayer.x+(c.x-gesture.startCenter.x)/state.workspace.zoom;
+      l.y=gesture.startLayer.y+(c.y-gesture.startCenter.y)/state.workspace.zoom;
+    }else{
+      const next=Math.max(.1,Math.min(8,gesture.startZoom*(dist(a,b)/Math.max(1,gesture.startDist))));
+      const r=viewport.getBoundingClientRect();
+      const vcx=r.left+r.width/2,vcy=r.top+r.height/2;
+      const wx=(gesture.startCenter.x-vcx-gesture.startWX)/gesture.startZoom;
+      const wy=(gesture.startCenter.y-vcy-gesture.startWY)/gesture.startZoom;
+      state.workspace.zoom=next;
+      state.workspace.x=c.x-vcx-wx*next;
+      state.workspace.y=c.y-vcy-wy*next;
+    }
+    renderVisuals();
+  }
+},{passive:false});
+
+viewport.addEventListener("touchend",()=>{
+  if(!gesture)return;
+  if(gesture.timer)clearTimeout(gesture.timer);
+  if(gesture.kind==="point-pending"){
+    // v2.2.3: a quick tap never places a point. Point placement requires
+    // an intentional press-and-hold followed by release.
+    if(gesture.precision)endPrecisionPlacement(true);
+  }
+  gesture=null;
+},{passive:false});
+
+/* KEYBOARD MICRO ADJUST */
+window.addEventListener("keydown",e=>{
+  if(!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key))return;
+  e.preventDefault();
+
+  const map={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};
+
+  if(e.shiftKey){
+    if(e.key==="ArrowUp")scaleLayer(.005);
+    if(e.key==="ArrowDown")scaleLayer(-.005);
+    if(e.key==="ArrowLeft")rotateLayer(-.25);
+    if(e.key==="ArrowRight")rotateLayer(.25);
+  }else{
+    nudge(map[e.key]);
+  }
+});
+
+if(!isMobileLayout()) state.mobileStrategyChosen=true;
+render();
+});
+</script>
+</body>
+</html>
