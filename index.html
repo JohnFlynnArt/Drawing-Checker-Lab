@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Foundation Sprint Rev. 2: Image Preparation | Baseline v2.2.3 -->
+<!-- Drawing Checker Studio | Foundation Sprint Rev. 3: Image Preparation | Baseline v2.2.3 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Foundation Sprint Rev. 2: Image Preparation</title>
+<title>Drawing Checker Studio — Foundation Sprint Rev. 3: Image Preparation</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -154,9 +154,13 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .corner-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.corner-polygon{fill:rgba(59,130,246,.07);stroke:#60a5fa;stroke-width:1.5;vector-effect:non-scaling-stroke}
 .corner-handle{position:absolute;width:22px;height:22px;border-radius:50%;background:#3b82f6;border:3px solid #dbeafe;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.65)}
 .corner-help{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:6px 10px;border-radius:999px;background:rgba(10,10,12,.78);border:1px solid rgba(255,255,255,.1);font-size:10px;color:#fff;white-space:nowrap}
-.corner-actions{display:none;grid-template-columns:1fr 1fr;gap:7px}.corner-actions.show{display:grid}
+.corner-actions{display:none;flex-direction:column;gap:7px}.corner-actions.show{display:flex}.corner-constraint{display:grid;grid-template-columns:1fr 1fr;gap:7px}.corner-constraint button.active{background:var(--blue);border-color:#60a5fa}.corner-commit{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .crop-main-actions.hidden,.crop-format.hidden,.crop-tools.hidden,.crop-guidance.hidden{display:none}
-@media(max-width:768px){.crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:78px}}
+.crop-precision-overlay{position:absolute;inset:0;z-index:30;display:none;pointer-events:none}.crop-precision-overlay.active{display:block}.crop-loupe{position:absolute;left:50%;top:16px;transform:translateX(-50%);width:150px;height:150px;border-radius:50%;overflow:hidden;border:3px solid #fff;background:#08080a;box-shadow:0 8px 28px rgba(0,0,0,.65)}.crop-loupe canvas{width:100%;height:100%;display:block}.crop-loupe::before,.crop-loupe::after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}.crop-loupe::before{left:50%;top:12%;bottom:12%;width:1px}.crop-loupe::after{top:50%;left:12%;right:12%;height:1px}.crop-precision-caption{position:absolute;left:50%;top:174px;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.12);font-size:10px;font-weight:700;white-space:nowrap}
+@media(max-width:768px){
+  .crop-header{padding:6px 10px;min-height:52px}.crop-header>div:first-child{min-width:0}.crop-header strong{font-size:13px}.crop-header br,.crop-header span{display:none}.crop-header-actions{gap:5px}.crop-header-actions button{min-width:58px;min-height:36px;padding:6px 8px}
+  .crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:74px;min-height:34px;padding:4px 9px}.crop-controls{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}.crop-guidance{display:none}.crop-format-head{min-height:16px}.crop-format-head strong{font-size:10px}.crop-format-head span{font-size:9px}.ratio-strip{gap:5px;padding-bottom:2px}.crop-row{gap:5px}.crop-controls button{min-height:36px}.crop-note{display:none}.ratio-feedback{padding:5px 7px;font-size:10px}.corner-help{top:7px;font-size:9px;padding:4px 8px}.corner-actions{gap:5px}.corner-constraint,.corner-commit{gap:5px}.crop-loupe{width:132px;height:132px;top:10px}.crop-precision-caption{top:148px}
+}
 
 /* PRECISION POINT PLACEMENT */
 .precision-overlay{position:absolute;inset:0;z-index:110;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 52px,rgba(0,0,0,.18) 53px 100%)}
@@ -173,7 +177,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Foundation Sprint Rev. 2 — Image Preparation</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Foundation Sprint Rev. 3 — Image Preparation</h1></div>
     <div class="desktop-scroll">
       <section class="card">
         <div class="card-title">Alignment Strategy</div>
@@ -321,13 +325,17 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       </div>
       <div id="corner-layer" class="corner-layer" aria-hidden="true">
         <svg class="corner-svg"><polygon id="corner-polygon" class="corner-polygon" points="0,0 0,0 0,0 0,0"></polygon></svg>
-        <div class="corner-help">Place the four points on the canvas corners.</div>
+        <div class="corner-help">Hold a blue point for precision. Edge Snap keeps near-horizontal and vertical edges aligned.</div>
         <span class="corner-handle" data-corner="0"></span><span class="corner-handle" data-corner="1"></span><span class="corner-handle" data-corner="2"></span><span class="corner-handle" data-corner="3"></span>
+      </div>
+      <div id="crop-precision-overlay" class="crop-precision-overlay" aria-hidden="true">
+        <div class="crop-loupe"><canvas id="crop-loupe-canvas" width="300" height="300"></canvas></div>
+        <div class="crop-precision-caption">Move point under crosshair • Release to place</div>
       </div>
     </div>
     <div class="crop-controls">
       <div id="canvas-status" class="canvas-status"><span id="canvas-status-text" class="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
-      <div id="crop-guidance" class="crop-guidance"><strong>Choose a canvas format.</strong> Resize the frame or position the image inside it. Use Free Form whenever perspective correction is needed.</div>
+      <div id="crop-guidance" class="crop-guidance"><strong>Choose a format.</strong> Resize the frame or position the image. Free Form corrects perspective.</div>
       <div id="crop-format" class="crop-format">
         <div class="crop-format-head"><strong>Canvas Format</strong><span>Swipe left or right</span></div>
         <div id="ratio-strip" class="ratio-strip">
@@ -339,7 +347,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
         <button id="crop-zoom-out">Zoom −</button><button id="crop-rotate">Rotate</button><button id="crop-zoom-in">Zoom +</button>
       </div>
       <div id="crop-main-actions" class="crop-row two"><button id="crop-reset-frame">Reset</button><button id="crop-use" class="btn-primary">Accept Image</button></div>
-      <div id="corner-actions" class="corner-actions"><button id="corner-cancel">Cancel Adjust</button><button id="corner-apply" class="btn-primary">Apply Free Form</button></div>
+      <div id="corner-actions" class="corner-actions">
+        <div class="corner-constraint"><button id="corner-snap" class="active">Edge Snap On</button><button id="corner-free">Corners Free</button></div>
+        <div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button id="corner-apply" class="btn-primary">Apply Free Form</button></div>
+      </div>
       <div id="crop-note" class="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
     </div>
   </div>
@@ -414,14 +425,14 @@ function beginNewMobileSession(){
 const cropState={
   kind:null,file:null,url:null,image:null,x:0,y:0,scale:1,rotation:0,
   locked:false,ratioKey:"free",frame:{x:0,y:0,w:100,h:100},drag:null,
-  mode:"crop",corners:[],cornerDrag:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],wheelHistoryTimer:null,detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original"
+  mode:"crop",corners:[],cornerDrag:null,cornerConstraint:"snap",canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],wheelHistoryTimer:null,detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original"
 };
 
 function beginCrop(kind,file){
   if(!file)return;
   closePopover();
   cropState.ownedUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});
-  Object.assign(cropState,{kind,file,locked:false,ratioKey:"free",rotation:0,x:0,y:0,mode:"crop",drag:null,cornerDrag:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original"});
+  Object.assign(cropState,{kind,file,locked:false,ratioKey:"free",rotation:0,x:0,y:0,mode:"crop",drag:null,cornerDrag:null,cornerConstraint:"snap",canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original"});
   cropState.url=URL.createObjectURL(file);
   cropState.ownedUrls.push(cropState.url);
   const preview=$("#crop-preview");
@@ -447,7 +458,7 @@ function openCropEditor(){
 }
 function closeCropEditor(){$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");cropState.drag=null;cropState.cornerDrag=null}
 function cropSnapshot(){
-  return{url:cropState.url,x:cropState.x,y:cropState.y,scale:cropState.scale,rotation:cropState.rotation,locked:cropState.locked,ratioKey:cropState.ratioKey,frame:{...cropState.frame},mode:cropState.mode,corners:(cropState.corners||[]).map(p=>({...p})),canvasDetected:cropState.canvasDetected,status:$("#canvas-status-text").textContent,previousRatioKey:cropState.previousRatioKey};
+  return{url:cropState.url,x:cropState.x,y:cropState.y,scale:cropState.scale,rotation:cropState.rotation,locked:cropState.locked,ratioKey:cropState.ratioKey,frame:{...cropState.frame},mode:cropState.mode,corners:(cropState.corners||[]).map(p=>({...p})),canvasDetected:cropState.canvasDetected,status:$("#canvas-status-text").textContent,previousRatioKey:cropState.previousRatioKey,cornerConstraint:cropState.cornerConstraint};
 }
 function updateUndoButton(){const b=$("#crop-undo");if(b)b.disabled=cropState.history.length===0}
 function resetCropHistory(){cropState.history=[];cropState.fineTuneBaseline=null;updateUndoButton()}
@@ -458,7 +469,7 @@ function pushCropHistory(){
 }
 function restoreCropSnapshot(snap){
   if(!snap)return;
-  const apply=()=>{Object.assign(cropState,{x:snap.x,y:snap.y,scale:snap.scale,rotation:snap.rotation,locked:snap.locked,ratioKey:snap.ratioKey,frame:{...snap.frame},mode:snap.mode,corners:snap.corners.map(p=>({...p})),canvasDetected:snap.canvasDetected,previousRatioKey:snap.previousRatioKey||snap.ratioKey});cropState.url=snap.url;$("#canvas-status-text").textContent=snap.status;updateRatioButtons();setCornerMode(snap.mode==="corners",false);renderCrop();};
+  const apply=()=>{Object.assign(cropState,{x:snap.x,y:snap.y,scale:snap.scale,rotation:snap.rotation,locked:snap.locked,ratioKey:snap.ratioKey,frame:{...snap.frame},mode:snap.mode,corners:snap.corners.map(p=>({...p})),canvasDetected:snap.canvasDetected,previousRatioKey:snap.previousRatioKey||snap.ratioKey,cornerConstraint:snap.cornerConstraint||"snap"});cropState.url=snap.url;$("#canvas-status-text").textContent=snap.status;updateRatioButtons();setCornerMode(snap.mode==="corners",false);renderCrop();};
   if(cropState.image.src!==snap.url){cropState.image.onload=()=>{cropState.image.onload=null;apply()};cropState.image.src=snap.url}else apply();
 }
 function undoCrop(){const snap=cropState.history.pop();if(!snap)return;restoreCropSnapshot(snap);cropState.fineTuneBaseline=null;updateUndoButton()}
@@ -580,12 +591,33 @@ function renderCorners(){
   if(cropState.mode!=="corners")return;const pts=cropState.corners;$("#corner-polygon").setAttribute("points",pts.map(p=>`${p.x},${p.y}`).join(" "));
   document.querySelectorAll(".corner-handle").forEach((h,i)=>{h.style.left=pts[i].x+"px";h.style.top=pts[i].y+"px"});
 }
+function updateCornerConstraintButtons(){
+  $("#corner-snap")?.classList.toggle("active",cropState.cornerConstraint==="snap");
+  $("#corner-free")?.classList.toggle("active",cropState.cornerConstraint==="free");
+}
+function constrainCornerPoint(index,p){
+  const pad=4,b=visibleImageBounds(),next={x:Math.max(b.x+pad,Math.min(b.x+b.w-pad,p.x)),y:Math.max(b.y+pad,Math.min(b.y+b.h-pad,p.y))};
+  if(cropState.cornerConstraint!=="snap")return next;
+  const horizontal=[1,0,3,2],vertical=[3,2,1,0],threshold=isMobileLayout()?22:12;
+  const hp=cropState.corners[horizontal[index]],vp=cropState.corners[vertical[index]];
+  if(hp&&Math.abs(next.y-hp.y)<=threshold)next.y=hp.y;
+  if(vp&&Math.abs(next.x-vp.x)<=threshold)next.x=vp.x;
+  return next;
+}
+function showCropPrecision(){const o=$("#crop-precision-overlay");o.classList.add("active");o.setAttribute("aria-hidden","false")}
+function hideCropPrecision(){const o=$("#crop-precision-overlay");o.classList.remove("active");o.setAttribute("aria-hidden","true")}
+function updateCropLoupe(stagePoint){
+  const canvas=$("#crop-loupe-canvas"),ctx=canvas?.getContext("2d");if(!ctx||!cropState.image)return;
+  const stage=$("#crop-stage").getBoundingClientRect(),zoom=2.5;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#08080a";ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.save();ctx.translate(canvas.width/2-stagePoint.x*zoom,canvas.height/2-stagePoint.y*zoom);ctx.scale(zoom,zoom);
+  const cx=stage.width/2+cropState.x,cy=stage.height/2+cropState.y;ctx.translate(cx,cy);ctx.rotate(cropState.rotation*Math.PI/180);ctx.scale(cropState.scale,cropState.scale);ctx.drawImage(cropState.image,-cropState.image.naturalWidth/2,-cropState.image.naturalHeight/2);ctx.restore();
+}
 function setCornerMode(on,announce=true){
   cropState.mode=on?"corners":"crop";$("#corner-layer").classList.toggle("active",on);$("#corner-layer").setAttribute("aria-hidden",on?"false":"true");
   $("#crop-format").classList.toggle("hidden",on);$("#crop-guidance").classList.toggle("hidden",on);$("#crop-tools").classList.toggle("hidden",on);$("#crop-main-actions").classList.toggle("hidden",on);$("#corner-actions").classList.toggle("show",on);
   if(on)cropState.ratioKey="free";
-  updateRatioButtons();
-  if(announce)$("#crop-note").textContent=on?"Free Form: place four points inside the original image, then apply.":"Choose a ratio, resize the frame, or use Free Form again at any time.";renderCrop();
+  updateRatioButtons();updateCornerConstraintButtons();
+  if(announce)$("#crop-note").textContent=on?"Free Form: hold and position each point. Edge Snap assists near-horizontal and vertical edges.":"Choose a ratio, resize the frame, or use Free Form again at any time.";renderCrop();
 }
 function stageToImagePoint(pt){
   const stage=$("#crop-stage").getBoundingClientRect(),cx=stage.width/2+cropState.x,cy=stage.height/2+cropState.y,a=-cropState.rotation*Math.PI/180;
@@ -1202,14 +1234,29 @@ $("#crop-cancel-top").onclick=cancelCrop;$("#crop-undo").onclick=undoCrop;$("#cr
 document.querySelectorAll(".ratio-option[data-ratio]").forEach(btn=>btn.onclick=()=>{if(btn.dataset.ratio!=="free")pushCropHistory();chooseRatio(btn.dataset.ratio)});
 $("#crop-zoom-out").onclick=()=>{pushCropHistory();cropState.scale=Math.max(.01,cropState.scale*.94);renderCrop()};$("#crop-zoom-in").onclick=()=>{pushCropHistory();cropState.scale*=1.06;renderCrop()};
 $("#crop-rotate").onclick=()=>{pushCropHistory();cropState.rotation=(cropState.rotation+90)%360;fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));renderCrop()};
-$("#canvas-adjust").onclick=()=>enterFreeForm();$("#corner-cancel").onclick=()=>{if(cropState.fineTuneBaseline){const snap={...cropState.fineTuneBaseline,mode:"crop",ratioKey:cropState.fineTuneBaseline.previousRatioKey||cropState.previousRatioKey||cropState.detectedKey,locked:true};restoreCropSnapshot(snap);cropState.fineTuneBaseline=null}else{cropState.ratioKey=cropState.previousRatioKey||cropState.detectedKey;cropState.locked=true;setCornerMode(false)}};$("#corner-apply").onclick=()=>{pushCropHistory();applyCornerCorrection()};
+$("#canvas-adjust").onclick=()=>enterFreeForm();$("#corner-snap").onclick=()=>{cropState.cornerConstraint="snap";updateCornerConstraintButtons()};$("#corner-free").onclick=()=>{cropState.cornerConstraint="free";updateCornerConstraintButtons()};$("#corner-cancel").onclick=()=>{if(cropState.fineTuneBaseline){const snap={...cropState.fineTuneBaseline,mode:"crop",ratioKey:cropState.fineTuneBaseline.previousRatioKey||cropState.previousRatioKey||cropState.detectedKey,locked:true};restoreCropSnapshot(snap);cropState.fineTuneBaseline=null}else{cropState.ratioKey=cropState.previousRatioKey||cropState.detectedKey;cropState.locked=true;setCornerMode(false)}};$("#corner-apply").onclick=()=>{pushCropHistory();applyCornerCorrection()};
 const cropStage=$("#crop-stage");function cropPointerPosition(e){const r=cropStage.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-cropStage.addEventListener("pointerdown",e=>{e.preventDefault();const corner=e.target?.dataset?.corner;pushCropHistory();if(corner!==undefined){cropState.cornerDrag={index:+corner};e.target.setPointerCapture(e.pointerId);return}if(cropState.mode==="corners")return;cropStage.setPointerCapture(e.pointerId);const p=cropPointerPosition(e),handle=e.target?.dataset?.handle;cropState.drag=handle?{type:"locked-handle",handle,start:p,frame:{...cropState.frame}}:{type:"image",start:p,x:cropState.x,y:cropState.y}});
-cropStage.addEventListener("pointermove",e=>{const p=cropPointerPosition(e);if(cropState.cornerDrag){const pad=4,b=visibleImageBounds();cropState.corners[cropState.cornerDrag.index]={x:Math.max(b.x+pad,Math.min(b.x+b.w-pad,p.x)),y:Math.max(b.y+pad,Math.min(b.y+b.h-pad,p.y))};renderCrop();return}if(!cropState.drag)return;const dx=p.x-cropState.drag.start.x,dy=p.y-cropState.drag.start.y;if(cropState.drag.type==="image"){cropState.x=cropState.drag.x+dx;cropState.y=cropState.drag.y+dy}else if(cropState.drag.type==="locked-handle"){resizeLockedCrop(cropState.drag.handle,p,cropState.drag.frame)}renderCrop()});
-cropStage.addEventListener("pointerup",()=>{cropState.drag=null;cropState.cornerDrag=null});cropStage.addEventListener("pointercancel",()=>{cropState.drag=null;cropState.cornerDrag=null});
-let cropTouches=null;cropStage.addEventListener("touchstart",e=>{if(cropState.mode==="corners")return;if(e.touches.length===2){e.preventDefault();pushCropHistory();const a=e.touches[0],b=e.touches[1];cropTouches={dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y}}},{passive:false});
+cropStage.addEventListener("pointerdown",e=>{
+  e.preventDefault();const corner=e.target?.dataset?.corner;
+  if(corner!==undefined){
+    pushCropHistory();e.target.setPointerCapture(e.pointerId);const p=cropPointerPosition(e);
+    cropState.cornerDrag={index:+corner,pointerId:e.pointerId,active:e.pointerType!=="touch",timer:null,last:p};
+    const activate=()=>{if(!cropState.cornerDrag)return;cropState.cornerDrag.active=true;showCropPrecision();updateCropLoupe(p)};
+    if(e.pointerType==="touch")cropState.cornerDrag.timer=setTimeout(activate,260);else activate();
+    return;
+  }
+  if(cropState.mode==="corners")return;pushCropHistory();cropStage.setPointerCapture(e.pointerId);const p=cropPointerPosition(e),handle=e.target?.dataset?.handle;cropState.drag=handle?{type:"locked-handle",handle,start:p,frame:{...cropState.frame}}:{type:"image",start:p,x:cropState.x,y:cropState.y};
+});
+cropStage.addEventListener("pointermove",e=>{
+  const p=cropPointerPosition(e);
+  if(cropState.cornerDrag){cropState.cornerDrag.last=p;if(!cropState.cornerDrag.active)return;cropState.corners[cropState.cornerDrag.index]=constrainCornerPoint(cropState.cornerDrag.index,p);updateCropLoupe(p);renderCrop();return}
+  if(!cropState.drag)return;const dx=p.x-cropState.drag.start.x,dy=p.y-cropState.drag.start.y;if(cropState.drag.type==="image"){cropState.x=cropState.drag.x+dx;cropState.y=cropState.drag.y+dy}else if(cropState.drag.type==="locked-handle"){resizeLockedCrop(cropState.drag.handle,p,cropState.drag.frame)}renderCrop();
+});
+function endCropPointer(){if(cropState.cornerDrag?.timer)clearTimeout(cropState.cornerDrag.timer);hideCropPrecision();cropState.drag=null;cropState.cornerDrag=null}
+cropStage.addEventListener("pointerup",endCropPointer);cropStage.addEventListener("pointercancel",endCropPointer);
+let cropTouches=null;cropStage.addEventListener("touchstart",e=>{if(e.touches.length===2){e.preventDefault();pushCropHistory();const a=e.touches[0],b=e.touches[1];cropTouches={dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y}}},{passive:false});
 cropStage.addEventListener("touchmove",e=>{if(e.touches.length===2&&cropTouches){e.preventDefault();const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop()}},{passive:false});cropStage.addEventListener("touchend",()=>cropTouches=null,{passive:true});
-cropStage.addEventListener("wheel",e=>{if(cropState.mode==="corners")return;e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
+cropStage.addEventListener("wheel",e=>{e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
 window.addEventListener("resize",()=>{if($("#crop-editor").classList.contains("open")){fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));renderCrop()}});
 
 /* POINTER / TOUCH STATE ENGINE */
