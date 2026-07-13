@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Foundation Sprint Rev. 6: Engineering Corrections | Baseline v2.2.3 -->
+<!-- Drawing Checker Studio | Foundation Sprint Rev. 8: Mobile Constrained Crop Touch Patch | Canonical Source: Tested Rev. 7 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Foundation Sprint Rev. 6: Engineering Corrections</title>
+<title>Drawing Checker Studio — Foundation Sprint Rev. 8: Mobile Crop Touch Patch</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -177,7 +177,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Foundation Sprint Rev. 6 — Engineering Corrections</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Foundation Sprint Rev. 8 — Mobile Crop Touch Patch</h1></div>
     <div class="desktop-scroll">
       <section class="card">
         <div class="card-title">Alignment Strategy</div>
@@ -1332,7 +1332,25 @@ cropStage.addEventListener("touchstart",e=>{
     }
     return;
   }
-  if(e.touches.length===2){e.preventDefault();pushCropHistory();const a=e.touches[0],b=e.touches[1];cropTouches={dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y}}
+  if(e.touches.length===2){
+    e.preventDefault();
+    cropState.drag=null;
+    pushCropHistory();
+    const a=e.touches[0],b=e.touches[1];
+    cropTouches={type:"pinch",dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y};
+    return;
+  }
+  if(e.touches.length===1){
+    e.preventDefault();
+    const t=e.touches[0],p=touchStagePoint(t);
+    const target=document.elementFromPoint(t.clientX,t.clientY)||e.target;
+    const handle=target?.dataset?.handle;
+    pushCropHistory();
+    cropTouches={type:"drag"};
+    cropState.drag=handle
+      ?{type:"locked-handle",handle,start:p,frame:{...cropState.frame}}
+      :{type:"image",start:p,x:cropState.x,y:cropState.y};
+  }
 },{passive:false});
 cropStage.addEventListener("touchmove",e=>{
   if(cropState.mode==="corners"){
@@ -1340,16 +1358,31 @@ cropStage.addEventListener("touchmove",e=>{
     if(e.touches.length===2&&cropTouches){const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop();return}
     const g=cropState.freeTouchGesture;if(e.touches.length===1&&g){const p=touchStagePoint(e.touches[0]);if(g.precision&&cropState.freePointGesture?.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}else if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){g.moved=true;clearTimeout(g.timer)}}return;
   }
-  if(e.touches.length===2&&cropTouches){e.preventDefault();const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop()}
+  if(e.touches.length===2&&cropTouches?.type==="pinch"){
+    e.preventDefault();
+    const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;
+    cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));
+    cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop();return;
+  }
+  if(e.touches.length===1&&cropTouches?.type==="drag"&&cropState.drag){
+    e.preventDefault();
+    const p=touchStagePoint(e.touches[0]),dx=p.x-cropState.drag.start.x,dy=p.y-cropState.drag.start.y;
+    if(cropState.drag.type==="image"){
+      cropState.x=cropState.drag.x+dx;cropState.y=cropState.drag.y+dy;
+    }else if(cropState.drag.type==="locked-handle"){
+      resizeLockedCrop(cropState.drag.handle,p,cropState.drag.frame);
+    }
+    renderCrop();
+  }
 },{passive:false});
 cropStage.addEventListener("touchend",e=>{
   if(cropState.mode==="corners"){
     if(e.touches.length===0){const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(true);cropState.freeTouchGesture=null;cropTouches=null}
     return;
   }
-  cropTouches=null;
+  if(e.touches.length===0){cropState.drag=null;cropTouches=null;}
 },{passive:false});
-cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;cropTouches=null},{passive:false});
+cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null},{passive:false});
 cropStage.addEventListener("wheel",e=>{e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
 window.addEventListener("resize",()=>{if($("#crop-editor").classList.contains("open")){fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));renderCrop()}});
 
