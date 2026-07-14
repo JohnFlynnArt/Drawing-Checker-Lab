@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Foundation Sprint Rev. 8: Mobile Constrained Crop Touch Patch | Canonical Source: Tested Rev. 7 -->
+<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 1 | Canonical Source: Foundation Sprint Rev. 8 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Foundation Sprint Rev. 8: Mobile Crop Touch Patch</title>
+<title>Drawing Checker Studio — Workflow Harmonization Sprint Rev. 1</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -177,7 +177,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Foundation Sprint Rev. 8 — Mobile Crop Touch Patch</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Sprint Rev. 1</h1></div>
     <div class="desktop-scroll">
       <section class="card">
         <div class="card-title">Alignment Strategy</div>
@@ -250,15 +250,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
   <div id="foundation-start" class="foundation-start">
     <div class="foundation-card">
-      <div class="foundation-progress">
-        <div id="foundation-step-ref" class="foundation-step active">1 · Reference</div>
-        <div id="foundation-step-draw" class="foundation-step">2 · Drawing</div>
-        <div id="foundation-step-align" class="foundation-step">3 · Alignment</div>
-      </div>
       <h2 id="foundation-title">Drawing Checker Studio</h2>
       <p id="foundation-copy">Prepare the Reference and Drawing first. Alignment comes after both images are ready.</p>
       <div id="foundation-actions" class="foundation-actions one"></div>
-      <div id="foundation-note" class="foundation-note">Image Preparation is the only active workflow in this Foundation Sprint.</div>
+      <div id="foundation-note" class="foundation-note">Desktop and Mobile now follow the same familiar process.</div>
     </div>
   </div>
 
@@ -383,7 +378,7 @@ const state={
   mobileStrategyChosen:false,
   loadingKind:null,
   returnPhase:"workspace",
-  setupStage:"home",
+  setupStage:"reference",
   setupComplete:false,
   referenceRatio:null,
   drawingRatio:null
@@ -415,7 +410,7 @@ function beginNewMobileSession(){
   state.aligned=false;
   state.aspectMismatch=false;
   state.mobileStrategyChosen=false;
-  state.setupStage="home";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;
+  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;
   closePopover();
   render();
 }
@@ -1051,32 +1046,43 @@ function renderStart(){
   if(!overlay)return;
   overlay.classList.toggle("hidden",state.setupComplete);
   if(state.setupComplete)return;
-  const refStep=$("#foundation-step-ref"),drawStep=$("#foundation-step-draw"),alignStep=$("#foundation-step-align");
-  [refStep,drawStep,alignStep].forEach(x=>x.className="foundation-step");
-  if(state.setupStage==="home"||state.setupStage==="reference"){refStep.classList.add("active")}
-  if(state.setupStage==="drawing"){refStep.classList.add("done");drawStep.classList.add("active")}
-  if(state.setupStage==="alignment"){refStep.classList.add("done");drawStep.classList.add("done");alignStep.classList.add("active")}
-  actions.className="foundation-actions";actions.innerHTML="";
-  if(state.setupStage==="home"){
-    title.textContent="Prepare Images";copy.textContent="Start by preparing the Reference, then prepare the current Drawing. Alignment is selected only after both images are ready.";actions.classList.add("one");
-    actions.innerHTML='<button id="foundation-launch" class="foundation-primary">Launch Prepare Images</button>';
-    $("#foundation-launch").onclick=()=>{state.setupStage="reference";render()};note.textContent="Designed for artists with no technical setup required.";
-  }else if(state.setupStage==="reference"){
-    title.textContent="Load Reference Image";copy.textContent="Choose an existing prepared reference or take a photo. The app will detect its ratio and select the full image.";
+
+  actions.className="foundation-actions";
+  actions.innerHTML="";
+
+  if(state.setupStage==="home")state.setupStage="reference";
+
+  if(state.setupStage==="reference"){
+    title.textContent="Prepare Reference";
+    copy.textContent="Choose the reference image you prepared for this drawing session.";
     actions.innerHTML='<button id="foundation-ref-library" class="foundation-primary">Choose Photo</button><button id="foundation-ref-camera" class="foundation-secondary">Take Photo</button>';
-    $("#foundation-ref-library").onclick=()=>$("#mobile-ref-input").click();$("#foundation-ref-camera").onclick=()=>$("#mobile-ref-camera").click();note.textContent="Reference first · Drawing second";
+    $("#foundation-ref-library").onclick=()=>$("#mobile-ref-input").click();
+    $("#foundation-ref-camera").onclick=()=>$("#mobile-ref-camera").click();
+    note.textContent="Prepare the Reference first. The Drawing comes next.";
   }else if(state.setupStage==="drawing"){
-    title.textContent="Reference Ready";copy.textContent="Now load the current Drawing. Ratio feedback will remain informational; a match is helpful but never required.";
+    title.textContent="Prepare Drawing";
+    copy.textContent="Load the current drawing image. Ratio feedback is helpful, but matching the Reference is not required.";
     actions.innerHTML='<button id="foundation-draw-library" class="foundation-primary">Choose Drawing</button><button id="foundation-draw-camera" class="foundation-secondary">Take Drawing Photo</button><button id="foundation-replace-ref" class="foundation-secondary">Replace Reference</button>';
-    $("#foundation-draw-library").onclick=()=>$("#mobile-draw-library").click();$("#foundation-draw-camera").onclick=()=>$("#mobile-draw-camera").click();$("#foundation-replace-ref").onclick=()=>$("#mobile-ref-input").click();note.textContent="Replace either image without restarting the entire session.";
+    $("#foundation-draw-library").onclick=()=>$("#mobile-draw-library").click();
+    $("#foundation-draw-camera").onclick=()=>$("#mobile-draw-camera").click();
+    $("#foundation-replace-ref").onclick=()=>$("#mobile-ref-input").click();
+    note.textContent="The accepted Reference remains available unless you replace it.";
   }else{
-    title.textContent="Choose Alignment";copy.textContent="Both images are prepared. Choose how you want to bring them together for observation.";actions.classList.add("three");
+    title.textContent="Choose Alignment";
+    copy.textContent="Both images are prepared. Choose how you want to bring them together for observation.";
+    actions.classList.add("three");
     actions.innerHTML='<button id="foundation-sight" class="foundation-primary">Sight-Size</button><button id="foundation-free" class="foundation-secondary">Free Form</button><button id="foundation-two" class="foundation-secondary">2-Point</button>';
     const finish=type=>{state.setupComplete=true;state.mobileStrategyChosen=true;setAlignment(type);render()};
-    $("#foundation-sight").onclick=()=>finish("sight");$("#foundation-free").onclick=()=>finish("free");$("#foundation-two").onclick=()=>finish("two");
-    const match=state.referenceRatio&&state.drawingRatio&&Math.abs(state.referenceRatio-state.drawingRatio)<.012;note.textContent=match?"✓ Reference and Drawing ratios match.":"Reference and Drawing ratios differ. All alignment strategies remain available.";
+    $("#foundation-sight").onclick=()=>finish("sight");
+    $("#foundation-free").onclick=()=>finish("free");
+    $("#foundation-two").onclick=()=>finish("two");
+    const match=state.referenceRatio&&state.drawingRatio&&Math.abs(state.referenceRatio-state.drawingRatio)<.012;
+    note.textContent=match?"✓ Reference and Drawing ratios match.":"Reference and Drawing ratios differ. All alignment strategies remain available.";
   }
-  const toolbar=$("#mobile-toolbar");if(toolbar)toolbar.style.display="none";closePopover();
+
+  const toolbar=$("#mobile-toolbar");
+  if(toolbar)toolbar.style.display="none";
+  closePopover();
 }
 function renderMobileWorkflow(){
   const next=$("#mobile-next-action");
