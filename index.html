@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 1 | Canonical Source: Foundation Sprint Rev. 8 -->
+<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 1 Rebuild | Base: Foundation Sprint Rev. 8 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -118,7 +118,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .foundation-start.hidden{display:none}
 .foundation-card{width:min(560px,94vw);max-height:92vh;overflow:auto;padding:24px;border-radius:20px;background:rgba(26,26,30,.97);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 70px rgba(0,0,0,.55)}
 .foundation-card h2{margin:0 0 8px;font-size:24px}.foundation-card p{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.45}
-.foundation-progress{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.foundation-step{padding:8px;border-radius:10px;border:1px solid var(--border);font-size:10px;text-align:center;color:var(--muted)}.foundation-step.active{background:rgba(59,130,246,.18);border-color:#60a5fa;color:#fff}.foundation-step.done{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.5);color:#9ae6c8}
+.foundation-progress{display:none;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.foundation-step{padding:8px;border-radius:10px;border:1px solid var(--border);font-size:10px;text-align:center;color:var(--muted)}.foundation-step.active{background:rgba(59,130,246,.18);border-color:#60a5fa;color:#fff}.foundation-step.done{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.5);color:#9ae6c8}
 .foundation-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.foundation-actions.one{grid-template-columns:1fr}.foundation-actions.three{grid-template-columns:repeat(3,1fr)}.foundation-actions button{min-height:48px;border-radius:12px;font-size:13px}.foundation-primary{background:var(--blue);border-color:#60a5fa}.foundation-secondary{background:#26262d}.foundation-note{margin-top:12px;font-size:11px;color:var(--muted);text-align:center}
 .ratio-feedback{display:none;padding:8px 10px;border-radius:9px;border:1px solid var(--border);font-size:11px;color:var(--muted);justify-content:space-between;gap:8px}.ratio-feedback.show{display:flex}.ratio-feedback.match{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08);color:#9ae6c8}.ratio-feedback strong{color:inherit}
 @media(max-width:768px){.foundation-start{padding:16px}.foundation-card{padding:20px}.foundation-card h2{font-size:21px}.foundation-actions.three{grid-template-columns:1fr}.foundation-progress{gap:5px}.foundation-step{font-size:9px;padding:7px 4px}}
@@ -177,9 +177,14 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Sprint Rev. 1</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Rev. 1</h1></div>
+    <div id="desktop-workflow-card" class="card desktop-workflow-card">
+      <div class="card-title">Current Step</div>
+      <strong id="desktop-workflow-title">Prepare Reference</strong>
+      <div id="desktop-workflow-copy" class="small-label">Choose a reference image to begin.</div>
+    </div>
     <div class="desktop-scroll">
-      <section class="card">
+      <section class="card" id="desktop-alignment-card">
         <div class="card-title">Alignment Strategy</div>
         <div class="row3">
           <button id="desktop-free">Free Form</button>
@@ -188,7 +193,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" id="desktop-source-card">
         <div class="card-title">Source Images</div>
         <div class="small-label">Reference</div>
         <div class="upload-box" id="desktop-ref-slot"></div>
@@ -209,7 +214,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
         <button id="desktop-compute" class="btn-primary" disabled>Execute Match</button>
       </section>
 
-      <section class="card">
+      <section class="card" id="desktop-compare-card">
         <div class="card-title">Compare</div>
         <div class="row3">
           <button id="desktop-overlay" class="audit active">Overlay</button>
@@ -219,7 +224,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       </section>
     </div>
 
-    <div class="desktop-bottom">
+    <div class="desktop-bottom" id="desktop-bottom-controls">
       <div class="row2">
         <button id="desktop-target-ref">Target Ref</button>
         <button id="desktop-target-draw" class="active">Target Draw</button>
@@ -250,16 +255,21 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
   <div id="foundation-start" class="foundation-start">
     <div class="foundation-card">
+      <div class="foundation-progress">
+        <div id="foundation-step-ref" class="foundation-step active">1 · Reference</div>
+        <div id="foundation-step-draw" class="foundation-step">2 · Drawing</div>
+        <div id="foundation-step-align" class="foundation-step">3 · Alignment</div>
+      </div>
       <h2 id="foundation-title">Drawing Checker Studio</h2>
       <p id="foundation-copy">Prepare the Reference and Drawing first. Alignment comes after both images are ready.</p>
       <div id="foundation-actions" class="foundation-actions one"></div>
-      <div id="foundation-note" class="foundation-note">Desktop and Mobile now follow the same familiar process.</div>
+      <div id="foundation-note" class="foundation-note">Image Preparation is the only active workflow in this Foundation Sprint.</div>
     </div>
   </div>
 
   <div class="mobile-ui mobile-topbar"><div id="mobile-status" class="mobile-status">Load a reference to begin.</div></div>
 
-  <div id="mobile-start" class="mobile-ui mobile-start show">
+  <div id="mobile-start" class="mobile-ui mobile-start">
     <div class="mobile-start-card">
       <h2 id="start-title">Choose Alignment</h2>
       <p id="start-copy">Select the alignment tool you want to begin with.</p>
@@ -1044,32 +1054,37 @@ function renderDesktopSlots(){
 function renderStart(){
   const overlay=$("#foundation-start"),title=$("#foundation-title"),copy=$("#foundation-copy"),actions=$("#foundation-actions"),note=$("#foundation-note");
   if(!overlay)return;
+
+  // Desktop keeps its workspace visible. Progressive disclosure happens in the sidebar.
+  if(!isMobileLayout()){
+    overlay.classList.add("hidden");
+    return;
+  }
+
   overlay.classList.toggle("hidden",state.setupComplete);
   if(state.setupComplete)return;
-
-  actions.className="foundation-actions";
-  actions.innerHTML="";
+  actions.className="foundation-actions";actions.innerHTML="";
 
   if(state.setupStage==="home")state.setupStage="reference";
 
   if(state.setupStage==="reference"){
     title.textContent="Prepare Reference";
-    copy.textContent="Choose the reference image you prepared for this drawing session.";
+    copy.textContent="Choose an existing reference image or take a photo.";
     actions.innerHTML='<button id="foundation-ref-library" class="foundation-primary">Choose Photo</button><button id="foundation-ref-camera" class="foundation-secondary">Take Photo</button>';
     $("#foundation-ref-library").onclick=()=>$("#mobile-ref-input").click();
     $("#foundation-ref-camera").onclick=()=>$("#mobile-ref-camera").click();
-    note.textContent="Prepare the Reference first. The Drawing comes next.";
+    note.textContent="Prepare the Reference first.";
   }else if(state.setupStage==="drawing"){
     title.textContent="Prepare Drawing";
-    copy.textContent="Load the current drawing image. Ratio feedback is helpful, but matching the Reference is not required.";
+    copy.textContent="Reference ready. Now choose or photograph the current drawing.";
     actions.innerHTML='<button id="foundation-draw-library" class="foundation-primary">Choose Drawing</button><button id="foundation-draw-camera" class="foundation-secondary">Take Drawing Photo</button><button id="foundation-replace-ref" class="foundation-secondary">Replace Reference</button>';
     $("#foundation-draw-library").onclick=()=>$("#mobile-draw-library").click();
     $("#foundation-draw-camera").onclick=()=>$("#mobile-draw-camera").click();
     $("#foundation-replace-ref").onclick=()=>$("#mobile-ref-input").click();
-    note.textContent="The accepted Reference remains available unless you replace it.";
+    note.textContent="Replace either image without restarting.";
   }else{
     title.textContent="Choose Alignment";
-    copy.textContent="Both images are prepared. Choose how you want to bring them together for observation.";
+    copy.textContent="Both images are prepared. Choose the alignment method.";
     actions.classList.add("three");
     actions.innerHTML='<button id="foundation-sight" class="foundation-primary">Sight-Size</button><button id="foundation-free" class="foundation-secondary">Free Form</button><button id="foundation-two" class="foundation-secondary">2-Point</button>';
     const finish=type=>{state.setupComplete=true;state.mobileStrategyChosen=true;setAlignment(type);render()};
@@ -1077,13 +1092,43 @@ function renderStart(){
     $("#foundation-free").onclick=()=>finish("free");
     $("#foundation-two").onclick=()=>finish("two");
     const match=state.referenceRatio&&state.drawingRatio&&Math.abs(state.referenceRatio-state.drawingRatio)<.012;
-    note.textContent=match?"✓ Reference and Drawing ratios match.":"Reference and Drawing ratios differ. All alignment strategies remain available.";
+    note.textContent=match?"✓ Reference and Drawing ratios match.":"All alignment methods remain available.";
   }
-
-  const toolbar=$("#mobile-toolbar");
-  if(toolbar)toolbar.style.display="none";
-  closePopover();
+  const toolbar=$("#mobile-toolbar");if(toolbar)toolbar.style.display="none";closePopover();
 }
+
+function renderDesktopWorkflow(){
+  if(isMobileLayout())return;
+  const alignmentCard=$("#desktop-alignment-card");
+  const compareCard=$("#desktop-compare-card");
+  const pinsCard=$("#desktop-pins-card");
+  const bottom=$("#desktop-bottom-controls");
+  const title=$("#desktop-workflow-title");
+  const copy=$("#desktop-workflow-copy");
+  const drawSlot=$("#desktop-draw-slot");
+
+  const atAlignment=state.setupStage==="alignment"||state.setupComplete;
+  alignmentCard.style.display=atAlignment?"flex":"none";
+  compareCard.style.display=state.setupComplete?"flex":"none";
+  bottom.style.display=state.setupComplete?"flex":"none";
+  if(pinsCard&&!state.setupComplete)pinsCard.style.display="none";
+
+  if(state.setupStage==="reference"&&!hasRef()){
+    title.textContent="Prepare Reference";
+    copy.textContent="Choose a reference image. The preparation editor opens automatically.";
+    if(drawSlot)drawSlot.innerHTML='<span class="small-label">Available after Reference is prepared</span>';
+  }else if(state.setupStage==="drawing"&&!hasDraw()){
+    title.textContent="Prepare Drawing";
+    copy.textContent="Reference ready. Choose the current drawing next.";
+  }else if(atAlignment&&!state.setupComplete){
+    title.textContent="Choose Alignment";
+    copy.textContent="Both images are ready. Select Sight-Size, Free Form, or 2-Point.";
+  }else{
+    title.textContent="Alignment Workspace";
+    copy.textContent="Images prepared. Alignment and observation tools are available.";
+  }
+}
+
 function renderMobileWorkflow(){
   const next=$("#mobile-next-action");
   const undoPoint=$("#mobile-undo-point");
@@ -1205,12 +1250,21 @@ function render(){
   const mt=$("#mobile-toolbar");if(mt&&state.setupComplete)mt.style.display="";
   renderMobileWorkflow();
   renderDesktopSlots();
+  renderDesktopWorkflow();
 }
 
 /* DESKTOP BINDINGS */
-$("#desktop-free").onclick=()=>setAlignment("free");
-$("#desktop-sight").onclick=()=>setAlignment("sight");
-$("#desktop-two").onclick=()=>setAlignment("two");
+function chooseDesktopAlignment(type){
+  if(!state.setupComplete&&state.setupStage==="alignment"){
+    state.setupComplete=true;
+    state.mobileStrategyChosen=true;
+  }
+  setAlignment(type);
+  render();
+}
+$("#desktop-free").onclick=()=>chooseDesktopAlignment("free");
+$("#desktop-sight").onclick=()=>chooseDesktopAlignment("sight");
+$("#desktop-two").onclick=()=>chooseDesktopAlignment("two");
 $("#desktop-ref-pins").onclick=()=>state.phase==="point-ref"?setPhase("workspace"):beginPointPhase("ref");
 $("#desktop-draw-pins").onclick=()=>state.phase==="point-draw"?setPhase("workspace"):beginPointPhase("draw");
 $("#desktop-clear-ref").onclick=()=>{state.markersHidden=false;removeMarkers("ref");state.aligned=false;rebuildMarkers();beginPointPhase("ref")};
