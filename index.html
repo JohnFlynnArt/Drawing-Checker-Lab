@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 4: Interactive 2-Point Workspace | Base: Tested Alignment Sprint Rev. 3 -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 5: Mobile Interactive Alignment Workspace | Base: Tested Alignment Sprint Rev. 4 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 4</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 5</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -70,6 +70,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .mobile-next.show{display:flex}
 .mobile-next.secondary{background:transparent;border-color:var(--border);color:var(--text)}
 .mobile-point-actions{display:none;grid-template-columns:1fr 1fr;gap:6px;width:100%}.mobile-point-actions.show{display:grid}.mobile-point-actions .mobile-next{display:block;margin:0}
+.mobile-alignment-methods{display:none;grid-template-columns:repeat(3,1fr);gap:6px;width:100%}.mobile-alignment-methods.show{display:grid}.mobile-alignment-methods button{min-height:40px;border-radius:10px;font-size:11px}.mobile-alignment-methods button.active{background:var(--blue);border-color:#60a5fa;color:#fff}
 .mobile-toolbar-row{display:flex;gap:6px;align-items:center;width:100%}
 .mobile-layer-controls{display:none;width:100%;align-items:center;gap:7px;padding:2px 0 5px}
 .mobile-layer-controls.show{display:flex}
@@ -181,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 4</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 5</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -300,6 +301,12 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       <button id="mobile-reset-points" class="mobile-next secondary">Reset All Points</button>
     </div>
 
+    <div id="mobile-alignment-methods" class="mobile-alignment-methods">
+      <button id="m-sight" class="active">Sight Size</button>
+      <button id="m-two">2-Point</button>
+      <button id="m-free">Free Align</button>
+    </div>
+
     <div id="mobile-layer-controls" class="mobile-layer-controls">
       <div class="mobile-layer-buttons">
         <button id="mobile-target-ref">Reference</button>
@@ -315,9 +322,6 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     <div class="mobile-tools">
       <button id="m-images" class="tool"><strong>Images</strong><span>upload/replace</span></button>
       <button id="m-nav" class="tool active"><strong>View</strong><span>locked</span></button>
-      <button id="m-sight" class="tool active"><strong>Sight</strong><span>align</span></button>
-      <button id="m-two" class="tool"><strong>2-Point</strong><span>align</span></button>
-      <button id="m-free" class="tool"><strong>Free Align</strong><span>manual</span></button>
       <button id="m-overlay" class="tool audit active"><strong>Overlay</strong><span>compare</span></button>
       <button id="m-blink" class="tool audit"><strong>Blink</strong><span>compare</span></button>
       <button id="m-outline" class="tool audit"><strong>Outline</strong><span>compare</span></button>
@@ -834,6 +838,10 @@ function setAlignment(type){
       state.layers.ref.z=1;state.layers.draw.z=2;
       render();
     }else if(type==="two"){
+      if(isMobileLayout()&&state.aligned){
+        resetAllPoints();
+        return;
+      }
       state.twoPointCollapsed=false;
       render();
     }else render();
@@ -1178,49 +1186,40 @@ function renderMobileWorkflow(){
   const undoPoint=$("#mobile-undo-point");
   const resetPoints=$("#mobile-reset-points");
   const pointActions=$("#mobile-point-actions");
+  const alignmentMethods=$("#mobile-alignment-methods");
   if(!next)return;
 
   next.classList.remove("show");
   if(pointActions)pointActions.classList.remove("show");
+  if(alignmentMethods)alignmentMethods.classList.remove("show");
   if(undoPoint)undoPoint.onclick=undoLastPoint;
   if(resetPoints)resetPoints.onclick=resetAllPoints;
   next.disabled=false;
   next.onclick=null;
 
-  // Keep alignment tools available, but let the current state drive the main action.
-  $("#m-free").style.display=hasRef()&&hasDraw() ? "" : "none";
-  $("#m-sight").style.display=hasRef()&&hasDraw() ? "" : "none";
-  $("#m-two").style.display=hasRef()&&hasDraw() ? "" : "none";
-  $("#m-overlay").style.display=hasRef()&&hasDraw() ? "" : "none";
-  $("#m-blink").style.display=hasRef()&&hasDraw() ? "" : "none";
-  $("#m-outline").style.display=hasRef()&&hasDraw() ? "" : "none";
-  $("#m-nav").style.display=hasRef()&&hasDraw() ? "" : "none";
+  const imagesReady=hasRef()&&hasDraw();
+  const activeTwoPoint=imagesReady&&state.alignment==="two"&&!state.aligned;
+
+  // Alignment methods are primary controls whenever the workspace is idle.
+  // During active 2-Point placement they yield to the point workflow.
+  if(alignmentMethods)alignmentMethods.classList.toggle("show",imagesReady&&!activeTwoPoint);
+
+  // Compare tools recede during active 2-Point placement and return after Match.
+  $("#m-overlay").style.display=imagesReady&&!activeTwoPoint ? "" : "none";
+  $("#m-blink").style.display=imagesReady&&!activeTwoPoint ? "" : "none";
+  $("#m-outline").style.display=imagesReady&&!activeTwoPoint ? "" : "none";
+  $("#m-nav").style.display=imagesReady ? "" : "none";
 
   const layerControls=$("#mobile-layer-controls");
-  if(layerControls){
-    layerControls.classList.toggle("show",hasRef()&&hasDraw());
-  }
+  if(layerControls)layerControls.classList.toggle("show",imagesReady);
 
-  if(!hasRef()||!hasDraw())return;
+  if(!imagesReady)return;
 
-  if(state.alignment==="free"){
-    next.textContent=state.phase==="adjust" ? "Lock Workspace" : "Unlock Selected Layer";
-    next.classList.add("show");
-    next.onclick=()=>toggleViewLock();
-    return;
-  }
+  // Sight Size and Free Align use the existing View lock control; no duplicate
+  // Adjust Drawing action is shown.
+  if(!activeTwoPoint)return;
 
-  if(state.alignment==="sight"){
-    next.textContent="Adjust Drawing";
-    next.classList.add("show");
-    next.onclick=()=>{
-      setTarget("draw");
-      toggleViewLock(true);
-    };
-    return;
-  }
-
-  if(pointActions&&(state.points.ref.length||state.points.draw.length||state.aligned))pointActions.classList.add("show");
+  if(pointActions&&(state.points.ref.length||state.points.draw.length))pointActions.classList.add("show");
 
   if(state.points.ref.length<2){
     next.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
@@ -1236,21 +1235,10 @@ function renderMobileWorkflow(){
     return;
   }
 
-  if(!state.aligned){
-    next.textContent="Execute Match";
-    next.classList.add("show");
-    next.onclick=computeTwoPoint;
-    return;
-  }
-
-  next.textContent="Adjust Drawing";
+  next.textContent="Execute Match";
   next.classList.add("show");
-  next.onclick=()=>{
-    setTarget("draw");
-    toggleViewLock(true);
-  };
+  next.onclick=computeTwoPoint;
 }
-
 function render(){
   renderVisuals();
   $("#desktop-status").textContent=statusText();
