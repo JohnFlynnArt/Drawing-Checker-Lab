@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 3 Final: Desktop Alignment Transition Cleanup | Base: Tested Workflow Harmonization Rev. 2 -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 1: Desktop 2-Point Precision Placement | Base: Workflow Harmonization Sprint Rev. 3 Final -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Workflow Harmonization Sprint Rev. 3 Final</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 1</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -178,7 +178,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Rev. 3 Final</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 1</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -1460,17 +1460,69 @@ window.addEventListener("resize",()=>{if($("#crop-editor").classList.contains("o
 
 /* POINTER / TOUCH STATE ENGINE */
 let mousePan=null;
+let mousePointGesture=null;
+
+function beginDesktopPrecisionPlacement(){
+  const g=mousePointGesture;
+  if(!g||g.precision||!(state.phase==="point-ref"||state.phase==="point-draw"))return;
+  g.precision=true;
+  g.savedWorkspace={...state.workspace};
+  const pt=worldPoint(g.startX,g.startY);
+  const targetZoom=Math.min(8,state.workspace.zoom*1.5);
+  state.workspace.zoom=targetZoom;
+  state.workspace.x=-(pt.x*targetZoom);
+  state.workspace.y=-(pt.y*targetZoom);
+  $("#precision-overlay").classList.add("active");
+  $("#precision-overlay").setAttribute("aria-hidden","false");
+  renderVisuals();
+}
+
+function endDesktopPrecisionPlacement(place=true){
+  const g=mousePointGesture;
+  if(!g)return;
+  if(g.timer)clearTimeout(g.timer);
+  if(g.precision){
+    const r=viewport.getBoundingClientRect();
+    const pt=worldPoint(r.left+r.width/2,r.top+r.height/2);
+    state.workspace={...g.savedWorkspace};
+    $("#precision-overlay").classList.remove("active");
+    $("#precision-overlay").setAttribute("aria-hidden","true");
+    renderVisuals();
+    if(place)commitPoint(pt);
+  }
+  mousePointGesture=null;
+}
 
 viewport.addEventListener("mousedown",e=>{
   if(e.button!==0)return;
   if(state.phase==="point-ref"||state.phase==="point-draw"){
-    placePoint(e.clientX,e.clientY);
+    e.preventDefault();
+    mousePointGesture={
+      startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,
+      moved:false,precision:false,savedWorkspace:null,timer:null
+    };
+    mousePointGesture.timer=setTimeout(beginDesktopPrecisionPlacement,400);
     return;
   }
   mousePan={x:e.clientX,y:e.clientY};
 });
 
 window.addEventListener("mousemove",e=>{
+  if(mousePointGesture){
+    const g=mousePointGesture;
+    const dx=e.clientX-g.lastX,dy=e.clientY-g.lastY;
+    g.lastX=e.clientX;g.lastY=e.clientY;
+    if(Math.hypot(e.clientX-g.startX,e.clientY-g.startY)>10)g.moved=true;
+    if(g.precision){
+      state.workspace.x+=dx;
+      state.workspace.y+=dy;
+      renderVisuals();
+    }else if(g.moved&&g.timer){
+      clearTimeout(g.timer);
+      g.timer=null;
+    }
+    return;
+  }
   if(!mousePan)return;
   const dx=e.clientX-mousePan.x,dy=e.clientY-mousePan.y;
   mousePan={x:e.clientX,y:e.clientY};
@@ -1486,7 +1538,17 @@ window.addEventListener("mousemove",e=>{
   renderVisuals();
 });
 
-window.addEventListener("mouseup",()=>mousePan=null);
+window.addEventListener("mouseup",e=>{
+  if(mousePointGesture){
+    endDesktopPrecisionPlacement(true);
+    return;
+  }
+  mousePan=null;
+});
+window.addEventListener("blur",()=>{
+  if(mousePointGesture)endDesktopPrecisionPlacement(false);
+  mousePan=null;
+});
 
 viewport.addEventListener("wheel",e=>{
   e.preventDefault();
