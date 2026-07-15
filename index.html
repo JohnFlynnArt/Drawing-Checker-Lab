@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 3: Desktop 2-Point Workflow Harmonization | Base: Tested Alignment Sprint Rev. 2 -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 4: Interactive 2-Point Workspace | Base: Tested Alignment Sprint Rev. 3 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 3</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 4</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -38,6 +38,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .upload-box{border:1px dashed var(--border);background:rgba(0,0,0,.15);border-radius:7px;padding:8px;display:flex;gap:8px;align-items:center;justify-content:space-between}
 .upload-box input{width:100%;font-size:11px;color:var(--muted)}
 .disclosure-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.disclosure-toggle{min-width:34px;padding:4px 8px;font-size:15px;line-height:1}.source-body{display:flex;flex-direction:column;gap:8px}.source-body.collapsed{display:none}
+.two-point-body{display:flex;flex-direction:column;gap:8px}.two-point-body.collapsed{display:none}
 .small-label{font-size:11px;color:var(--muted)}
 .slider-wrap{display:flex;flex-direction:column;gap:6px}
 .slider-head{display:flex;justify-content:space-between;font-size:12px}
@@ -68,6 +69,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .mobile-next{display:none;width:100%;min-height:44px;border-radius:11px;background:var(--blue);border-color:#60a5fa;color:#fff;font-size:13px;font-weight:800}
 .mobile-next.show{display:flex}
 .mobile-next.secondary{background:transparent;border-color:var(--border);color:var(--text)}
+.mobile-point-actions{display:none;grid-template-columns:1fr 1fr;gap:6px;width:100%}.mobile-point-actions.show{display:grid}.mobile-point-actions .mobile-next{display:block;margin:0}
 .mobile-toolbar-row{display:flex;gap:6px;align-items:center;width:100%}
 .mobile-layer-controls{display:none;width:100%;align-items:center;gap:7px;padding:2px 0 5px}
 .mobile-layer-controls.show{display:flex}
@@ -179,7 +181,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 3</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 4</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -206,12 +208,17 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       </section>
 
       <section class="card" id="desktop-pins-card" style="display:none">
-        <div class="card-title">2-Point Alignment</div>
-        <strong id="desktop-two-title">Set Reference Points</strong>
-        <div id="desktop-two-status" class="small-label">Point 1 of 2</div>
-        <button id="desktop-two-action" class="btn-primary">Set Reference Points (0/2)</button>
-        <button id="desktop-undo-point" style="display:none">Undo Last Point</button>
-        <button id="desktop-compute" class="btn-primary" style="display:none">Execute Match</button>
+        <div class="disclosure-head"><div class="card-title">2-Point Alignment</div><button id="desktop-two-toggle" class="disclosure-toggle" aria-expanded="true" aria-label="Collapse 2-Point Alignment">▴</button></div>
+        <div id="desktop-two-body" class="two-point-body">
+          <strong id="desktop-two-title">Set Reference Points</strong>
+          <div id="desktop-two-status" class="small-label">Point 1 of 2</div>
+          <button id="desktop-two-action" class="btn-primary">Set Reference Points (0/2)</button>
+          <div class="row2">
+            <button id="desktop-undo-point" style="display:none">Undo Last Point</button>
+            <button id="desktop-reset-points" style="display:none">Reset All Points</button>
+          </div>
+          <button id="desktop-compute" class="btn-primary" style="display:none">Execute Match</button>
+        </div>
       </section>
 
       <section class="card" id="desktop-compare-card">
@@ -288,7 +295,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
   <div id="mobile-toolbar" class="mobile-ui mobile-toolbar">
     <button id="mobile-next-action" class="mobile-next"></button>
-    <button id="mobile-undo-point" class="mobile-next secondary">Undo Last Point</button>
+    <div id="mobile-point-actions" class="mobile-point-actions">
+      <button id="mobile-undo-point" class="mobile-next secondary">Undo Last Point</button>
+      <button id="mobile-reset-points" class="mobile-next secondary">Reset All Points</button>
+    </div>
 
     <div id="mobile-layer-controls" class="mobile-layer-controls">
       <div class="mobile-layer-buttons">
@@ -392,7 +402,8 @@ const state={
   setupComplete:false,
   referenceRatio:null,
   drawingRatio:null,
-  sourceImagesCollapsed:false
+  sourceImagesCollapsed:false,
+  twoPointCollapsed:false
 };
 
 const hasRef=()=>refImg.classList.contains("loaded");
@@ -421,7 +432,7 @@ function beginNewMobileSession(){
   state.aligned=false;
   state.aspectMismatch=false;
   state.mobileStrategyChosen=false;
-  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;
+  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;
   closePopover();
   render();
 }
@@ -822,15 +833,20 @@ function setAlignment(type){
       state.phase="adjust";state.target="draw";
       state.layers.ref.z=1;state.layers.draw.z=2;
       render();
+    }else if(type==="two"){
+      state.twoPointCollapsed=false;
+      render();
     }else render();
     return;
   }
 
+  const enteringTwo=type==="two";
   state.alignment=type;
   state.aligned=false;
   state.markersHidden=false;
+  state.twoPointCollapsed=false;
   removeMarkers("all");
-  resetLayer("ref");resetLayer("draw");
+  if(!enteringTwo){resetLayer("ref");resetLayer("draw");}
   state.phase="workspace";state.returnPhase="workspace";
 
   if(type==="sight"&&hasRef()&&hasDraw())autoSight();
@@ -936,6 +952,15 @@ function undoLastPoint(){
   rebuildMarkers();
   render();
 }
+function resetAllPoints(){
+  if(state.alignment!=="two")return;
+  removeMarkers("all");
+  state.aligned=false;
+  state.markersHidden=false;
+  state.twoPointCollapsed=false;
+  beginPointPhase("ref");
+}
+
 function commitPoint(pt){
   if(state.alignment!=="two")return;
   if(state.phase==="point-ref"&&state.points.ref.length<2){
@@ -979,6 +1004,7 @@ function computeTwoPoint(){
   state.target="draw";
   state.layers.ref.z=1;state.layers.draw.z=2;
   state.markersHidden=true;
+  state.twoPointCollapsed=true;
   resetWorkspace();
   render();
 }
@@ -1127,7 +1153,7 @@ function renderDesktopWorkflow(){
 
   const atAlignment=state.setupStage==="alignment"||state.setupComplete;
   alignmentCard.style.display=atAlignment?"flex":"none";
-  compareCard.style.display=state.setupComplete?"flex":"none";
+  compareCard.style.display=(state.setupComplete&&!(state.alignment==="two"&&!state.aligned))?"flex":"none";
   bottom.style.display=state.setupComplete?"flex":"none";
   if(pinsCard&&!state.setupComplete)pinsCard.style.display="none";
 
@@ -1150,13 +1176,14 @@ function renderDesktopWorkflow(){
 function renderMobileWorkflow(){
   const next=$("#mobile-next-action");
   const undoPoint=$("#mobile-undo-point");
+  const resetPoints=$("#mobile-reset-points");
+  const pointActions=$("#mobile-point-actions");
   if(!next)return;
 
   next.classList.remove("show");
-  if(undoPoint){
-    undoPoint.classList.remove("show");
-    undoPoint.onclick=undoLastPoint;
-  }
+  if(pointActions)pointActions.classList.remove("show");
+  if(undoPoint)undoPoint.onclick=undoLastPoint;
+  if(resetPoints)resetPoints.onclick=resetAllPoints;
   next.disabled=false;
   next.onclick=null;
 
@@ -1193,7 +1220,7 @@ function renderMobileWorkflow(){
     return;
   }
 
-  if(undoPoint&&(state.points.ref.length||state.points.draw.length))undoPoint.classList.add("show");
+  if(pointActions&&(state.points.ref.length||state.points.draw.length||state.aligned))pointActions.classList.add("show");
 
   if(state.points.ref.length<2){
     next.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
@@ -1236,11 +1263,19 @@ function render(){
   $("#m-sight").classList.toggle("active",state.alignment==="sight");
   $("#m-two").classList.toggle("active",state.alignment==="two");
   $("#desktop-pins-card").style.display=state.alignment==="two"?"flex":"none";
+  const desktopTwoBody=$("#desktop-two-body"),desktopTwoToggle=$("#desktop-two-toggle");
+  if(desktopTwoBody&&desktopTwoToggle){
+    desktopTwoBody.classList.toggle("collapsed",state.twoPointCollapsed);
+    desktopTwoToggle.textContent=state.twoPointCollapsed?"▾":"▴";
+    desktopTwoToggle.setAttribute("aria-expanded",String(!state.twoPointCollapsed));
+    desktopTwoToggle.setAttribute("aria-label",state.twoPointCollapsed?"Expand 2-Point Alignment":"Collapse 2-Point Alignment");
+  }
 
   const desktopTwoTitle=$("#desktop-two-title");
   const desktopTwoStatus=$("#desktop-two-status");
   const desktopTwoAction=$("#desktop-two-action");
   const desktopUndoPoint=$("#desktop-undo-point");
+  const desktopResetPoints=$("#desktop-reset-points");
   const desktopCompute=$("#desktop-compute");
   if(state.alignment==="two"){
     const refDone=state.points.ref.length===2;
@@ -1263,7 +1298,9 @@ function render(){
       desktopTwoAction.style.display="none";
       desktopTwoAction.classList.remove("active");
     }
-    desktopUndoPoint.style.display=(state.points.ref.length||state.points.draw.length)?"block":"none";
+    const hasAnyPoints=state.points.ref.length||state.points.draw.length;
+    desktopUndoPoint.style.display=hasAnyPoints?"block":"none";
+    desktopResetPoints.style.display=(hasAnyPoints||state.aligned)?"block":"none";
     desktopCompute.style.display=(!state.aligned&&refDone&&drawDone)?"block":"none";
   }
 
@@ -1305,6 +1342,7 @@ function chooseDesktopAlignment(type){
   render();
 }
 $("#desktop-source-toggle").onclick=()=>{state.sourceImagesCollapsed=!state.sourceImagesCollapsed;renderDesktopWorkflow()};
+$("#desktop-two-toggle").onclick=()=>{state.twoPointCollapsed=!state.twoPointCollapsed;render()};
 $("#desktop-free").onclick=()=>chooseDesktopAlignment("free");
 $("#desktop-sight").onclick=()=>chooseDesktopAlignment("sight");
 $("#desktop-two").onclick=()=>chooseDesktopAlignment("two");
@@ -1313,6 +1351,7 @@ $("#desktop-two-action").onclick=()=>{
   else if(state.points.draw.length<2)beginPointPhase("draw");
 };
 $("#desktop-undo-point").onclick=undoLastPoint;
+$("#desktop-reset-points").onclick=resetAllPoints;
 $("#desktop-compute").onclick=computeTwoPoint;
 $("#desktop-overlay").onclick=()=>setCompare("overlay");
 $("#desktop-blink").onclick=()=>setCompare("blink");
