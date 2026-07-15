@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 2: Workflow Language Harmonization | Base: Tested Harmonization Rev. 1 Rebuild -->
+<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 3 Final: Desktop Alignment Transition Cleanup | Base: Tested Workflow Harmonization Rev. 2 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Workflow Harmonization Sprint Rev. 2</title>
+<title>Drawing Checker Studio — Workflow Harmonization Sprint Rev. 3 Final</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -141,7 +141,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-handle.nw{left:0;top:0}.crop-handle.ne{left:100%;top:0}.crop-handle.sw{left:0;top:100%}.crop-handle.se{left:100%;top:100%}
 .crop-frame.locked .crop-handle{display:block;background:#e2e8f0;border-color:#3b82f6}.crop-frame.hidden{display:none}
 .crop-controls{position:relative;z-index:20;flex:0 0 auto;background:#17171b;border-top:1px solid var(--border);padding:8px 10px calc(9px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px}
-.crop-format-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.crop-format-head strong{font-size:11px}.crop-format-head span{font-size:10px;color:var(--muted)}
+.crop-format-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.crop-format-head strong{font-size:11px}.crop-format-head span{font-size:10px;color:var(--muted)}.mobile-only-hint{display:none}
 .ratio-strip{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding:1px 1px 4px}
 .ratio-strip::-webkit-scrollbar{display:none}.ratio-option{flex:0 0 auto;min-width:72px;min-height:38px;border-radius:9px;padding:5px 10px;font-size:11px;scroll-snap-align:start}
 .ratio-option.active{background:var(--blue);border-color:#60a5fa;color:#fff}.ratio-option[disabled]{display:none}
@@ -158,6 +158,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-main-actions.hidden,.crop-format.hidden,.crop-guidance.hidden{display:none}
 .crop-precision-overlay{position:absolute;inset:0;z-index:30;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 62px,rgba(0,0,0,.22) 63px 100%)}.crop-precision-overlay.active{display:block}.crop-precision-crosshair{position:absolute;left:50%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%)}.crop-precision-crosshair::before,.crop-precision-crosshair::after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000,0 0 6px rgba(0,0,0,.8)}.crop-precision-crosshair::before{left:50%;top:0;width:1px;height:100%}.crop-precision-crosshair::after{top:50%;left:0;height:1px;width:100%}.crop-precision-dot{position:absolute;left:50%;top:50%;width:8px;height:8px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 3px #000}.crop-precision-caption{position:absolute;left:50%;top:calc(50% + 48px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.12);font-size:10px;font-weight:700;white-space:nowrap}
 @media(max-width:768px){
+  .mobile-only-hint{display:inline}
   .crop-header{padding:6px 10px;min-height:52px}.crop-header>div:first-child{min-width:0}.crop-header strong{font-size:13px}.crop-header br,.crop-header span{display:none}.crop-header-actions{gap:5px}.crop-header-actions button{min-width:58px;min-height:36px;padding:6px 8px}
   .crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:74px;min-height:34px;padding:4px 9px}.crop-controls{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}.crop-guidance{display:none}.crop-format-head{min-height:16px}.crop-format-head strong{font-size:10px}.crop-format-head span{font-size:9px}.ratio-strip{gap:5px;padding-bottom:2px}.crop-row{gap:5px}.crop-controls button{min-height:36px}.crop-note{display:none}.ratio-feedback{padding:5px 7px;font-size:10px}.corner-help{top:7px;left:8px;right:8px;font-size:9px;padding:4px 8px}.corner-actions{gap:5px}.corner-commit,.corner-secondary{gap:5px}.crop-precision-caption{font-size:9px}
 }
@@ -177,13 +178,21 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Rev. 2</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Rev. 3 Final</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
       <div id="desktop-workflow-copy" class="small-label">Choose a reference image. Image Prep opens next.</div>
     </div>
     <div class="desktop-scroll">
+      <section class="card" id="desktop-source-card">
+        <div class="card-title">Source Images</div>
+        <div class="small-label">Reference</div>
+        <div class="upload-box" id="desktop-ref-slot"></div>
+        <div class="small-label">Drawing</div>
+        <div class="upload-box" id="desktop-draw-slot"></div>
+      </section>
+
       <section class="card" id="desktop-alignment-card">
         <div class="card-title">Alignment Strategy</div>
         <div class="row3">
@@ -191,14 +200,6 @@ input[type=range]{width:100%;accent-color:var(--blue)}
           <button id="desktop-sight" class="active">Sight-Size</button>
           <button id="desktop-two">2-Point</button>
         </div>
-      </section>
-
-      <section class="card" id="desktop-source-card">
-        <div class="card-title">Source Images</div>
-        <div class="small-label">Reference</div>
-        <div class="upload-box" id="desktop-ref-slot"></div>
-        <div class="small-label">Drawing</div>
-        <div class="upload-box" id="desktop-draw-slot"></div>
       </section>
 
       <section class="card" id="desktop-pins-card" style="display:none">
@@ -342,7 +343,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       <div id="canvas-status" class="canvas-status"><span id="canvas-status-text" class="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
       <div id="crop-guidance" class="crop-guidance"><strong>Choose a format.</strong> Resize the frame or position the image. Free Form corrects perspective.</div>
       <div id="crop-format" class="crop-format">
-        <div class="crop-format-head"><strong>Canvas Format</strong><span>Swipe left or right</span></div>
+        <div class="crop-format-head"><strong>Canvas Format</strong><span class="mobile-only-hint">Swipe left or right</span></div>
         <div id="ratio-strip" class="ratio-strip">
           <button class="ratio-option" data-ratio="free">Free Form</button><button id="ratio-original" class="ratio-option active" data-ratio="original">Detected</button><button id="ratio-reference" class="ratio-option" data-ratio="reference">Match Ref</button><button class="ratio-option" data-ratio="1:1">1 : 1</button><button class="ratio-option" data-ratio="4:5">4 : 5</button><button class="ratio-option" data-ratio="8.5:11">8.5 : 11</button><button class="ratio-option" data-ratio="5:7">5 : 7</button><button class="ratio-option" data-ratio="2:3">2 : 3</button><button class="ratio-option" data-ratio="3:4">3 : 4</button><button class="ratio-option" data-ratio="3:5">3 : 5</button><button class="ratio-option" data-ratio="16:9">16 : 9</button>
         </div>
@@ -746,7 +747,17 @@ function loadPreparedImage(kind,blob){
     img.classList.add("loaded");
     state.loadingKind=null;
     if(kind==="ref"){state.referenceRatio=cropState.acceptedRatio||img.naturalWidth/img.naturalHeight;state.setupStage="drawing";}
-    else{state.drawingRatio=cropState.acceptedRatio||img.naturalWidth/img.naturalHeight;state.setupStage="alignment";}
+    else{
+      state.drawingRatio=cropState.acceptedRatio||img.naturalWidth/img.naturalHeight;
+      state.setupStage="alignment";
+      if(!isMobileLayout()){
+        state.alignment="sight";
+        state.aligned=false;
+        state.phase="workspace";
+        autoSight();
+        return;
+      }
+    }
 
     if(state.setupComplete&&state.alignment==="sight"&&hasRef()&&hasDraw()){
       autoSight();
@@ -1022,17 +1033,18 @@ function renderVisuals(){
   }
 }
 function statusText(){
+  const mobile=isMobileLayout();
   if(state.loadingKind==="ref")return"Adding prepared reference…";
   if(state.loadingKind==="draw")return"Adding prepared drawing…";
   if(!hasRef())return"Upload a reference to begin.";
   if(!hasDraw())return"Reference ready. Upload the current drawing.";
-  if(state.phase==="point-ref")return`Reference Point ${state.points.ref.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`;
-  if(state.phase==="point-draw")return`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`;
+  if(state.phase==="point-ref")return mobile?`Reference Point ${state.points.ref.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Reference Point ${state.points.ref.length+1} of 2 — Click to place the matching point.`;
+  if(state.phase==="point-draw")return mobile?`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Drawing Point ${state.points.draw.length+1} of 2 — Click to place the matching point.`;
   if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Points ready. Execute Match.";
-  if(state.phase==="adjust")return`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`;
-  if(state.alignment==="free")return"Free Form: manually align the selected layer with drag, pinch, and twist.";
+  if(state.phase==="adjust")return mobile?`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`:`${state.target==="draw"?"Drawing":"Reference"} layer unlocked for manual adjustment.`;
+  if(state.alignment==="free")return mobile?"Free Form: manually align the selected layer with drag, pinch, and twist.":"Free Form alignment active.";
   if(state.alignment==="sight"&&state.aspectMismatch)return"Aspect ratios differ. Try 2-Point, Free Form, or manual adjustment.";
-  return"Workspace locked. Drag to pan and pinch to zoom.";
+  return mobile?"Workspace locked. Drag to pan and pinch to zoom.":"Sight-Size alignment active.";
 }
 function renderDesktopSlots(){
   const rs=$("#desktop-ref-slot"),ds=$("#desktop-draw-slot");
