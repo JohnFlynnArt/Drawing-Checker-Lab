@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 1 Rebuild | Base: Foundation Sprint Rev. 8 -->
+<!-- Drawing Checker Studio | Workflow Harmonization Sprint Rev. 2: Workflow Language Harmonization | Base: Tested Harmonization Rev. 1 Rebuild -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Workflow Harmonization Sprint Rev. 1</title>
+<title>Drawing Checker Studio — Workflow Harmonization Sprint Rev. 2</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -177,11 +177,11 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Rev. 1</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Workflow Harmonization Rev. 2</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
-      <strong id="desktop-workflow-title">Prepare Reference</strong>
-      <div id="desktop-workflow-copy" class="small-label">Choose a reference image to begin.</div>
+      <strong id="desktop-workflow-title">Upload Reference</strong>
+      <div id="desktop-workflow-copy" class="small-label">Choose a reference image. Image Prep opens next.</div>
     </div>
     <div class="desktop-scroll">
       <section class="card" id="desktop-alignment-card">
@@ -261,17 +261,17 @@ input[type=range]{width:100%;accent-color:var(--blue)}
         <div id="foundation-step-align" class="foundation-step">3 · Alignment</div>
       </div>
       <h2 id="foundation-title">Drawing Checker Studio</h2>
-      <p id="foundation-copy">Prepare the Reference and Drawing first. Alignment comes after both images are ready.</p>
+      <p id="foundation-copy">Upload the Reference and Drawing. Each image opens in Image Prep before Alignment.</p>
       <div id="foundation-actions" class="foundation-actions one"></div>
-      <div id="foundation-note" class="foundation-note">Image Preparation is the only active workflow in this Foundation Sprint.</div>
+      <div id="foundation-note" class="foundation-note">Choose an image first. Image Prep opens next.</div>
     </div>
   </div>
 
-  <div class="mobile-ui mobile-topbar"><div id="mobile-status" class="mobile-status">Load a reference to begin.</div></div>
+  <div class="mobile-ui mobile-topbar"><div id="mobile-status" class="mobile-status">Upload a reference to begin.</div></div>
 
   <div id="mobile-start" class="mobile-ui mobile-start">
     <div class="mobile-start-card">
-      <h2 id="start-title">Choose Alignment</h2>
+      <h2 id="start-title">Alignment</h2>
       <p id="start-copy">Select the alignment tool you want to begin with.</p>
       <div id="start-strategy-actions" class="row3">
         <button id="start-free">Free Form</button>
@@ -303,7 +303,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
     <div class="mobile-toolbar-row">
     <div class="mobile-tools">
-      <button id="m-images" class="tool"><strong>Images</strong><span>load/replace</span></button>
+      <button id="m-images" class="tool"><strong>Images</strong><span>upload/replace</span></button>
       <button id="m-nav" class="tool active"><strong>View</strong><span>locked</span></button>
       <button id="m-free" class="tool"><strong>Free</strong><span>manual</span></button>
       <button id="m-sight" class="tool active"><strong>Sight</strong><span>align</span></button>
@@ -439,13 +439,13 @@ function beginCrop(kind,file){
   cropState.ownedUrls.push(cropState.url);
   const preview=$("#crop-preview");
   preview.onload=()=>{cropState.image=preview;openCropEditor()};
-  preview.onerror=()=>{if(cropState.url)URL.revokeObjectURL(cropState.url);cropState.url=null;alert("That image could not be prepared. Please choose another image.")};
+  preview.onerror=()=>{if(cropState.url)URL.revokeObjectURL(cropState.url);cropState.url=null;alert("That image could not be opened for Image Prep. Please choose another image.")};
   preview.src=cropState.url;
 }
 
 function openCropEditor(){
   $("#crop-editor").classList.add("open");$("#crop-editor").setAttribute("aria-hidden","false");
-  $("#crop-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing Photo";
+  $("#crop-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
   $("#crop-subtitle").textContent=cropState.kind==="ref"?"Detect the ratio, confirm the full image, or correct it with Free Form.":"Prepare the current drawing and review live ratio feedback.";
   $("#crop-use").textContent=cropState.kind==="ref"?"Accept Reference":"Accept Drawing";
   $("#crop-replace").textContent=cropState.kind==="ref"?"Replace Reference":"Replace Drawing";
@@ -766,7 +766,7 @@ function loadPreparedImage(kind,blob){
     img.classList.remove("loaded");
     img.removeAttribute("src");
     render();
-    alert("That prepared image could not be loaded. Please choose another image.");
+    alert("The prepared image could not be added to the workspace. Please choose it again.");
   };
 
   img.src=url;
@@ -1022,10 +1022,10 @@ function renderVisuals(){
   }
 }
 function statusText(){
-  if(state.loadingKind==="ref")return"Loading reference…";
-  if(state.loadingKind==="draw")return"Loading drawing…";
-  if(!hasRef())return"Load a reference to begin.";
-  if(!hasDraw())return"Reference loaded. Add the current drawing.";
+  if(state.loadingKind==="ref")return"Adding prepared reference…";
+  if(state.loadingKind==="draw")return"Adding prepared drawing…";
+  if(!hasRef())return"Upload a reference to begin.";
+  if(!hasDraw())return"Reference ready. Upload the current drawing.";
   if(state.phase==="point-ref")return`Reference Point ${state.points.ref.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`;
   if(state.phase==="point-draw")return`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`;
   if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Points ready. Execute Match.";
@@ -1068,23 +1068,23 @@ function renderStart(){
   if(state.setupStage==="home")state.setupStage="reference";
 
   if(state.setupStage==="reference"){
-    title.textContent="Prepare Reference";
-    copy.textContent="Choose an existing reference image or take a photo.";
-    actions.innerHTML='<button id="foundation-ref-library" class="foundation-primary">Choose Photo</button><button id="foundation-ref-camera" class="foundation-secondary">Take Photo</button>';
+    title.textContent="Upload Reference";
+    copy.textContent="Choose an existing reference image or take a photo. Image Prep opens next.";
+    actions.innerHTML='<button id="foundation-ref-library" class="foundation-primary">Choose Reference</button><button id="foundation-ref-camera" class="foundation-secondary">Take Reference Photo</button>';
     $("#foundation-ref-library").onclick=()=>$("#mobile-ref-input").click();
     $("#foundation-ref-camera").onclick=()=>$("#mobile-ref-camera").click();
-    note.textContent="Prepare the Reference first.";
+    note.textContent="Image Prep begins after you choose the Reference.";
   }else if(state.setupStage==="drawing"){
-    title.textContent="Prepare Drawing";
-    copy.textContent="Reference ready. Now choose or photograph the current drawing.";
+    title.textContent="Upload Drawing";
+    copy.textContent="Reference ready. Choose or photograph the current drawing. Image Prep opens next.";
     actions.innerHTML='<button id="foundation-draw-library" class="foundation-primary">Choose Drawing</button><button id="foundation-draw-camera" class="foundation-secondary">Take Drawing Photo</button><button id="foundation-replace-ref" class="foundation-secondary">Replace Reference</button>';
     $("#foundation-draw-library").onclick=()=>$("#mobile-draw-library").click();
     $("#foundation-draw-camera").onclick=()=>$("#mobile-draw-camera").click();
     $("#foundation-replace-ref").onclick=()=>$("#mobile-ref-input").click();
-    note.textContent="Replace either image without restarting.";
+    note.textContent="Image Prep begins after you choose the Drawing. You can replace the Reference without restarting.";
   }else{
-    title.textContent="Choose Alignment";
-    copy.textContent="Both images are prepared. Choose the alignment method.";
+    title.textContent="Alignment";
+    copy.textContent="Both images are ready. Choose the alignment method.";
     actions.classList.add("three");
     actions.innerHTML='<button id="foundation-sight" class="foundation-primary">Sight-Size</button><button id="foundation-free" class="foundation-secondary">Free Form</button><button id="foundation-two" class="foundation-secondary">2-Point</button>';
     const finish=type=>{state.setupComplete=true;state.mobileStrategyChosen=true;setAlignment(type);render()};
@@ -1114,18 +1114,18 @@ function renderDesktopWorkflow(){
   if(pinsCard&&!state.setupComplete)pinsCard.style.display="none";
 
   if(state.setupStage==="reference"&&!hasRef()){
-    title.textContent="Prepare Reference";
-    copy.textContent="Choose a reference image. The preparation editor opens automatically.";
-    if(drawSlot)drawSlot.innerHTML='<span class="small-label">Available after Reference is prepared</span>';
+    title.textContent="Upload Reference";
+    copy.textContent="Choose a reference image. Image Prep opens automatically.";
+    if(drawSlot)drawSlot.innerHTML='<span class="small-label">Available after the Reference is ready</span>';
   }else if(state.setupStage==="drawing"&&!hasDraw()){
-    title.textContent="Prepare Drawing";
-    copy.textContent="Reference ready. Choose the current drawing next.";
+    title.textContent="Upload Drawing";
+    copy.textContent="Reference ready. Choose the current drawing. Image Prep opens automatically.";
   }else if(atAlignment&&!state.setupComplete){
-    title.textContent="Choose Alignment";
+    title.textContent="Alignment";
     copy.textContent="Both images are ready. Select Sight-Size, Free Form, or 2-Point.";
   }else{
     title.textContent="Alignment Workspace";
-    copy.textContent="Images prepared. Alignment and observation tools are available.";
+    copy.textContent="Images ready. Alignment and observation tools are available.";
   }
 }
 
