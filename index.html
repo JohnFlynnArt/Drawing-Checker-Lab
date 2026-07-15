@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 2: Alignment Workspace Progressive Disclosure | Base: Tested Alignment Sprint Rev. 1 -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 3: Desktop 2-Point Workflow Harmonization | Base: Tested Alignment Sprint Rev. 2 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 2</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 3</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -179,7 +179,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 2</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 3</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -206,16 +206,12 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       </section>
 
       <section class="card" id="desktop-pins-card" style="display:none">
-        <div class="card-title">Match Pins</div>
-        <div class="row2">
-          <button id="desktop-ref-pins" class="mode-ref">Set Ref (0/2)</button>
-          <button id="desktop-draw-pins" class="mode-draw">Set Draw (0/2)</button>
-        </div>
-        <div class="row2">
-          <button id="desktop-clear-ref">Clear Ref</button>
-          <button id="desktop-clear-draw">Clear Draw</button>
-        </div>
-        <button id="desktop-compute" class="btn-primary" disabled>Execute Match</button>
+        <div class="card-title">2-Point Alignment</div>
+        <strong id="desktop-two-title">Set Reference Points</strong>
+        <div id="desktop-two-status" class="small-label">Point 1 of 2</div>
+        <button id="desktop-two-action" class="btn-primary">Set Reference Points (0/2)</button>
+        <button id="desktop-undo-point" style="display:none">Undo Last Point</button>
+        <button id="desktop-compute" class="btn-primary" style="display:none">Execute Match</button>
       </section>
 
       <section class="card" id="desktop-compare-card">
@@ -1043,8 +1039,8 @@ function statusText(){
   if(state.loadingKind==="draw")return"Adding prepared drawing…";
   if(!hasRef())return"Upload a reference to begin.";
   if(!hasDraw())return"Reference ready. Upload the current drawing.";
-  if(state.phase==="point-ref")return mobile?`Reference Point ${state.points.ref.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Reference Point ${state.points.ref.length+1} of 2 — Click to place the matching point.`;
-  if(state.phase==="point-draw")return mobile?`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Drawing Point ${state.points.draw.length+1} of 2 — Click to place the matching point.`;
+  if(state.phase==="point-ref")return mobile?`Reference Point ${state.points.ref.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Reference Point ${state.points.ref.length+1} of 2 — Press and hold for Precision Placement, move the image under the crosshair, then release.`;
+  if(state.phase==="point-draw")return mobile?`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Drawing Point ${state.points.draw.length+1} of 2 — Press and hold for Precision Placement, move the image under the crosshair, then release.`;
   if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Points ready. Execute Match.";
   if(state.phase==="adjust")return mobile?`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`:`${state.target==="draw"?"Drawing":"Reference"} layer unlocked for manual adjustment.`;
   if(state.alignment==="free")return mobile?"Free Align: manually align the selected layer with drag, pinch, and twist.":"Free Align active.";
@@ -1241,11 +1237,35 @@ function render(){
   $("#m-two").classList.toggle("active",state.alignment==="two");
   $("#desktop-pins-card").style.display=state.alignment==="two"?"flex":"none";
 
-  $("#desktop-ref-pins").classList.toggle("active",state.phase==="point-ref");
-  $("#desktop-draw-pins").classList.toggle("active",state.phase==="point-draw");
-  $("#desktop-ref-pins").textContent=`Set Ref (${state.points.ref.length}/2)`;
-  $("#desktop-draw-pins").textContent=`Set Draw (${state.points.draw.length}/2)`;
-  $("#desktop-compute").disabled=!(state.points.ref.length===2&&state.points.draw.length===2);
+  const desktopTwoTitle=$("#desktop-two-title");
+  const desktopTwoStatus=$("#desktop-two-status");
+  const desktopTwoAction=$("#desktop-two-action");
+  const desktopUndoPoint=$("#desktop-undo-point");
+  const desktopCompute=$("#desktop-compute");
+  if(state.alignment==="two"){
+    const refDone=state.points.ref.length===2;
+    const drawDone=state.points.draw.length===2;
+    if(!refDone){
+      desktopTwoTitle.textContent="Set Reference Points";
+      desktopTwoStatus.textContent=`Point ${state.points.ref.length+1} of 2`;
+      desktopTwoAction.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
+      desktopTwoAction.style.display="block";
+      desktopTwoAction.classList.toggle("active",state.phase==="point-ref");
+    }else if(!drawDone){
+      desktopTwoTitle.textContent="Set Drawing Points";
+      desktopTwoStatus.textContent=`Point ${state.points.draw.length+1} of 2`;
+      desktopTwoAction.textContent=`Set Drawing Points (${state.points.draw.length}/2)`;
+      desktopTwoAction.style.display="block";
+      desktopTwoAction.classList.toggle("active",state.phase==="point-draw");
+    }else{
+      desktopTwoTitle.textContent="Ready to Execute Match";
+      desktopTwoStatus.textContent="2 Reference points and 2 Drawing points selected";
+      desktopTwoAction.style.display="none";
+      desktopTwoAction.classList.remove("active");
+    }
+    desktopUndoPoint.style.display=(state.points.ref.length||state.points.draw.length)?"block":"none";
+    desktopCompute.style.display=(!state.aligned&&refDone&&drawDone)?"block":"none";
+  }
 
   for(const mode of ["overlay","blink","outline"]){
     $("#desktop-"+mode).classList.toggle("active",state.compare===mode);
@@ -1288,10 +1308,11 @@ $("#desktop-source-toggle").onclick=()=>{state.sourceImagesCollapsed=!state.sour
 $("#desktop-free").onclick=()=>chooseDesktopAlignment("free");
 $("#desktop-sight").onclick=()=>chooseDesktopAlignment("sight");
 $("#desktop-two").onclick=()=>chooseDesktopAlignment("two");
-$("#desktop-ref-pins").onclick=()=>state.phase==="point-ref"?setPhase("workspace"):beginPointPhase("ref");
-$("#desktop-draw-pins").onclick=()=>state.phase==="point-draw"?setPhase("workspace"):beginPointPhase("draw");
-$("#desktop-clear-ref").onclick=()=>{state.markersHidden=false;removeMarkers("ref");state.aligned=false;rebuildMarkers();beginPointPhase("ref")};
-$("#desktop-clear-draw").onclick=()=>{state.markersHidden=false;removeMarkers("draw");state.aligned=false;rebuildMarkers();beginPointPhase("draw")};
+$("#desktop-two-action").onclick=()=>{
+  if(state.points.ref.length<2)beginPointPhase("ref");
+  else if(state.points.draw.length<2)beginPointPhase("draw");
+};
+$("#desktop-undo-point").onclick=undoLastPoint;
 $("#desktop-compute").onclick=computeTwoPoint;
 $("#desktop-overlay").onclick=()=>setCompare("overlay");
 $("#desktop-blink").onclick=()=>setCompare("blink");
