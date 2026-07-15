@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 1: Desktop 2-Point Precision Placement | Base: Workflow Harmonization Sprint Rev. 3 Final -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 2: Alignment Workspace Progressive Disclosure | Base: Tested Alignment Sprint Rev. 1 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 1</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 2</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -37,6 +37,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .audit.active{background:var(--amber);border-color:#fbbf24;color:#111}
 .upload-box{border:1px dashed var(--border);background:rgba(0,0,0,.15);border-radius:7px;padding:8px;display:flex;gap:8px;align-items:center;justify-content:space-between}
 .upload-box input{width:100%;font-size:11px;color:var(--muted)}
+.disclosure-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.disclosure-toggle{min-width:34px;padding:4px 8px;font-size:15px;line-height:1}.source-body{display:flex;flex-direction:column;gap:8px}.source-body.collapsed{display:none}
 .small-label{font-size:11px;color:var(--muted)}
 .slider-wrap{display:flex;flex-direction:column;gap:6px}
 .slider-head{display:flex;justify-content:space-between;font-size:12px}
@@ -178,7 +179,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 1</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 2</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -186,19 +187,21 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     </div>
     <div class="desktop-scroll">
       <section class="card" id="desktop-source-card">
-        <div class="card-title">Source Images</div>
-        <div class="small-label">Reference</div>
-        <div class="upload-box" id="desktop-ref-slot"></div>
-        <div class="small-label">Drawing</div>
-        <div class="upload-box" id="desktop-draw-slot"></div>
+        <div class="disclosure-head"><div class="card-title">Source Images</div><button id="desktop-source-toggle" class="disclosure-toggle" aria-expanded="true" aria-label="Collapse Source Images">▴</button></div>
+        <div id="desktop-source-body" class="source-body">
+          <div class="small-label">Reference</div>
+          <div class="upload-box" id="desktop-ref-slot"></div>
+          <div class="small-label">Drawing</div>
+          <div class="upload-box" id="desktop-draw-slot"></div>
+        </div>
       </section>
 
       <section class="card" id="desktop-alignment-card">
         <div class="card-title">Alignment Strategy</div>
         <div class="row3">
-          <button id="desktop-free">Free Form</button>
           <button id="desktop-sight" class="active">Sight-Size</button>
           <button id="desktop-two">2-Point</button>
+          <button id="desktop-free">Free Align</button>
         </div>
       </section>
 
@@ -275,9 +278,9 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       <h2 id="start-title">Alignment</h2>
       <p id="start-copy">Select the alignment tool you want to begin with.</p>
       <div id="start-strategy-actions" class="row3">
-        <button id="start-free">Free Form</button>
         <button id="start-sight">Sight-Size</button>
         <button id="start-two">2-Point</button>
+        <button id="start-free">Free Align</button>
       </div>
       <button id="start-action" style="display:none">Continue</button>
     </div>
@@ -306,9 +309,9 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     <div class="mobile-tools">
       <button id="m-images" class="tool"><strong>Images</strong><span>upload/replace</span></button>
       <button id="m-nav" class="tool active"><strong>View</strong><span>locked</span></button>
-      <button id="m-free" class="tool"><strong>Free</strong><span>manual</span></button>
       <button id="m-sight" class="tool active"><strong>Sight</strong><span>align</span></button>
       <button id="m-two" class="tool"><strong>2-Point</strong><span>align</span></button>
+      <button id="m-free" class="tool"><strong>Free Align</strong><span>manual</span></button>
       <button id="m-overlay" class="tool audit active"><strong>Overlay</strong><span>compare</span></button>
       <button id="m-blink" class="tool audit"><strong>Blink</strong><span>compare</span></button>
       <button id="m-outline" class="tool audit"><strong>Outline</strong><span>compare</span></button>
@@ -392,7 +395,8 @@ const state={
   setupStage:"reference",
   setupComplete:false,
   referenceRatio:null,
-  drawingRatio:null
+  drawingRatio:null,
+  sourceImagesCollapsed:false
 };
 
 const hasRef=()=>refImg.classList.contains("loaded");
@@ -421,7 +425,7 @@ function beginNewMobileSession(){
   state.aligned=false;
   state.aspectMismatch=false;
   state.mobileStrategyChosen=false;
-  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;
+  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;
   closePopover();
   render();
 }
@@ -732,7 +736,7 @@ function loadPreparedImage(kind,blob){
     refImg.classList.remove("loaded");drawImg.classList.remove("loaded");
     refImg.removeAttribute("src");drawImg.removeAttribute("src");
     removeMarkers("all");resetWorkspace();resetLayer("ref");resetLayer("draw");
-    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;
+    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;state.sourceImagesCollapsed=false;
   }else{
     revoke(drawImg);drawImg.classList.remove("loaded");drawImg.removeAttribute("src");
     removeMarkers("draw");resetLayer("draw");
@@ -750,13 +754,14 @@ function loadPreparedImage(kind,blob){
     else{
       state.drawingRatio=cropState.acceptedRatio||img.naturalWidth/img.naturalHeight;
       state.setupStage="alignment";
-      if(!isMobileLayout()){
-        state.alignment="sight";
-        state.aligned=false;
-        state.phase="workspace";
-        autoSight();
-        return;
-      }
+      state.setupComplete=true;
+      state.mobileStrategyChosen=true;
+      state.alignment="sight";
+      state.aligned=false;
+      state.phase="workspace";
+      if(!isMobileLayout())state.sourceImagesCollapsed=true;
+      autoSight();
+      return;
     }
 
     if(state.setupComplete&&state.alignment==="sight"&&hasRef()&&hasDraw()){
@@ -1042,8 +1047,8 @@ function statusText(){
   if(state.phase==="point-draw")return mobile?`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Drawing Point ${state.points.draw.length+1} of 2 — Click to place the matching point.`;
   if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Points ready. Execute Match.";
   if(state.phase==="adjust")return mobile?`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`:`${state.target==="draw"?"Drawing":"Reference"} layer unlocked for manual adjustment.`;
-  if(state.alignment==="free")return mobile?"Free Form: manually align the selected layer with drag, pinch, and twist.":"Free Form alignment active.";
-  if(state.alignment==="sight"&&state.aspectMismatch)return"Aspect ratios differ. Try 2-Point, Free Form, or manual adjustment.";
+  if(state.alignment==="free")return mobile?"Free Align: manually align the selected layer with drag, pinch, and twist.":"Free Align active.";
+  if(state.alignment==="sight"&&state.aspectMismatch)return"Aspect ratios differ. Try 2-Point, Free Align, or manual adjustment.";
   return mobile?"Workspace locked. Drag to pan and pinch to zoom.":"Sight-Size alignment active.";
 }
 function renderDesktopSlots(){
@@ -1095,16 +1100,12 @@ function renderStart(){
     $("#foundation-replace-ref").onclick=()=>$("#mobile-ref-input").click();
     note.textContent="Image Prep begins after you choose the Drawing. You can replace the Reference without restarting.";
   }else{
-    title.textContent="Alignment";
-    copy.textContent="Both images are ready. Choose the alignment method.";
-    actions.classList.add("three");
-    actions.innerHTML='<button id="foundation-sight" class="foundation-primary">Sight-Size</button><button id="foundation-free" class="foundation-secondary">Free Form</button><button id="foundation-two" class="foundation-secondary">2-Point</button>';
-    const finish=type=>{state.setupComplete=true;state.mobileStrategyChosen=true;setAlignment(type);render()};
-    $("#foundation-sight").onclick=()=>finish("sight");
-    $("#foundation-free").onclick=()=>finish("free");
-    $("#foundation-two").onclick=()=>finish("two");
-    const match=state.referenceRatio&&state.drawingRatio&&Math.abs(state.referenceRatio-state.drawingRatio)<.012;
-    note.textContent=match?"✓ Reference and Drawing ratios match.":"All alignment methods remain available.";
+    state.setupComplete=true;
+    state.mobileStrategyChosen=true;
+    state.alignment="sight";
+    overlay.classList.add("hidden");
+    autoSight();
+    return;
   }
   const toolbar=$("#mobile-toolbar");if(toolbar)toolbar.style.display="none";closePopover();
 }
@@ -1118,6 +1119,15 @@ function renderDesktopWorkflow(){
   const title=$("#desktop-workflow-title");
   const copy=$("#desktop-workflow-copy");
   const drawSlot=$("#desktop-draw-slot");
+  const sourceBody=$("#desktop-source-body");
+  const sourceToggle=$("#desktop-source-toggle");
+
+  if(sourceBody&&sourceToggle){
+    sourceBody.classList.toggle("collapsed",state.sourceImagesCollapsed);
+    sourceToggle.textContent=state.sourceImagesCollapsed?"▾":"▴";
+    sourceToggle.setAttribute("aria-expanded",String(!state.sourceImagesCollapsed));
+    sourceToggle.setAttribute("aria-label",state.sourceImagesCollapsed?"Expand Source Images":"Collapse Source Images");
+  }
 
   const atAlignment=state.setupStage==="alignment"||state.setupComplete;
   alignmentCard.style.display=atAlignment?"flex":"none";
@@ -1134,7 +1144,7 @@ function renderDesktopWorkflow(){
     copy.textContent="Reference ready. Choose the current drawing. Image Prep opens automatically.";
   }else if(atAlignment&&!state.setupComplete){
     title.textContent="Alignment";
-    copy.textContent="Both images are ready. Select Sight-Size, Free Form, or 2-Point.";
+    copy.textContent="Both images are ready. Select Sight-Size, 2-Point, or Free Align.";
   }else{
     title.textContent="Alignment Workspace";
     copy.textContent="Images ready. Alignment and observation tools are available.";
@@ -1274,6 +1284,7 @@ function chooseDesktopAlignment(type){
   setAlignment(type);
   render();
 }
+$("#desktop-source-toggle").onclick=()=>{state.sourceImagesCollapsed=!state.sourceImagesCollapsed;renderDesktopWorkflow()};
 $("#desktop-free").onclick=()=>chooseDesktopAlignment("free");
 $("#desktop-sight").onclick=()=>chooseDesktopAlignment("sight");
 $("#desktop-two").onclick=()=>chooseDesktopAlignment("two");
