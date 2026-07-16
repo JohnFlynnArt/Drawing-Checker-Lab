@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 8.3 Mobile Hotfix Final | Base: Alignment Sprint Rev. 8.2 Mobile Transaction Recovery Canonical -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence | Base: Alignment Sprint Rev. 8.3 Mobile Hotfix Final Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 8.3 Mobile Hotfix Final</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -106,7 +106,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 @media(max-width:768px){
   .desktop-sidebar,.desktop-help{display:none}
   #app{display:block;height:100dvh;min-height:100vh}
-  .main{position:absolute;inset:0;padding:0}
+  .main{position:absolute;left:0;right:0;top:var(--mobile-alignment-top,0px);bottom:var(--mobile-alignment-bottom,0px);padding:0}
   .viewport{border:0;border-radius:0;box-shadow:none;width:100%;height:100%}
   .layer{max-width:96%;max-height:88%}
   .marker{width:22px;height:22px;font-size:11px;border-width:2px}
@@ -184,7 +184,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 8.2 Mobile Transaction Recovery</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -411,13 +411,69 @@ const state={
   twoPointCollapsed:false,
   desktopIndependentBase:{refScale:1,drawScale:1},
   desktopTwoPointMemory:null,
-  mobileTwoPointMemory:null
+  mobileTwoPointMemory:null,
+  mobilePresentationMemory:{sight:null,free:null},
+  mobileViewportReserve:{top:0,bottom:0}
 };
 
 const hasRef=()=>refImg.classList.contains("loaded");
 const hasDraw=()=>drawImg.classList.contains("loaded");
 const isMobileLayout=()=>window.matchMedia("(max-width:768px)").matches;
 
+function updateMobileAlignmentViewport(){
+  const app=$("#app"),main=document.querySelector(".main");
+  if(!app||!main)return;
+  if(!isMobileLayout()){
+    app.style.removeProperty("--mobile-alignment-top");
+    app.style.removeProperty("--mobile-alignment-bottom");
+    return;
+  }
+
+  const topbar=$(".mobile-topbar");
+  const toolbar=$("#mobile-toolbar");
+  const top=topbar&&getComputedStyle(topbar).display!=="none"
+    ? Math.ceil(topbar.getBoundingClientRect().height)
+    : 0;
+  const bottom=toolbar&&getComputedStyle(toolbar).display!=="none"
+    ? Math.ceil(toolbar.getBoundingClientRect().height)
+    : 0;
+
+  // Preserve the largest control footprint seen during the Alignment session.
+  // This creates one stable visible workspace across Sight Size, 2-Point,
+  // Free Align, and every transaction phase.
+  state.mobileViewportReserve.top=Math.max(state.mobileViewportReserve.top,top);
+  state.mobileViewportReserve.bottom=Math.max(state.mobileViewportReserve.bottom,bottom);
+
+  app.style.setProperty("--mobile-alignment-top",state.mobileViewportReserve.top+"px");
+  app.style.setProperty("--mobile-alignment-bottom",state.mobileViewportReserve.bottom+"px");
+}
+function captureMobileMethodPresentation(type=state.alignment){
+  if(!isMobileLayout()||!["sight","free"].includes(type))return;
+  state.mobilePresentationMemory[type]={
+    workspace:{...state.workspace},
+    target:state.target,
+    phase:state.phase,
+    returnPhase:state.returnPhase,
+    markersHidden:state.markersHidden,
+    layers:{
+      ref:snapshotLayer("ref"),
+      draw:snapshotLayer("draw")
+    }
+  };
+}
+function restoreMobileMethodPresentation(type){
+  const saved=state.mobilePresentationMemory[type];
+  if(!saved)return false;
+  state.workspace={...saved.workspace};
+  state.target=saved.target;
+  state.phase=saved.phase;
+  state.returnPhase=saved.returnPhase;
+  state.markersHidden=saved.markersHidden;
+  restoreLayer("ref",saved.layers.ref);
+  restoreLayer("draw",saved.layers.draw);
+  render();
+  return true;
+}
 function revoke(img){
   if(img.src&&img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
 }
@@ -572,7 +628,7 @@ function beginNewMobileSession(){
   state.aligned=false;
   state.aspectMismatch=false;
   state.mobileStrategyChosen=false;
-  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;
+  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;state.mobilePresentationMemory={sight:null,free:null};state.mobileViewportReserve={top:0,bottom:0};
   closePopover();
   render();
 }
@@ -982,6 +1038,8 @@ function setAlignment(type){
 
   if(state.alignment===type){
     if(type==="sight"&&hasRef()&&hasDraw()){
+      // Re-selecting Sight Size intentionally restores its normalized fit.
+      state.mobilePresentationMemory.sight=null;
       autoSight();
     }else if(type==="free"&&hasRef()&&hasDraw()){
       if(isMobileLayout()){
@@ -1009,17 +1067,20 @@ function setAlignment(type){
     return;
   }
 
-  // Persist the active 2-Point transaction before another method temporarily
-  // takes ownership of the shared Alignment presentation.
-  if(state.alignment==="two"){
-    if(isMobileLayout()){
+  // Each Mobile method owns its own presentation. Capture it before another
+  // method becomes active. 2-Point continues to use its complete transaction
+  // memory, which already includes the presentation.
+  if(isMobileLayout()){
+    if(state.alignment==="two"){
       captureMobileTwoPointState();
       document.querySelectorAll(".marker").forEach(n=>n.remove());
     }else{
-      captureDesktopTwoPointState();
-      document.querySelectorAll(".marker").forEach(n=>n.remove());
-      state.points={ref:[],draw:[]};
+      captureMobileMethodPresentation(state.alignment);
     }
+  }else if(state.alignment==="two"){
+    captureDesktopTwoPointState();
+    document.querySelectorAll(".marker").forEach(n=>n.remove());
+    state.points={ref:[],draw:[]};
   }
 
   state.alignment=type;
@@ -1029,13 +1090,16 @@ function setAlignment(type){
 
   if(type==="sight"&&hasRef()&&hasDraw()){
     state.aligned=false;
-    autoSight();
+    if(!(isMobileLayout()&&restoreMobileMethodPresentation("sight"))){
+      autoSight();
+    }
   }else if(type==="two"&&hasRef()&&hasDraw()){
     if(isMobileLayout()){
       state.twoPointCollapsed=false;
       if(!restoreMobileTwoPointState()){
         state.aligned=false;
         removeMarkers("all");
+        resetWorkspace();
         resetLayer("ref");
         resetLayer("draw");
         beginPointPhase("ref");
@@ -1049,12 +1113,15 @@ function setAlignment(type){
   }else if(type==="free"&&hasRef()&&hasDraw()){
     state.aligned=false;
     if(isMobileLayout()){
-      resetLayer("ref");
-      resetLayer("draw");
-      state.target="draw";
-      state.layers.ref.z=1;state.layers.draw.z=2;
-      state.phase="adjust";
-      render();
+      if(!restoreMobileMethodPresentation("free")){
+        resetWorkspace();
+        resetLayer("ref");
+        resetLayer("draw");
+        state.target="draw";
+        state.layers.ref.z=1;state.layers.draw.z=2;
+        state.phase="adjust";
+        render();
+      }
     }else{
       initializeDesktopIndependentAlignment(()=>{
         state.target="draw";
@@ -1065,6 +1132,7 @@ function setAlignment(type){
     }
   }else{
     state.aligned=false;
+    resetWorkspace();
     resetLayer("ref");
     resetLayer("draw");
     render();
@@ -1541,6 +1609,7 @@ function render(){
   renderStart();
   const mt=$("#mobile-toolbar");if(mt&&state.setupComplete)mt.style.display="";
   renderMobileWorkflow();
+  updateMobileAlignmentViewport();
   renderDesktopSlots();
   renderDesktopWorkflow();
 }
@@ -1791,6 +1860,10 @@ cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture
 cropStage.addEventListener("wheel",e=>{e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
 let alignmentResizeTimer=null;
 window.addEventListener("resize",()=>{
+  if(isMobileLayout()){
+    state.mobileViewportReserve={top:0,bottom:0};
+    updateMobileAlignmentViewport();
+  }
   if($("#crop-editor").classList.contains("open")){
     fitImageInsideStage();
     setFrameToVisibleImage();
