@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence | Base: Alignment Sprint Rev. 8.3 Mobile Hotfix Final Canonical -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix | Base: Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -184,7 +184,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -1033,8 +1033,20 @@ function autoSight(){
   });
 }
 
+function resetMobileObservationToOverlay(){
+  if(!isMobileLayout())return;
+  if(state.blinkTimer){
+    clearInterval(state.blinkTimer);
+    state.blinkTimer=null;
+  }
+  state.blinkOn=true;
+  state.compare="overlay";
+}
 function setAlignment(type){
-  if(isMobileLayout())state.mobileStrategyChosen=true;
+  if(isMobileLayout()){
+    state.mobileStrategyChosen=true;
+    resetMobileObservationToOverlay();
+  }
 
   if(state.alignment===type){
     if(type==="sight"&&hasRef()&&hasDraw()){
