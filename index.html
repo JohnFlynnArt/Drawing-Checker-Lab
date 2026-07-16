@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix | Base: Alignment Sprint Rev. 9 Mobile Viewport & Presentation Independence Canonical -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 9.2 Terminology Update | Base: Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 9.2 Terminology Update</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -184,7 +184,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9.2 Terminology Update</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -204,7 +204,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       <section class="card" id="desktop-alignment-card">
         <div class="card-title">Alignment Strategy</div>
         <div class="row3">
-          <button id="desktop-sight" class="active">Sight-Size</button>
+          <button id="desktop-sight" class="active">Ratio Matching</button>
           <button id="desktop-two">2-Point</button>
           <button id="desktop-free">Free Align</button>
         </div>
@@ -284,7 +284,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       <h2 id="start-title">Alignment</h2>
       <p id="start-copy">Select the alignment tool you want to begin with.</p>
       <div id="start-strategy-actions" class="row3">
-        <button id="start-sight">Sight-Size</button>
+        <button id="start-sight">Ratio Matching</button>
         <button id="start-two">2-Point</button>
         <button id="start-free">Free Align</button>
       </div>
@@ -304,7 +304,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     </div>
 
     <div id="mobile-alignment-methods" class="mobile-alignment-methods">
-      <button id="m-sight" class="active">Sight Size</button>
+      <button id="m-sight" class="active">Ratio Matching</button>
       <button id="m-two">2-Point</button>
       <button id="m-free">Free Align</button>
     </div>
@@ -439,7 +439,7 @@ function updateMobileAlignmentViewport(){
     : 0;
 
   // Preserve the largest control footprint seen during the Alignment session.
-  // This creates one stable visible workspace across Sight Size, 2-Point,
+  // This creates one stable visible workspace across Ratio Matching, 2-Point,
   // Free Align, and every transaction phase.
   state.mobileViewportReserve.top=Math.max(state.mobileViewportReserve.top,top);
   state.mobileViewportReserve.bottom=Math.max(state.mobileViewportReserve.bottom,bottom);
@@ -1015,13 +1015,13 @@ function autoSight(){
       return;
     }
 
-    // Preserve the proven Sight Size ratio match.
+    // Preserve the proven Ratio Matching ratio match.
     const drawMatchScale=rr>=dr
       ? refRect.height/drawRect.height
       : refRect.width/drawRect.width;
 
     // The Alignment workspace—not Image Prep or the selected method—owns
-    // initial image presentation. Fit the locked Sight Size pair to the same
+    // initial image presentation. Fit the locked Ratio Matching pair to the same
     // available viewing area used by 2-Point and Free Align.
     const pairFit=alignmentFitMultiplier(refRect.width,refRect.height);
 
@@ -1050,7 +1050,7 @@ function setAlignment(type){
 
   if(state.alignment===type){
     if(type==="sight"&&hasRef()&&hasDraw()){
-      // Re-selecting Sight Size intentionally restores its normalized fit.
+      // Re-selecting Ratio Matching intentionally restores its normalized fit.
       state.mobilePresentationMemory.sight=null;
       autoSight();
     }else if(type==="free"&&hasRef()&&hasDraw()){
@@ -1377,7 +1377,7 @@ function statusText(){
   if(state.phase==="adjust")return mobile?`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`:`${state.target==="draw"?"Drawing":"Reference"} layer unlocked for manual adjustment.`;
   if(state.alignment==="free")return mobile?"Free Align: manually align the selected layer with drag, pinch, and twist.":"Free Align active.";
   if(state.alignment==="sight"&&state.aspectMismatch)return"Aspect ratios differ. Try 2-Point, Free Align, or manual adjustment.";
-  return mobile?"Workspace locked. Drag to pan and pinch to zoom.":"Sight-Size alignment active.";
+  return mobile?"Workspace locked. Drag to pan and pinch to zoom.":"Ratio Matching alignment active.";
 }
 function renderDesktopSlots(){
   const rs=$("#desktop-ref-slot"),ds=$("#desktop-draw-slot");
@@ -1472,7 +1472,7 @@ function renderDesktopWorkflow(){
     copy.textContent="Reference ready. Choose the current drawing. Image Prep opens automatically.";
   }else if(atAlignment&&!state.setupComplete){
     title.textContent="Alignment";
-    copy.textContent="Both images are ready. Select Sight-Size, 2-Point, or Free Align.";
+    copy.textContent="Both images are ready. Select Ratio Matching, 2-Point, or Free Align.";
   }else{
     title.textContent="Alignment Workspace";
     copy.textContent="Images ready. Alignment and observation tools are available.";
@@ -1515,7 +1515,7 @@ function renderMobileWorkflow(){
 
   if(!imagesReady)return;
 
-  // Sight Size and Free Align use the existing View lock control; no duplicate
+  // Ratio Matching and Free Align use the existing View lock control; no duplicate
   // Adjust Drawing action is shown.
   if(!activeTwoPoint)return;
 
@@ -1888,7 +1888,7 @@ window.addEventListener("resize",()=>{
   clearTimeout(alignmentResizeTimer);
   alignmentResizeTimer=setTimeout(()=>{
     if(state.alignment==="sight"){
-      // Refit the locked Sight Size pair to the current Alignment viewport.
+      // Refit the locked Ratio Matching pair to the current Alignment viewport.
       autoSight();
     }else{
       // 2-Point and Free Align keep their current method-owned transforms.
