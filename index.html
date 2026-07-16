@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Viewport Unification Sprint Rev. 1 | Base: Alignment Sprint Rev. 6 Canonical -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 7 | Base: Alignment Viewport Unification Sprint Rev. 1 Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Viewport Unification Sprint Rev. 1</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 7</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -32,6 +32,9 @@ button.active{background:var(--blue);border-color:#60a5fa;color:#fff}
 button:disabled{opacity:.35;cursor:not-allowed}
 .btn-danger{background:transparent;color:var(--red);border-color:var(--red)}
 .btn-primary{background:var(--blue);border-color:transparent;color:white}
+.two-ref-state{background:var(--red)!important;border-color:#f87171!important;color:#fff!important}
+.two-draw-state{background:var(--blue)!important;border-color:#60a5fa!important;color:#fff!important}
+.mobile-next.status{display:flex;background:#26262d;border-color:var(--border);color:var(--text);opacity:1;cursor:default}
 .mode-ref.active{background:var(--red)}
 .mode-draw.active{background:var(--blue)}
 .audit.active{background:var(--amber);border-color:#fbbf24;color:#111}
@@ -182,7 +185,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Viewport Unification Sprint Rev. 1</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 7</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -320,7 +323,6 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
     <div id="mobile-toolbar-row" class="mobile-toolbar-row">
     <div class="mobile-tools">
-      <button id="m-images" class="tool"><strong>Images</strong><span>upload/replace</span></button>
       <button id="m-nav" class="tool active"><strong>View</strong><span>locked</span></button>
       <button id="m-overlay" class="tool audit active"><strong>Overlay</strong><span>compare</span></button>
       <button id="m-blink" class="tool audit"><strong>Blink</strong><span>compare</span></button>
@@ -408,7 +410,8 @@ const state={
   drawingRatio:null,
   sourceImagesCollapsed:false,
   twoPointCollapsed:false,
-  desktopIndependentBase:{refScale:1,drawScale:1}
+  desktopIndependentBase:{refScale:1,drawScale:1},
+  desktopTwoPointMemory:null
 };
 
 const hasRef=()=>refImg.classList.contains("loaded");
@@ -462,6 +465,56 @@ function initializeDesktopIndependentAlignment(onReady){
     if(typeof onReady==="function")onReady();
     else render();
   });
+}
+function snapshotLayer(which){
+  const l=state.layers[which];
+  return{x:l.x,y:l.y,scale:l.scale,rot:l.rot,opacity:l.opacity,z:l.z};
+}
+function restoreLayer(which,saved){
+  if(!saved)return;
+  Object.assign(state.layers[which],saved);
+}
+function captureDesktopTwoPointState(){
+  if(isMobileLayout()||state.alignment!=="two")return;
+  state.desktopTwoPointMemory={
+    points:{
+      ref:state.points.ref.map(p=>({...p})),
+      draw:state.points.draw.map(p=>({...p}))
+    },
+    phase:state.phase,
+    returnPhase:state.returnPhase,
+    aligned:state.aligned,
+    markersHidden:state.markersHidden,
+    twoPointCollapsed:state.twoPointCollapsed,
+    target:state.target,
+    workspace:{...state.workspace},
+    layers:{
+      ref:snapshotLayer("ref"),
+      draw:snapshotLayer("draw")
+    },
+    desktopIndependentBase:{...state.desktopIndependentBase}
+  };
+}
+function restoreDesktopTwoPointState(){
+  const saved=state.desktopTwoPointMemory;
+  if(!saved)return false;
+  state.points={
+    ref:saved.points.ref.map(p=>({...p})),
+    draw:saved.points.draw.map(p=>({...p}))
+  };
+  state.phase=saved.phase;
+  state.returnPhase=saved.returnPhase;
+  state.aligned=saved.aligned;
+  state.markersHidden=saved.markersHidden;
+  state.twoPointCollapsed=saved.twoPointCollapsed;
+  state.target=saved.target;
+  state.workspace={...saved.workspace};
+  state.desktopIndependentBase={...saved.desktopIndependentBase};
+  restoreLayer("ref",saved.layers.ref);
+  restoreLayer("draw",saved.layers.draw);
+  rebuildMarkers();
+  render();
+  return true;
 }
 function removeMarkers(kind="all"){
   if(kind==="all"||kind==="ref"){state.points.ref=[];document.querySelectorAll(".marker.ref").forEach(n=>n.remove())}
@@ -883,7 +936,7 @@ function autoSight(){
 }
 
 function setAlignment(type){
-  if(isMobileLayout()) state.mobileStrategyChosen=true;
+  if(isMobileLayout())state.mobileStrategyChosen=true;
 
   if(state.alignment===type){
     if(type==="sight"&&hasRef()&&hasDraw()){
@@ -903,42 +956,49 @@ function setAlignment(type){
       }
     }else if(type==="two"){
       if(isMobileLayout()){
-        if(state.aligned){
-          resetAllPoints();
-          return;
-        }
+        if(state.points.ref.length<2)beginPointPhase("ref");
+        else if(state.points.draw.length<2)beginPointPhase("draw");
+        else render();
+      }else{
         state.twoPointCollapsed=false;
         render();
-      }else{
-        removeMarkers("all");
-        state.aligned=false;
-        state.markersHidden=false;
-        state.twoPointCollapsed=false;
-        initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
       }
     }else render();
     return;
   }
 
+  // Desktop 2-Point is a persistent integrated method. Leaving it stores the
+  // complete transaction; switching methods never discards artist work.
+  if(!isMobileLayout()&&state.alignment==="two"){
+    captureDesktopTwoPointState();
+    document.querySelectorAll(".marker").forEach(n=>n.remove());
+    state.points={ref:[],draw:[]};
+  }
+
   state.alignment=type;
-  state.aligned=false;
   state.markersHidden=false;
-  state.twoPointCollapsed=false;
-  removeMarkers("all");
   state.phase="workspace";
   state.returnPhase="workspace";
 
   if(type==="sight"&&hasRef()&&hasDraw()){
+    state.aligned=false;
     autoSight();
   }else if(type==="two"&&hasRef()&&hasDraw()){
     if(isMobileLayout()){
+      state.aligned=false;
+      state.twoPointCollapsed=false;
+      removeMarkers("all");
       resetLayer("ref");
       resetLayer("draw");
-      render();
-    }else{
+      beginPointPhase("ref");
+    }else if(!restoreDesktopTwoPointState()){
+      state.aligned=false;
+      state.twoPointCollapsed=false;
+      removeMarkers("all");
       initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
     }
   }else if(type==="free"&&hasRef()&&hasDraw()){
+    state.aligned=false;
     if(isMobileLayout()){
       resetLayer("ref");
       resetLayer("draw");
@@ -955,6 +1015,7 @@ function setAlignment(type){
       });
     }
   }else{
+    state.aligned=false;
     resetLayer("ref");
     resetLayer("draw");
     render();
@@ -1064,6 +1125,7 @@ function resetAllPoints(){
   if(isMobileLayout()){
     beginPointPhase("ref");
   }else{
+    state.desktopTwoPointMemory=null;
     initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
   }
 }
@@ -1329,20 +1391,23 @@ function renderMobileWorkflow(){
 
   if(pointActions&&(state.points.ref.length||state.points.draw.length))pointActions.classList.add("show");
 
+  next.classList.remove("status");
   if(state.points.ref.length<2){
-    next.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
-    next.classList.add("show");
-    next.onclick=()=>beginPointPhase("ref");
+    next.textContent=`Reference Points (${state.points.ref.length}/2)`;
+    next.classList.add("show","status");
+    next.disabled=true;
     return;
   }
 
   if(state.points.draw.length<2){
-    next.textContent=`Set Drawing Points (${state.points.draw.length}/2)`;
-    next.classList.add("show");
-    next.onclick=()=>beginPointPhase("draw");
+    next.textContent=`Drawing Points (${state.points.draw.length}/2)`;
+    next.classList.add("show","status");
+    next.disabled=true;
     return;
   }
 
+  next.classList.remove("status");
+  next.disabled=false;
   next.textContent="Execute Match";
   next.classList.add("show");
   next.onclick=computeTwoPoint;
@@ -1381,18 +1446,20 @@ function render(){
       desktopTwoStatus.textContent=`Point ${state.points.ref.length+1} of 2`;
       desktopTwoAction.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
       desktopTwoAction.style.display="block";
-      desktopTwoAction.classList.toggle("active",state.phase==="point-ref");
+      desktopTwoAction.classList.remove("active","two-draw-state");
+      desktopTwoAction.classList.add("two-ref-state");
     }else if(!drawDone){
       desktopTwoTitle.textContent="Set Drawing Points";
       desktopTwoStatus.textContent=`Point ${state.points.draw.length+1} of 2`;
       desktopTwoAction.textContent=`Set Drawing Points (${state.points.draw.length}/2)`;
       desktopTwoAction.style.display="block";
-      desktopTwoAction.classList.toggle("active",state.phase==="point-draw");
+      desktopTwoAction.classList.remove("active","two-ref-state");
+      desktopTwoAction.classList.add("two-draw-state");
     }else{
       desktopTwoTitle.textContent="Ready to Execute Match";
       desktopTwoStatus.textContent="2 Reference points and 2 Drawing points selected";
       desktopTwoAction.style.display="none";
-      desktopTwoAction.classList.remove("active");
+      desktopTwoAction.classList.remove("active","two-ref-state","two-draw-state");
     }
     const hasAnyPoints=state.points.ref.length||state.points.draw.length;
     desktopUndoPoint.style.display=hasAnyPoints?"block":"none";
@@ -1461,10 +1528,9 @@ $("#desktop-reset").onclick=()=>{
     resetWorkspace();
     autoSight();
   }else if(state.alignment==="two"){
-    removeMarkers("all");
+    resetWorkspace();
     state.markersHidden=false;
-    state.twoPointCollapsed=false;
-    initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
+    render();
   }else if(state.alignment==="free"){
     initializeDesktopIndependentAlignment(()=>{
       state.phase="adjust";
@@ -1491,30 +1557,21 @@ function closePopover(){$("#mobile-popover").classList.remove("open")}
 
 $("#m-more").onclick=()=>{
   openPopover(`
-    <div class="pop-title">Session & View</div>
+    <div class="pop-title">Session, Images & View</div>
     <div class="pop-grid two">
       <button id="p-hide">${state.markersHidden?"Show":"Hide"} Pins</button>
       <button id="p-reset">Reset View</button>
-      <button id="p-new">Change Reference</button>
+      <button id="p-ref">Change Reference</button>
+      <button id="p-library">Replace Drawing</button>
+      <button id="p-camera">Take Drawing Photo</button>
       <button id="p-close">Close</button>
     </div>`);
   $("#p-hide").onclick=()=>{state.markersHidden=!state.markersHidden;closePopover();render()};
   $("#p-reset").onclick=()=>{resetWorkspace();if(state.alignment==="sight")autoSight();closePopover();render()};
-  $("#p-new").onclick=beginNewMobileSession;
-  $("#p-close").onclick=closePopover;
-};
-
-$("#m-images").onclick=()=>{
-  openPopover(`
-    <div class="pop-title">Images</div>
-    <div class="pop-grid">
-      <button id="p-ref">Change Reference</button>
-      <button id="p-library">Choose Drawing</button>
-      <button id="p-camera">Take Drawing Photo</button>
-    </div>`);
   $("#p-ref").onclick=beginNewMobileSession;
   $("#p-library").onclick=()=>{closePopover();$("#mobile-draw-library").click()};
   $("#p-camera").onclick=()=>{closePopover();$("#mobile-draw-camera").click()};
+  $("#p-close").onclick=closePopover;
 };
 
 $("#start-free").onclick=()=>setAlignment("free");
