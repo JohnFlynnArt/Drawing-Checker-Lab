@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | 2-Point Initial-State Restoration Sprint Rev. 1 | Base: Alignment Sprint Rev. 5 Canonical -->
+<!-- Drawing Checker Studio | Alignment Initialization Restoration Sprint Rev. 1 | Base: Alignment Sprint Rev. 5 Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — 2-Point Initial-State Restoration Sprint Rev. 1</title>
+<title>Drawing Checker Studio — Alignment Initialization Restoration Sprint Rev. 1</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -182,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">2-Point Initial-State Restoration Sprint Rev. 1</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Initialization Restoration Sprint Rev. 1</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -407,7 +407,8 @@ const state={
   referenceRatio:null,
   drawingRatio:null,
   sourceImagesCollapsed:false,
-  twoPointCollapsed:false
+  twoPointCollapsed:false,
+  desktopIndependentBase:{refScale:1,drawScale:1}
 };
 
 const hasRef=()=>refImg.classList.contains("loaded");
@@ -421,6 +422,38 @@ function resetWorkspace(){state.workspace={zoom:1,x:0,y:0}}
 function resetLayer(which){
   const l=state.layers[which];
   l.x=0;l.y=0;l.scale=1;l.rot=0;l.opacity=1;
+}
+function fitDesktopLayerIndependently(which){
+  const layer=state.layers[which],el=layer.el;
+  const vr=viewport.getBoundingClientRect();
+  const ir=el.getBoundingClientRect();
+  if(!vr.width||!vr.height||!ir.width||!ir.height)return 1;
+  const availableW=vr.width*.90;
+  const availableH=vr.height*.90;
+  return Math.min(availableW/ir.width,availableH/ir.height);
+}
+function initializeDesktopIndependentAlignment(onReady){
+  resetWorkspace();
+  resetLayer("ref");
+  resetLayer("draw");
+  state.layers.ref.z=1;
+  state.layers.draw.z=2;
+  state.target="draw";
+  state.phase="workspace";
+  state.returnPhase="workspace";
+  render();
+
+  requestAnimationFrame(()=>{
+    const refScale=fitDesktopLayerIndependently("ref");
+    const drawScale=fitDesktopLayerIndependently("draw");
+    state.desktopIndependentBase={refScale,drawScale};
+    state.layers.ref.scale=refScale;
+    state.layers.draw.scale=drawScale;
+    state.layers.ref.x=0;state.layers.ref.y=0;state.layers.ref.rot=0;
+    state.layers.draw.x=0;state.layers.draw.y=0;state.layers.draw.rot=0;
+    if(typeof onReady==="function")onReady();
+    else render();
+  });
 }
 function removeMarkers(kind="all"){
   if(kind==="all"||kind==="ref"){state.points.ref=[];document.querySelectorAll(".marker.ref").forEach(n=>n.remove())}
@@ -829,17 +862,39 @@ function autoSight(){
   });
 }
 function setAlignment(type){
-  // 2-Point owns a normalized identity state so stored workspace points and solver inputs share one coordinate space.
   if(isMobileLayout()) state.mobileStrategyChosen=true;
 
   if(state.alignment===type){
-    if(type==="sight"&&hasRef()&&hasDraw())autoSight();
-    else if(type==="free"&&hasRef()&&hasDraw()){
-      state.phase="adjust";state.target="draw";
-      state.layers.ref.z=1;state.layers.draw.z=2;
-      render();
+    if(type==="sight"&&hasRef()&&hasDraw()){
+      autoSight();
+    }else if(type==="free"&&hasRef()&&hasDraw()){
+      if(isMobileLayout()){
+        state.phase="adjust";state.target="draw";
+        state.layers.ref.z=1;state.layers.draw.z=2;
+        render();
+      }else{
+        initializeDesktopIndependentAlignment(()=>{
+          state.phase="adjust";
+          state.target="draw";
+          state.layers.ref.z=1;state.layers.draw.z=2;
+          render();
+        });
+      }
     }else if(type==="two"){
-      resetAllPoints();
+      if(isMobileLayout()){
+        if(state.aligned){
+          resetAllPoints();
+          return;
+        }
+        state.twoPointCollapsed=false;
+        render();
+      }else{
+        removeMarkers("all");
+        state.aligned=false;
+        state.markersHidden=false;
+        state.twoPointCollapsed=false;
+        initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
+      }
     }else render();
     return;
   }
@@ -849,20 +904,40 @@ function setAlignment(type){
   state.markersHidden=false;
   state.twoPointCollapsed=false;
   removeMarkers("all");
-  resetLayer("ref");
-  resetLayer("draw");
-  resetWorkspace();
-  state.phase="workspace";state.returnPhase="workspace";
+  state.phase="workspace";
+  state.returnPhase="workspace";
 
-  if(type==="sight"&&hasRef()&&hasDraw())autoSight();
-  else if(type==="free"&&hasRef()&&hasDraw()){
-    state.target="draw";
-    state.layers.ref.z=1;state.layers.draw.z=2;
-    state.phase="adjust";
-    render();
+  if(type==="sight"&&hasRef()&&hasDraw()){
+    autoSight();
   }else if(type==="two"&&hasRef()&&hasDraw()){
-    beginPointPhase("ref");
-  }else render();
+    if(isMobileLayout()){
+      resetLayer("ref");
+      resetLayer("draw");
+      render();
+    }else{
+      initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
+    }
+  }else if(type==="free"&&hasRef()&&hasDraw()){
+    if(isMobileLayout()){
+      resetLayer("ref");
+      resetLayer("draw");
+      state.target="draw";
+      state.layers.ref.z=1;state.layers.draw.z=2;
+      state.phase="adjust";
+      render();
+    }else{
+      initializeDesktopIndependentAlignment(()=>{
+        state.target="draw";
+        state.layers.ref.z=1;state.layers.draw.z=2;
+        state.phase="adjust";
+        render();
+      });
+    }
+  }else{
+    resetLayer("ref");
+    resetLayer("draw");
+    render();
+  }
 }
 
 function setCompare(mode){
@@ -962,15 +1037,14 @@ function undoLastPoint(){
 function resetAllPoints(){
   if(state.alignment!=="two")return;
   removeMarkers("all");
-  resetLayer("ref");
-  resetLayer("draw");
-  resetWorkspace();
   state.aligned=false;
   state.markersHidden=false;
   state.twoPointCollapsed=false;
-  state.phase="workspace";
-  state.returnPhase="workspace";
-  beginPointPhase("ref");
+  if(isMobileLayout()){
+    beginPointPhase("ref");
+  }else{
+    initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
+  }
 }
 
 function commitPoint(pt){
@@ -1005,9 +1079,16 @@ function computeTwoPoint(){
   const angleR=Math.atan2(R2.y-R1.y,R2.x-R1.x);
   const angleD=Math.atan2(D2.y-D1.y,D2.x-D1.x);
   const rad=angleR-angleD,cos=Math.cos(rad),sin=Math.sin(rad),scale=distR/distD;
-  resetLayer("ref");
   const d=state.layers.draw;
-  d.scale=scale;d.rot=rad*180/Math.PI;
+  if(isMobileLayout()){
+    resetLayer("ref");
+    d.scale=scale;
+  }else{
+    state.layers.ref.x=0;state.layers.ref.y=0;state.layers.ref.rot=0;
+    state.layers.ref.scale=state.desktopIndependentBase.refScale||state.layers.ref.scale||1;
+    d.scale=scale*(state.desktopIndependentBase.drawScale||1);
+  }
+  d.rot=rad*180/Math.PI;
   d.x=R1.x-((D1.x*cos-D1.y*sin)*scale);
   d.y=R1.y-((D1.x*sin+D1.y*cos)*scale);
   state.aligned=true;
@@ -1352,10 +1433,25 @@ $("#desktop-target-ref").onclick=()=>setTarget("ref");
 $("#desktop-target-draw").onclick=()=>setTarget("draw");
 $("#desktop-opacity").oninput=e=>{state.layers[state.target].opacity=+e.target.value;renderVisuals()};
 $("#desktop-reset").onclick=()=>{
-  resetWorkspace();resetLayer("ref");resetLayer("draw");
-  state.phase="workspace";state.aligned=false;
-  if(state.alignment==="sight")autoSight();
-  render();
+  state.aligned=false;
+  if(state.alignment==="sight"){
+    resetWorkspace();
+    autoSight();
+  }else if(state.alignment==="two"){
+    removeMarkers("all");
+    state.markersHidden=false;
+    state.twoPointCollapsed=false;
+    initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
+  }else if(state.alignment==="free"){
+    initializeDesktopIndependentAlignment(()=>{
+      state.phase="adjust";
+      state.target="draw";
+      state.layers.ref.z=1;state.layers.draw.z=2;
+      render();
+    });
+  }else{
+    resetWorkspace();resetLayer("ref");resetLayer("draw");render();
+  }
 };
 
 /* MOBILE FILE INPUTS */
