@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Initialization Restoration Sprint Rev. 1 | Base: Alignment Sprint Rev. 5 Canonical -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 6 | Base: Alignment Initialization Restoration Sprint Rev. 1 Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Initialization Restoration Sprint Rev. 1</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 6</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -182,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Initialization Restoration Sprint Rev. 1</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 6</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -318,7 +318,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
       </div>
     </div>
 
-    <div class="mobile-toolbar-row">
+    <div id="mobile-toolbar-row" class="mobile-toolbar-row">
     <div class="mobile-tools">
       <button id="m-images" class="tool"><strong>Images</strong><span>upload/replace</span></button>
       <button id="m-nav" class="tool active"><strong>View</strong><span>locked</span></button>
@@ -1285,18 +1285,20 @@ function renderMobileWorkflow(){
   const imagesReady=hasRef()&&hasDraw();
   const activeTwoPoint=imagesReady&&state.alignment==="two"&&!state.aligned;
 
-  // Alignment methods are primary controls whenever the workspace is idle.
+  // Rev. 6: Alignment methods are primary controls whenever the workspace is idle.
   // During active 2-Point placement they yield to the point workflow.
   if(alignmentMethods)alignmentMethods.classList.toggle("show",imagesReady&&!activeTwoPoint);
 
-  // Compare tools recede during active 2-Point placement and return after Match.
+  // Rev. 6: Compare and observation controls recede during active 2-Point placement and return after Match.
   $("#m-overlay").style.display=imagesReady&&!activeTwoPoint ? "" : "none";
   $("#m-blink").style.display=imagesReady&&!activeTwoPoint ? "" : "none";
   $("#m-outline").style.display=imagesReady&&!activeTwoPoint ? "" : "none";
   $("#m-nav").style.display=imagesReady ? "" : "none";
 
   const layerControls=$("#mobile-layer-controls");
-  if(layerControls)layerControls.classList.toggle("show",imagesReady);
+  const toolbarRow=$("#mobile-toolbar-row");
+  if(layerControls)layerControls.classList.toggle("show",imagesReady&&!activeTwoPoint);
+  if(toolbarRow)toolbarRow.style.display=imagesReady&&!activeTwoPoint?"flex":"none";
 
   if(!imagesReady)return;
 
