@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 7 | Base: Alignment Viewport Unification Sprint Rev. 1 Canonical -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 8 | Base: Alignment Sprint Rev. 7 Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 7</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 8</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -34,7 +34,6 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .btn-primary{background:var(--blue);border-color:transparent;color:white}
 .two-ref-state{background:var(--red)!important;border-color:#f87171!important;color:#fff!important}
 .two-draw-state{background:var(--blue)!important;border-color:#60a5fa!important;color:#fff!important}
-.mobile-next.status{display:flex;background:#26262d;border-color:var(--border);color:var(--text);opacity:1;cursor:default}
 .mode-ref.active{background:var(--red)}
 .mode-draw.active{background:var(--blue)}
 .audit.active{background:var(--amber);border-color:#fbbf24;color:#111}
@@ -185,7 +184,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 7</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 8</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -411,7 +410,8 @@ const state={
   sourceImagesCollapsed:false,
   twoPointCollapsed:false,
   desktopIndependentBase:{refScale:1,drawScale:1},
-  desktopTwoPointMemory:null
+  desktopTwoPointMemory:null,
+  mobileTwoPointMemory:null
 };
 
 const hasRef=()=>refImg.classList.contains("loaded");
@@ -516,6 +516,48 @@ function restoreDesktopTwoPointState(){
   render();
   return true;
 }
+function captureMobileTwoPointState(){
+  if(!isMobileLayout()||state.alignment!=="two")return;
+  state.mobileTwoPointMemory={
+    points:{
+      ref:state.points.ref.map(p=>({...p})),
+      draw:state.points.draw.map(p=>({...p}))
+    },
+    phase:state.phase,
+    returnPhase:state.returnPhase,
+    aligned:state.aligned,
+    markersHidden:state.markersHidden,
+    twoPointCollapsed:state.twoPointCollapsed,
+    target:state.target,
+    workspace:{...state.workspace},
+    layers:{
+      ref:snapshotLayer("ref"),
+      draw:snapshotLayer("draw")
+    },
+    desktopIndependentBase:{...state.desktopIndependentBase}
+  };
+}
+function restoreMobileTwoPointState(){
+  const saved=state.mobileTwoPointMemory;
+  if(!saved)return false;
+  state.points={
+    ref:saved.points.ref.map(p=>({...p})),
+    draw:saved.points.draw.map(p=>({...p}))
+  };
+  state.phase=saved.phase;
+  state.returnPhase=saved.returnPhase;
+  state.aligned=saved.aligned;
+  state.markersHidden=saved.markersHidden;
+  state.twoPointCollapsed=saved.twoPointCollapsed;
+  state.target=saved.target;
+  state.workspace={...saved.workspace};
+  state.desktopIndependentBase={...saved.desktopIndependentBase};
+  restoreLayer("ref",saved.layers.ref);
+  restoreLayer("draw",saved.layers.draw);
+  rebuildMarkers();
+  render();
+  return true;
+}
 function removeMarkers(kind="all"){
   if(kind==="all"||kind==="ref"){state.points.ref=[];document.querySelectorAll(".marker.ref").forEach(n=>n.remove())}
   if(kind==="all"||kind==="draw"){state.points.draw=[];document.querySelectorAll(".marker.draw").forEach(n=>n.remove())}
@@ -530,7 +572,7 @@ function beginNewMobileSession(){
   state.aligned=false;
   state.aspectMismatch=false;
   state.mobileStrategyChosen=false;
-  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;
+  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;
   closePopover();
   render();
 }
@@ -967,12 +1009,17 @@ function setAlignment(type){
     return;
   }
 
-  // Desktop 2-Point is a persistent integrated method. Leaving it stores the
-  // complete transaction; switching methods never discards artist work.
-  if(!isMobileLayout()&&state.alignment==="two"){
-    captureDesktopTwoPointState();
-    document.querySelectorAll(".marker").forEach(n=>n.remove());
-    state.points={ref:[],draw:[]};
+  // Persist the active 2-Point transaction before another method temporarily
+  // takes ownership of the shared Alignment presentation.
+  if(state.alignment==="two"){
+    if(isMobileLayout()){
+      captureMobileTwoPointState();
+      document.querySelectorAll(".marker").forEach(n=>n.remove());
+    }else{
+      captureDesktopTwoPointState();
+      document.querySelectorAll(".marker").forEach(n=>n.remove());
+      state.points={ref:[],draw:[]};
+    }
   }
 
   state.alignment=type;
@@ -985,12 +1032,14 @@ function setAlignment(type){
     autoSight();
   }else if(type==="two"&&hasRef()&&hasDraw()){
     if(isMobileLayout()){
-      state.aligned=false;
       state.twoPointCollapsed=false;
-      removeMarkers("all");
-      resetLayer("ref");
-      resetLayer("draw");
-      beginPointPhase("ref");
+      if(!restoreMobileTwoPointState()){
+        state.aligned=false;
+        removeMarkers("all");
+        resetLayer("ref");
+        resetLayer("draw");
+        beginPointPhase("ref");
+      }
     }else if(!restoreDesktopTwoPointState()){
       state.aligned=false;
       state.twoPointCollapsed=false;
@@ -1123,6 +1172,7 @@ function resetAllPoints(){
   state.markersHidden=false;
   state.twoPointCollapsed=false;
   if(isMobileLayout()){
+    state.mobileTwoPointMemory=null;
     beginPointPhase("ref");
   }else{
     state.desktopTwoPointMemory=null;
@@ -1216,7 +1266,7 @@ function renderVisuals(){
   viewport.classList.toggle("audit-outline",state.compare==="outline");
   viewport.classList.toggle("mark-ref",state.phase==="point-ref");
   viewport.classList.toggle("mark-draw",state.phase==="point-draw");
-  world.classList.toggle("hide-markers",state.markersHidden);
+  world.classList.toggle("hide-markers",state.markersHidden||state.alignment!=="two");
   world.classList.toggle("hide-draw",state.phase==="point-ref");
   world.classList.toggle("hide-ref",state.phase==="point-draw");
 
@@ -1391,22 +1441,22 @@ function renderMobileWorkflow(){
 
   if(pointActions&&(state.points.ref.length||state.points.draw.length))pointActions.classList.add("show");
 
-  next.classList.remove("status");
   if(state.points.ref.length<2){
-    next.textContent=`Reference Points (${state.points.ref.length}/2)`;
-    next.classList.add("show","status");
-    next.disabled=true;
+    next.disabled=false;
+    next.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
+    next.classList.add("show");
+    next.onclick=()=>beginPointPhase("ref");
     return;
   }
 
   if(state.points.draw.length<2){
-    next.textContent=`Drawing Points (${state.points.draw.length}/2)`;
-    next.classList.add("show","status");
-    next.disabled=true;
+    next.disabled=false;
+    next.textContent=`Set Drawing Points (${state.points.draw.length}/2)`;
+    next.classList.add("show");
+    next.onclick=()=>beginPointPhase("draw");
     return;
   }
 
-  next.classList.remove("status");
   next.disabled=false;
   next.textContent="Execute Match";
   next.classList.add("show");
