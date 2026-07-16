@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <!-- Drawing Checker Studio | Alignment Sprint Rev. 9.2 Terminology Update | Base: Alignment Sprint Rev. 9.1 Mobile Observation Reset Hotfix Canonical -->
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>Drawing Checker Studio — Alignment Sprint Rev. 9.2 Terminology Update</title>
 <style>
 :root{
@@ -182,202 +183,185 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app">
-  <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9.2 Terminology Update</h1></div>
-    <div id="desktop-workflow-card" class="card desktop-workflow-card">
-      <div class="card-title">Current Step</div>
-      <strong id="desktop-workflow-title">Upload Reference</strong>
-      <div id="desktop-workflow-copy" class="small-label">Choose a reference image. Image Prep opens next.</div>
-    </div>
-    <div class="desktop-scroll">
-      <section class="card" id="desktop-source-card">
-        <div class="disclosure-head"><div class="card-title">Source Images</div><button id="desktop-source-toggle" class="disclosure-toggle" aria-expanded="true" aria-label="Collapse Source Images">▴</button></div>
-        <div id="desktop-source-body" class="source-body">
-          <div class="small-label">Reference</div>
-          <div class="upload-box" id="desktop-ref-slot"></div>
-          <div class="small-label">Drawing</div>
-          <div class="upload-box" id="desktop-draw-slot"></div>
-        </div>
-      </section>
-
-      <section class="card" id="desktop-alignment-card">
-        <div class="card-title">Alignment Strategy</div>
-        <div class="row3">
-          <button id="desktop-sight" class="active">Ratio Matching</button>
-          <button id="desktop-two">2-Point</button>
-          <button id="desktop-free">Free Align</button>
-        </div>
-      </section>
-
-      <section class="card" id="desktop-pins-card" style="display:none">
-        <div class="disclosure-head"><div class="card-title">2-Point Alignment</div><button id="desktop-two-toggle" class="disclosure-toggle" aria-expanded="true" aria-label="Collapse 2-Point Alignment">▴</button></div>
-        <div id="desktop-two-body" class="two-point-body">
-          <strong id="desktop-two-title">Set Reference Points</strong>
-          <div id="desktop-two-status" class="small-label">Point 1 of 2</div>
-          <button id="desktop-two-action" class="btn-primary">Set Reference Points (0/2)</button>
-          <div class="row2">
-            <button id="desktop-undo-point" style="display:none">Undo Last Point</button>
-            <button id="desktop-reset-points" style="display:none">Reset All Points</button>
-          </div>
-          <button id="desktop-compute" class="btn-primary" style="display:none">Execute Match</button>
-        </div>
-      </section>
-
-      <section class="card" id="desktop-compare-card">
-        <div class="card-title">Compare</div>
-        <div class="row3">
-          <button id="desktop-overlay" class="audit active">Overlay</button>
-          <button id="desktop-blink" class="audit">Blink</button>
-          <button id="desktop-outline" class="audit">Outline</button>
-        </div>
-      </section>
-    </div>
-
-    <div class="desktop-bottom" id="desktop-bottom-controls">
-      <div class="row2">
-        <button id="desktop-target-ref">Target Ref</button>
-        <button id="desktop-target-draw" class="active">Target Draw</button>
-      </div>
-      <div class="slider-wrap">
-        <div class="slider-head"><span id="desktop-opacity-label">Drawing Opacity</span></div>
-        <input id="desktop-opacity" type="range" min="0" max="1" step="0.01" value="1">
-      </div>
-      <button id="desktop-reset" class="btn-danger">Reset View</button>
-    </div>
-  </aside>
-
-  <main class="main">
-    <div id="viewport" class="viewport">
-      <div id="world" class="world">
-        <img id="ref-image" class="layer" alt="Reference">
-        <img id="draw-image" class="layer" alt="Drawing">
-      </div>
-      <div id="precision-overlay" class="precision-overlay" aria-hidden="true">
-        <div class="precision-crosshair"><span class="precision-dot"></span></div>
-        <div class="precision-label">Move image under crosshair • Release to place</div>
-      </div>
-    </div>
-    <div class="desktop-help">
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta</p><button id="beta-begin">Begin</button></div></div>
+<aside class="desktop-sidebar">
+<div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9.2 Terminology Update</h1></div>
+<div class="card desktop-workflow-card" id="desktop-workflow-card">
+<div class="card-title">Current Step</div>
+<strong id="desktop-workflow-title">Upload Reference</strong>
+<div class="small-label" id="desktop-workflow-copy">Choose a reference image. Image Prep opens next.</div>
+</div>
+<div class="desktop-scroll">
+<section class="card" id="desktop-source-card">
+<div class="disclosure-head"><div class="card-title">Source Images</div><button aria-expanded="true" aria-label="Collapse Source Images" class="disclosure-toggle" id="desktop-source-toggle">▴</button></div>
+<div class="source-body" id="desktop-source-body">
+<div class="small-label">Reference</div>
+<div class="upload-box" id="desktop-ref-slot"></div>
+<div class="small-label">Drawing</div>
+<div class="upload-box" id="desktop-draw-slot"></div>
+</div>
+</section>
+<section class="card" id="desktop-alignment-card">
+<div class="card-title">Alignment Strategy</div>
+<div class="row3">
+<button class="active" id="desktop-sight">Ratio Matching</button>
+<button id="desktop-two">2-Point</button>
+<button id="desktop-free">Free Align</button>
+</div>
+</section>
+<section class="card" id="desktop-pins-card" style="display:none">
+<div class="disclosure-head"><div class="card-title">2-Point Alignment</div><button aria-expanded="true" aria-label="Collapse 2-Point Alignment" class="disclosure-toggle" id="desktop-two-toggle">▴</button></div>
+<div class="two-point-body" id="desktop-two-body">
+<strong id="desktop-two-title">Set Reference Points</strong>
+<div class="small-label" id="desktop-two-status">Point 1 of 2</div>
+<button class="btn-primary" id="desktop-two-action">Set Reference Points (0/2)</button>
+<div class="row2">
+<button id="desktop-undo-point" style="display:none">Undo Last Point</button>
+<button id="desktop-reset-points" style="display:none">Reset All Points</button>
+</div>
+<button class="btn-primary" id="desktop-compute" style="display:none">Execute Match</button>
+</div>
+</section>
+<section class="card" id="desktop-compare-card">
+<div class="card-title">Compare</div>
+<div class="row3">
+<button class="audit active" id="desktop-overlay">Overlay</button>
+<button class="audit" id="desktop-blink">Blink</button>
+<button class="audit" id="desktop-outline">Outline</button>
+</div>
+</section>
+</div>
+<div class="desktop-bottom" id="desktop-bottom-controls">
+<div class="row2">
+<button id="desktop-target-ref">Target Ref</button>
+<button class="active" id="desktop-target-draw">Target Draw</button>
+</div>
+<div class="slider-wrap">
+<div class="slider-head"><span id="desktop-opacity-label">Drawing Opacity</span></div>
+<input id="desktop-opacity" max="1" min="0" step="0.01" type="range" value="1"/>
+</div>
+<button class="btn-danger" id="desktop-reset">Reset View</button>
+</div>
+</aside>
+<main class="main">
+<div class="viewport" id="viewport">
+<div class="world" id="world">
+<img alt="Reference" class="layer" id="ref-image"/>
+<img alt="Drawing" class="layer" id="draw-image"/>
+</div>
+<div aria-hidden="true" class="precision-overlay" id="precision-overlay">
+<div class="precision-crosshair"><span class="precision-dot"></span></div>
+<div class="precision-label">Move image under crosshair • Release to place</div>
+</div>
+</div>
+<div class="desktop-help">
       Mouse wheel zooms the locked workspace. Drag pans. Arrow keys nudge the selected layer; Shift + arrows scale or rotate.
     </div>
-  </main>
-
-  <div id="foundation-start" class="foundation-start">
-    <div class="foundation-card">
-      <div class="foundation-progress">
-        <div id="foundation-step-ref" class="foundation-step active">1 · Reference</div>
-        <div id="foundation-step-draw" class="foundation-step">2 · Drawing</div>
-        <div id="foundation-step-align" class="foundation-step">3 · Alignment</div>
-      </div>
-      <h2 id="foundation-title">Drawing Checker Studio</h2>
-      <p id="foundation-copy">Upload the Reference and Drawing. Each image opens in Image Prep before Alignment.</p>
-      <div id="foundation-actions" class="foundation-actions one"></div>
-      <div id="foundation-note" class="foundation-note">Choose an image first. Image Prep opens next.</div>
-    </div>
-  </div>
-
-  <div class="mobile-ui mobile-topbar"><div id="mobile-status" class="mobile-status">Upload a reference to begin.</div></div>
-
-  <div id="mobile-start" class="mobile-ui mobile-start">
-    <div class="mobile-start-card">
-      <h2 id="start-title">Alignment</h2>
-      <p id="start-copy">Select the alignment tool you want to begin with.</p>
-      <div id="start-strategy-actions" class="row3">
-        <button id="start-sight">Ratio Matching</button>
-        <button id="start-two">2-Point</button>
-        <button id="start-free">Free Align</button>
-      </div>
-      <button id="start-action" style="display:none">Continue</button>
-    </div>
-  </div>
-
-  <div id="mobile-popover" class="mobile-ui mobile-popover">
-    <div id="popover-content"></div>
-  </div>
-
-  <div id="mobile-toolbar" class="mobile-ui mobile-toolbar">
-    <button id="mobile-next-action" class="mobile-next"></button>
-    <div id="mobile-point-actions" class="mobile-point-actions">
-      <button id="mobile-undo-point" class="mobile-next secondary">Undo Last Point</button>
-      <button id="mobile-reset-points" class="mobile-next secondary">Reset All Points</button>
-    </div>
-
-    <div id="mobile-alignment-methods" class="mobile-alignment-methods">
-      <button id="m-sight" class="active">Ratio Matching</button>
-      <button id="m-two">2-Point</button>
-      <button id="m-free">Free Align</button>
-    </div>
-
-    <div id="mobile-layer-controls" class="mobile-layer-controls">
-      <div class="mobile-layer-buttons">
-        <button id="mobile-target-ref">Reference</button>
-        <button id="mobile-target-draw" class="active">Drawing</button>
-      </div>
-      <div class="mobile-layer-opacity">
-        <label id="mobile-opacity-label" for="mobile-opacity">Drawing Opacity</label>
-        <input id="mobile-opacity" type="range" min="0" max="1" step="0.01" value="1">
-      </div>
-    </div>
-
-    <div id="mobile-toolbar-row" class="mobile-toolbar-row">
-    <div class="mobile-tools">
-      <button id="m-nav" class="tool active"><strong>View</strong><span>locked</span></button>
-      <button id="m-overlay" class="tool audit active"><strong>Overlay</strong><span>compare</span></button>
-      <button id="m-blink" class="tool audit"><strong>Blink</strong><span>compare</span></button>
-      <button id="m-outline" class="tool audit"><strong>Outline</strong><span>compare</span></button>
-    </div>
-    <button id="m-more" class="mobile-more">•••</button>
-    </div>
-  </div>
-
-
-  <div id="crop-editor" class="crop-editor" aria-hidden="true">
-    <div class="crop-header">
-      <div><strong id="crop-title">Prepare Image</strong><br><span id="crop-subtitle">Set the image area you want to observe.</span></div>
-      <div class="crop-header-actions"><button id="crop-undo" disabled>Undo</button><button id="crop-replace">Replace</button><button id="crop-cancel-top" class="btn-danger">Cancel</button></div>
-    </div>
-    <div id="crop-stage" class="crop-stage">
-      <img id="crop-preview" class="crop-preview" alt="Image preparation preview">
-      <div id="crop-shade-top" class="crop-shade"></div><div id="crop-shade-left" class="crop-shade"></div><div id="crop-shade-right" class="crop-shade"></div><div id="crop-shade-bottom" class="crop-shade"></div>
-      <div id="crop-frame" class="crop-frame">
-        <span class="crop-handle nw" data-handle="nw"></span><span class="crop-handle ne" data-handle="ne"></span><span class="crop-handle sw" data-handle="sw"></span><span class="crop-handle se" data-handle="se"></span>
-      </div>
-      <div id="corner-layer" class="corner-layer" aria-hidden="true">
-        <svg class="corner-svg"><polygon id="corner-polygon" class="corner-polygon" points=""></polygon></svg>
-        <div id="corner-help" class="corner-help">Press and hold near any canvas corner. Move the image under the crosshair and release to place. Order does not matter.</div>
-        <span class="corner-handle" data-corner="0"></span><span class="corner-handle" data-corner="1"></span><span class="corner-handle" data-corner="2"></span><span class="corner-handle" data-corner="3"></span>
-      </div>
-      <div id="crop-precision-overlay" class="crop-precision-overlay" aria-hidden="true">
-        <div class="crop-precision-crosshair"><span class="crop-precision-dot"></span></div>
-        <div class="crop-precision-caption">Move image under crosshair • Release to place</div>
-      </div>
-    </div>
-    <div class="crop-controls">
-      <div id="canvas-status" class="canvas-status"><span id="canvas-status-text" class="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
-      <div id="crop-guidance" class="crop-guidance"><strong>Choose a format.</strong> Resize the frame or position the image. Free Form corrects perspective.</div>
-      <div id="crop-format" class="crop-format">
-        <div class="crop-format-head"><strong>Canvas Format</strong><span class="mobile-only-hint">Swipe left or right</span></div>
-        <div id="ratio-strip" class="ratio-strip">
-          <button class="ratio-option" data-ratio="free">Free Form</button><button id="ratio-original" class="ratio-option active" data-ratio="original">Detected</button><button id="ratio-reference" class="ratio-option" data-ratio="reference">Match Ref</button><button class="ratio-option" data-ratio="1:1">1 : 1</button><button class="ratio-option" data-ratio="4:5">4 : 5</button><button class="ratio-option" data-ratio="8.5:11">8.5 : 11</button><button class="ratio-option" data-ratio="5:7">5 : 7</button><button class="ratio-option" data-ratio="2:3">2 : 3</button><button class="ratio-option" data-ratio="3:4">3 : 4</button><button class="ratio-option" data-ratio="3:5">3 : 5</button><button class="ratio-option" data-ratio="16:9">16 : 9</button>
-        </div>
-      </div>
-      <div id="ratio-feedback" class="ratio-feedback"><span id="ratio-feedback-label">Drawing ratio</span><strong id="ratio-feedback-value">—</strong></div>
-      <div id="crop-main-actions" class="crop-row two"><button id="crop-reset-frame">Reset</button><button id="crop-use" class="btn-primary">Accept Image</button></div>
-      <div id="corner-actions" class="corner-actions">
-        <div class="corner-secondary"><button id="corner-clear">Clear Points</button><button id="corner-remove">Remove Last</button></div>
-        <div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button id="corner-apply" class="btn-primary" disabled>Apply Free Form</button></div>
-      </div>
-      <div id="crop-note" class="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
-    </div>
-  </div>
-
-  <input id="mobile-ref-input" class="hidden-input" type="file" accept="image/*">
-  <input id="mobile-ref-camera" class="hidden-input" type="file" accept="image/*" capture="environment">
-  <input id="mobile-draw-library" class="hidden-input" type="file" accept="image/*">
-  <input id="mobile-draw-camera" class="hidden-input" type="file" accept="image/*" capture="environment">
+</main>
+<div class="foundation-start" id="foundation-start">
+<div class="foundation-card">
+<div class="foundation-progress">
+<div class="foundation-step active" id="foundation-step-ref">1 · Reference</div>
+<div class="foundation-step" id="foundation-step-draw">2 · Drawing</div>
+<div class="foundation-step" id="foundation-step-align">3 · Alignment</div>
 </div>
-
+<h2 id="foundation-title">Drawing Checker Studio</h2>
+<p id="foundation-copy">Upload the Reference and Drawing. Each image opens in Image Prep before Alignment.</p>
+<div class="foundation-actions one" id="foundation-actions"></div>
+<div class="foundation-note" id="foundation-note">Choose an image first. Image Prep opens next.</div>
+</div>
+</div>
+<div class="mobile-ui mobile-topbar"><div class="mobile-status" id="mobile-status">Upload a reference to begin.</div></div>
+<div class="mobile-ui mobile-start" id="mobile-start">
+<div class="mobile-start-card">
+<h2 id="start-title">Alignment</h2>
+<p id="start-copy">Select the alignment tool you want to begin with.</p>
+<div class="row3" id="start-strategy-actions">
+<button id="start-sight">Ratio Matching</button>
+<button id="start-two">2-Point</button>
+<button id="start-free">Free Align</button>
+</div>
+<button id="start-action" style="display:none">Continue</button>
+</div>
+</div>
+<div class="mobile-ui mobile-popover" id="mobile-popover">
+<div id="popover-content"></div>
+</div>
+<div class="mobile-ui mobile-toolbar" id="mobile-toolbar">
+<button class="mobile-next" id="mobile-next-action"></button>
+<div class="mobile-point-actions" id="mobile-point-actions">
+<button class="mobile-next secondary" id="mobile-undo-point">Undo Last Point</button>
+<button class="mobile-next secondary" id="mobile-reset-points">Reset All Points</button>
+</div>
+<div class="mobile-alignment-methods" id="mobile-alignment-methods">
+<button class="active" id="m-sight">Ratio Matching</button>
+<button id="m-two">2-Point</button>
+<button id="m-free">Free Align</button>
+</div>
+<div class="mobile-layer-controls" id="mobile-layer-controls">
+<div class="mobile-layer-buttons">
+<button id="mobile-target-ref">Reference</button>
+<button class="active" id="mobile-target-draw">Drawing</button>
+</div>
+<div class="mobile-layer-opacity">
+<label for="mobile-opacity" id="mobile-opacity-label">Drawing Opacity</label>
+<input id="mobile-opacity" max="1" min="0" step="0.01" type="range" value="1"/>
+</div>
+</div>
+<div class="mobile-toolbar-row" id="mobile-toolbar-row">
+<div class="mobile-tools">
+<button class="tool active" id="m-nav"><strong>View</strong><span>locked</span></button>
+<button class="tool audit active" id="m-overlay"><strong>Overlay</strong><span>compare</span></button>
+<button class="tool audit" id="m-blink"><strong>Blink</strong><span>compare</span></button>
+<button class="tool audit" id="m-outline"><strong>Outline</strong><span>compare</span></button>
+</div>
+<button class="mobile-more" id="m-more">•••</button>
+</div>
+</div>
+<div aria-hidden="true" class="crop-editor" id="crop-editor">
+<div class="crop-header">
+<div><strong id="crop-title">Prepare Image</strong><br/><span id="crop-subtitle">Set the image area you want to observe.</span></div>
+<div class="crop-header-actions"><button disabled="" id="crop-undo">Undo</button><button id="crop-replace">Replace</button><button class="btn-danger" id="crop-cancel-top">Cancel</button></div>
+</div>
+<div class="crop-stage" id="crop-stage">
+<img alt="Image preparation preview" class="crop-preview" id="crop-preview"/>
+<div class="crop-shade" id="crop-shade-top"></div><div class="crop-shade" id="crop-shade-left"></div><div class="crop-shade" id="crop-shade-right"></div><div class="crop-shade" id="crop-shade-bottom"></div>
+<div class="crop-frame" id="crop-frame">
+<span class="crop-handle nw" data-handle="nw"></span><span class="crop-handle ne" data-handle="ne"></span><span class="crop-handle sw" data-handle="sw"></span><span class="crop-handle se" data-handle="se"></span>
+</div>
+<div aria-hidden="true" class="corner-layer" id="corner-layer">
+<svg class="corner-svg"><polygon class="corner-polygon" id="corner-polygon" points=""></polygon></svg>
+<div class="corner-help" id="corner-help">Press and hold near any canvas corner. Move the image under the crosshair and release to place. Order does not matter.</div>
+<span class="corner-handle" data-corner="0"></span><span class="corner-handle" data-corner="1"></span><span class="corner-handle" data-corner="2"></span><span class="corner-handle" data-corner="3"></span>
+</div>
+<div aria-hidden="true" class="crop-precision-overlay" id="crop-precision-overlay">
+<div class="crop-precision-crosshair"><span class="crop-precision-dot"></span></div>
+<div class="crop-precision-caption">Move image under crosshair • Release to place</div>
+</div>
+</div>
+<div class="crop-controls">
+<div class="canvas-status" id="canvas-status"><span class="canvas-status-text" id="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
+<div class="crop-guidance" id="crop-guidance"><strong>Choose a format.</strong> Resize the frame or position the image. Free Form corrects perspective.</div>
+<div class="crop-format" id="crop-format">
+<div class="crop-format-head"><strong>Canvas Format</strong><span class="mobile-only-hint">Swipe left or right</span></div>
+<div class="ratio-strip" id="ratio-strip">
+<button class="ratio-option" data-ratio="free">Free Form</button><button class="ratio-option active" data-ratio="original" id="ratio-original">Detected</button><button class="ratio-option" data-ratio="reference" id="ratio-reference">Match Ref</button><button class="ratio-option" data-ratio="1:1">1 : 1</button><button class="ratio-option" data-ratio="4:5">4 : 5</button><button class="ratio-option" data-ratio="8.5:11">8.5 : 11</button><button class="ratio-option" data-ratio="5:7">5 : 7</button><button class="ratio-option" data-ratio="2:3">2 : 3</button><button class="ratio-option" data-ratio="3:4">3 : 4</button><button class="ratio-option" data-ratio="3:5">3 : 5</button><button class="ratio-option" data-ratio="16:9">16 : 9</button>
+</div>
+</div>
+<div class="ratio-feedback" id="ratio-feedback"><span id="ratio-feedback-label">Drawing ratio</span><strong id="ratio-feedback-value">—</strong></div>
+<div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button></div>
+<div class="corner-actions" id="corner-actions">
+<div class="corner-secondary"><button id="corner-clear">Clear Points</button><button id="corner-remove">Remove Last</button></div>
+<div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button class="btn-primary" disabled="" id="corner-apply">Apply Free Form</button></div>
+</div>
+<div class="crop-note" id="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
+</div>
+</div>
+<input accept="image/*" class="hidden-input" id="mobile-ref-input" type="file"/>
+<input accept="image/*" capture="environment" class="hidden-input" id="mobile-ref-camera" type="file"/>
+<input accept="image/*" class="hidden-input" id="mobile-draw-library" type="file"/>
+<input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
+</div>
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
@@ -2152,6 +2136,6 @@ window.addEventListener("keydown",e=>{
 if(!isMobileLayout()) state.mobileStrategyChosen=true;
 render();
 });
-</script>
+document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('beta-begin');const s=document.getElementById('beta-splash');if(b)b.onclick=()=>s.remove();});</script>
 </body>
 </html>
