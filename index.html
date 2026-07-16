@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 6 | Base: Alignment Initialization Restoration Sprint Rev. 1 Canonical -->
+<!-- Drawing Checker Studio | Alignment Viewport Unification Sprint Rev. 1 | Base: Alignment Sprint Rev. 6 Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 6</title>
+<title>Drawing Checker Studio — Alignment Viewport Unification Sprint Rev. 1</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -182,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 6</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Viewport Unification Sprint Rev. 1</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -423,14 +423,22 @@ function resetLayer(which){
   const l=state.layers[which];
   l.x=0;l.y=0;l.scale=1;l.rot=0;l.opacity=1;
 }
-function fitDesktopLayerIndependently(which){
-  const layer=state.layers[which],el=layer.el;
+function alignmentViewportBounds(){
   const vr=viewport.getBoundingClientRect();
+  return{
+    width:Math.max(0,vr.width*.90),
+    height:Math.max(0,vr.height*.90)
+  };
+}
+function alignmentFitMultiplier(renderedWidth,renderedHeight){
+  const available=alignmentViewportBounds();
+  if(!available.width||!available.height||!renderedWidth||!renderedHeight)return 1;
+  return Math.min(available.width/renderedWidth,available.height/renderedHeight);
+}
+function fitDesktopLayerIndependently(which){
+  const el=state.layers[which].el;
   const ir=el.getBoundingClientRect();
-  if(!vr.width||!vr.height||!ir.width||!ir.height)return 1;
-  const availableW=vr.width*.90;
-  const availableH=vr.height*.90;
-  return Math.min(availableW/ir.width,availableH/ir.height);
+  return alignmentFitMultiplier(ir.width,ir.height);
 }
 function initializeDesktopIndependentAlignment(onReady){
   resetWorkspace();
@@ -839,28 +847,41 @@ function autoSight(){
   const rr=refImg.naturalWidth/refImg.naturalHeight;
   const dr=drawImg.naturalWidth/drawImg.naturalHeight;
   state.aspectMismatch=Math.abs(rr-dr)>.01;
+  resetWorkspace();
   resetLayer("ref");
   resetLayer("draw");
   state.phase="workspace";
 
-  // Dismiss setup UI as soon as both images are confirmed loaded.
+  // First expose the accepted images without method-specific presentation.
   render();
 
   requestAnimationFrame(()=>{
-    const rw=refImg.getBoundingClientRect().width;
-    const rh=refImg.getBoundingClientRect().height;
-    const dw=drawImg.getBoundingClientRect().width;
-    const dh=drawImg.getBoundingClientRect().height;
+    const refRect=refImg.getBoundingClientRect();
+    const drawRect=drawImg.getBoundingClientRect();
 
-    if(!rw||!rh||!dw||!dh){
+    if(!refRect.width||!refRect.height||!drawRect.width||!drawRect.height){
       setTimeout(autoSight,30);
       return;
     }
 
-    state.layers.draw.scale=rr>=dr ? rh/dh : rw/dw;
+    // Preserve the proven Sight Size ratio match.
+    const drawMatchScale=rr>=dr
+      ? refRect.height/drawRect.height
+      : refRect.width/drawRect.width;
+
+    // The Alignment workspace—not Image Prep or the selected method—owns
+    // initial image presentation. Fit the locked Sight Size pair to the same
+    // available viewing area used by 2-Point and Free Align.
+    const pairFit=alignmentFitMultiplier(refRect.width,refRect.height);
+
+    state.layers.ref.scale=pairFit;
+    state.layers.draw.scale=drawMatchScale*pairFit;
+    state.layers.ref.x=0;state.layers.ref.y=0;state.layers.ref.rot=0;
+    state.layers.draw.x=0;state.layers.draw.y=0;state.layers.draw.rot=0;
     render();
   });
 }
+
 function setAlignment(type){
   if(isMobileLayout()) state.mobileStrategyChosen=true;
 
@@ -1617,7 +1638,29 @@ cropStage.addEventListener("touchend",e=>{
 },{passive:false});
 cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null},{passive:false});
 cropStage.addEventListener("wheel",e=>{e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
-window.addEventListener("resize",()=>{if($("#crop-editor").classList.contains("open")){fitImageInsideStage();setFrameToVisibleImage();if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));renderCrop()}});
+let alignmentResizeTimer=null;
+window.addEventListener("resize",()=>{
+  if($("#crop-editor").classList.contains("open")){
+    fitImageInsideStage();
+    setFrameToVisibleImage();
+    if(cropState.locked)applyLockedFrame(ratioValue(cropState.ratioKey));
+    renderCrop();
+    return;
+  }
+
+  if(!state.setupComplete||!hasRef()||!hasDraw())return;
+  clearTimeout(alignmentResizeTimer);
+  alignmentResizeTimer=setTimeout(()=>{
+    if(state.alignment==="sight"){
+      // Refit the locked Sight Size pair to the current Alignment viewport.
+      autoSight();
+    }else{
+      // 2-Point and Free Align keep their current method-owned transforms.
+      // Browser viewport constraints continue to provide responsive containment.
+      render();
+    }
+  },80);
+});
 
 /* POINTER / TOUCH STATE ENGINE */
 let mousePan=null;
