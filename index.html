@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 8 | Base: Alignment Sprint Rev. 7 Canonical -->
+<!-- Drawing Checker Studio | Alignment Sprint Rev. 8.1 Mobile Hotfix | Base: Alignment Sprint Rev. 8 Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 8</title>
+<title>Drawing Checker Studio — Alignment Sprint Rev. 8.1 Mobile Hotfix</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -184,7 +184,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 8</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 8.1 Mobile Hotfix</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -1417,6 +1417,12 @@ function renderMobileWorkflow(){
 
   const imagesReady=hasRef()&&hasDraw();
   const activeTwoPoint=imagesReady&&state.alignment==="two"&&!state.aligned;
+  const hasTwoPointWork=imagesReady&&state.alignment==="two"&&
+    (state.aligned||state.points.ref.length||state.points.draw.length);
+
+  // Rev. 8.1: Undo Last Point and Reset All Points remain available after
+  // Execute Match so the completed 2-Point transaction can be reopened or reset.
+  if(pointActions)pointActions.classList.toggle("show",!!hasTwoPointWork);
 
   // Rev. 6: Alignment methods are primary controls whenever the workspace is idle.
   // During active 2-Point placement they yield to the point workflow.
@@ -1438,8 +1444,6 @@ function renderMobileWorkflow(){
   // Sight Size and Free Align use the existing View lock control; no duplicate
   // Adjust Drawing action is shown.
   if(!activeTwoPoint)return;
-
-  if(pointActions&&(state.points.ref.length||state.points.draw.length))pointActions.classList.add("show");
 
   if(state.points.ref.length<2){
     next.disabled=false;
