@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Drawing Checker Studio | Alignment Sprint Rev. 5: Mobile Interactive Alignment Workspace | Base: Tested Alignment Sprint Rev. 4 -->
+<!-- Drawing Checker Studio | 2-Point Initial-State Restoration Sprint Rev. 1 | Base: Alignment Sprint Rev. 5 Canonical -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Drawing Checker Studio — Alignment Sprint Rev. 5</title>
+<title>Drawing Checker Studio — 2-Point Initial-State Restoration Sprint Rev. 1</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -182,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <body>
 <div id="app">
   <aside class="desktop-sidebar">
-    <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 5</h1></div>
+    <div class="desktop-header"><h1 id="desktop-status">2-Point Initial-State Restoration Sprint Rev. 1</h1></div>
     <div id="desktop-workflow-card" class="card desktop-workflow-card">
       <div class="card-title">Current Step</div>
       <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -829,6 +829,7 @@ function autoSight(){
   });
 }
 function setAlignment(type){
+  // 2-Point owns a normalized identity state so stored workspace points and solver inputs share one coordinate space.
   if(isMobileLayout()) state.mobileStrategyChosen=true;
 
   if(state.alignment===type){
@@ -838,23 +839,19 @@ function setAlignment(type){
       state.layers.ref.z=1;state.layers.draw.z=2;
       render();
     }else if(type==="two"){
-      if(isMobileLayout()&&state.aligned){
-        resetAllPoints();
-        return;
-      }
-      state.twoPointCollapsed=false;
-      render();
+      resetAllPoints();
     }else render();
     return;
   }
 
-  const enteringTwo=type==="two";
   state.alignment=type;
   state.aligned=false;
   state.markersHidden=false;
   state.twoPointCollapsed=false;
   removeMarkers("all");
-  if(!enteringTwo){resetLayer("ref");resetLayer("draw");}
+  resetLayer("ref");
+  resetLayer("draw");
+  resetWorkspace();
   state.phase="workspace";state.returnPhase="workspace";
 
   if(type==="sight"&&hasRef()&&hasDraw())autoSight();
@@ -863,6 +860,8 @@ function setAlignment(type){
     state.layers.ref.z=1;state.layers.draw.z=2;
     state.phase="adjust";
     render();
+  }else if(type==="two"&&hasRef()&&hasDraw()){
+    beginPointPhase("ref");
   }else render();
 }
 
@@ -963,9 +962,14 @@ function undoLastPoint(){
 function resetAllPoints(){
   if(state.alignment!=="two")return;
   removeMarkers("all");
+  resetLayer("ref");
+  resetLayer("draw");
+  resetWorkspace();
   state.aligned=false;
   state.markersHidden=false;
   state.twoPointCollapsed=false;
+  state.phase="workspace";
+  state.returnPhase="workspace";
   beginPointPhase("ref");
 }
 
