@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 1 | UX-001 -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 1 | UX-002 | Base: UX-001A -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 1 UX-002</title>
+<meta name="application-name" content="Drawing Checker Studio"/>
+<meta name="dcs-version" content="1.0 Beta RC1"/>
+<meta name="dcs-sprint" content="UX Foundation Sprint Rev. 1"/>
+<meta name="dcs-work-order" content="UX-002"/>
+<meta name="dcs-build-base" content="UX-001A"/>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Sprint Rev. 1 — UX-002</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -189,18 +194,31 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .precision-label{position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.72);font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
 
 
-/* UX-002 Static Workspace Header */
-.workspace-header{position:fixed;top:0;left:0;right:0;z-index:1500;background:#17171b;border-bottom:1px solid #34343d;padding:8px 12px;text-align:center}
-.workspace-app{font-size:14px;font-weight:700}
-.workspace-name{font-size:12px;font-weight:600;color:#d6d6dc}
-.workspace-instruction{font-size:11px;color:#9ba1a6}
-body.has-workspace-header .crop-editor,body.has-workspace-header .foundation-start{padding-top:56px}
+/* UX-002 — Integrated Standard Workspace Header
+   Standardizes the existing Desktop, Mobile, and Image Preparation header areas.
+   Existing contextual status behavior is preserved. */
+:root{--workspace-header-bg:#17171b;--workspace-header-border:#34343d;--workspace-header-app-size:10px;--workspace-header-name-size:14px;--workspace-header-copy-size:11px;--workspace-header-pad-y:8px;--workspace-header-pad-x:12px}
+.workspace-header{flex:0 0 auto;min-height:66px;padding:var(--workspace-header-pad-y) var(--workspace-header-pad-x);background:var(--workspace-header-bg);border-bottom:1px solid var(--workspace-header-border);display:flex;flex-direction:column;justify-content:center;gap:2px}
+.workspace-header-app{font-size:var(--workspace-header-app-size);line-height:1.15;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.workspace-header-name{font-size:var(--workspace-header-name-size);line-height:1.2;font-weight:750;color:var(--text)}
+.workspace-header-copy{min-width:0;font-size:var(--workspace-header-copy-size);line-height:1.25;font-weight:500;color:var(--muted);overflow-wrap:anywhere}
+.desktop-header.workspace-header{padding:10px 16px}.desktop-header h1{margin:0}
+.mobile-topbar.workspace-header{position:absolute;top:0;left:0;right:0;z-index:20;pointer-events:none;text-align:center;background:rgba(23,23,27,.96);backdrop-filter:blur(10px)}
+.mobile-topbar .workspace-header-copy{pointer-events:auto;max-width:100%}
+.crop-header.workspace-header{padding:8px 14px;align-items:flex-start;justify-content:center}.crop-header .workspace-header-copy{max-width:100%}
+@media(max-width:768px){.workspace-header{min-height:64px;padding:7px 10px}.workspace-header-app{font-size:9px}.workspace-header-name{font-size:13px}.workspace-header-copy{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.crop-header.workspace-header{min-height:64px;padding:7px 10px}.crop-header strong,.crop-header span{display:block}.crop-header br{display:none}}
+
 </style>
 </head>
-<body class="has-workspace-header"><div class="workspace-header" id="workspace-header"><div class="workspace-app">Drawing Checker Studio</div><div class="workspace-name" id="workspace-name">Image Preparation</div><div class="workspace-instruction" id="workspace-instruction">Prepare your image before alignment.</div></div>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta</p><button id="beta-begin">Begin</button></div></div>
+<body>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta RC1</h3>
+<p style="margin:-4px 0 12px;color:#9ba1a6;font-size:11px">UX Foundation Sprint Rev. 1 • UX-002</p><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
-<div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9.2 Terminology Update</h1></div>
+<div class="desktop-header workspace-header">
+<div class="workspace-header-app">Drawing Checker Studio</div>
+<div class="workspace-header-name">Alignment</div>
+<h1 class="workspace-header-copy" id="desktop-status">Upload a reference to begin.</h1>
+</div>
 <div class="card desktop-workflow-card" id="desktop-workflow-card">
 <div class="card-title">Current Step</div>
 <strong id="desktop-workflow-title">Upload Reference</strong>
@@ -286,7 +304,11 @@ body.has-workspace-header .crop-editor,body.has-workspace-header .foundation-sta
 <div class="foundation-note" id="foundation-note">Choose an image first. Image Prep opens next.</div>
 </div>
 </div>
-<div class="mobile-ui mobile-topbar"><div class="mobile-status" id="mobile-status">Upload a reference to begin.</div></div>
+<div class="mobile-ui mobile-topbar workspace-header">
+<div class="workspace-header-app">Drawing Checker Studio</div>
+<div class="workspace-header-name">Alignment</div>
+<div class="workspace-header-copy" id="mobile-status">Upload a reference to begin.</div>
+</div>
 <div class="mobile-ui mobile-start" id="mobile-start">
 <div class="mobile-start-card">
 <h2 id="start-title">Alignment</h2>
@@ -334,8 +356,10 @@ body.has-workspace-header .crop-editor,body.has-workspace-header .foundation-sta
 </div>
 </div>
 <div aria-hidden="true" class="crop-editor" id="crop-editor">
-<div class="crop-header">
-<div><strong id="crop-title">Prepare Image</strong><br/><span id="crop-subtitle">Set the image area you want to observe.</span></div>
+<div class="crop-header workspace-header">
+<div class="workspace-header-app">Drawing Checker Studio</div>
+<strong class="workspace-header-name" id="crop-title">Prepare Image</strong>
+<span class="workspace-header-copy" id="crop-subtitle">Set the image area you want to observe.</span>
 </div>
 <div class="crop-stage" id="crop-stage">
 <img alt="Image preparation preview" class="crop-preview" id="crop-preview"/>
@@ -377,6 +401,7 @@ body.has-workspace-header .crop-editor,body.has-workspace-header .foundation-sta
 <button class="btn-danger" id="crop-cancel-top">Cancel</button>
 </div>
 </div>
+
 </div>
 </div>
 <input accept="image/*" class="hidden-input" id="mobile-ref-input" type="file"/>
@@ -385,6 +410,7 @@ body.has-workspace-header .crop-editor,body.has-workspace-header .foundation-sta
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
+/* DCS BUILD: 1.0 Beta RC1 | UX Foundation Sprint Rev. 1 | UX-002 | Base UX-001A */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
