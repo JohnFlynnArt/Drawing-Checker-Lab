@@ -137,8 +137,8 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-header strong{font-size:14px}.crop-header span{font-size:11px;color:var(--muted)}
 /* UX-001: Image Preparation actions live in the bottom More menu. */
 .crop-header-actions{display:none}
-.crop-more-row{display:flex;justify-content:flex-end}
-.crop-more-toggle{min-width:92px}
+.crop-more-row{display:none}
+.crop-more-toggle{width:44px;min-width:44px;padding:0;font-size:20px;line-height:1}
 .crop-more-popover{display:none;position:absolute;left:8px;right:8px;bottom:calc(54px + env(safe-area-inset-bottom));z-index:45;background:rgba(26,26,30,.98);border:1px solid var(--border);border-radius:14px;padding:10px;box-shadow:0 -10px 28px rgba(0,0,0,.45)}
 .crop-more-popover.open{display:block}
 .crop-more-popover .pop-grid{grid-template-columns:repeat(3,1fr)}
@@ -160,7 +160,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .ratio-strip{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding:1px 1px 4px}
 .ratio-strip::-webkit-scrollbar{display:none}.ratio-option{flex:0 0 auto;min-width:72px;min-height:38px;border-radius:9px;padding:5px 10px;font-size:11px;scroll-snap-align:start}
 .ratio-option.active{background:var(--blue);border-color:#60a5fa;color:#fff}.ratio-option[disabled]{display:none}
-.crop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.crop-row.two{grid-template-columns:1fr 1fr}.crop-controls button{min-height:40px;border-radius:9px}
+.crop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.crop-row.two{grid-template-columns:1fr 1fr auto}.crop-controls button{min-height:40px;border-radius:9px}
 .crop-note{font-size:10px;color:var(--muted);text-align:center;min-height:14px}
 .crop-guidance{font-size:11px;color:#d5d9e0;text-align:center;padding:2px 6px 0;line-height:1.35}.crop-guidance strong{color:#fff}
 .canvas-status{display:none;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border:1px solid rgba(16,185,129,.35);background:rgba(16,185,129,.08);border-radius:9px}
@@ -329,7 +329,6 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div aria-hidden="true" class="crop-editor" id="crop-editor">
 <div class="crop-header">
 <div><strong id="crop-title">Prepare Image</strong><br/><span id="crop-subtitle">Set the image area you want to observe.</span></div>
-
 </div>
 <div class="crop-stage" id="crop-stage">
 <img alt="Image preparation preview" class="crop-preview" id="crop-preview"/>
@@ -357,13 +356,13 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </div>
 </div>
 <div class="ratio-feedback" id="ratio-feedback"><span id="ratio-feedback-label">Drawing ratio</span><strong id="ratio-feedback-value">—</strong></div>
-<div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button></div>
+<div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button><button aria-expanded="false" aria-label="More" class="crop-more-toggle" id="crop-more-toggle">•••</button></div>
 <div class="corner-actions" id="corner-actions">
 <div class="corner-secondary"><button id="corner-clear">Clear Points</button><button id="corner-remove">Remove Last</button></div>
 <div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button class="btn-primary" disabled="" id="corner-apply">Apply Free Form</button></div>
 </div>
 <div class="crop-note" id="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
-<div class="crop-more-popover" id="crop-more-popover" aria-hidden="true">
+<div aria-hidden="true" class="crop-more-popover" id="crop-more-popover">
 <div class="pop-title">Image Preparation</div>
 <div class="pop-grid">
 <button disabled="" id="crop-undo">Undo</button>
@@ -371,7 +370,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <button class="btn-danger" id="crop-cancel-top">Cancel</button>
 </div>
 </div>
-<div class="crop-more-row"><button class="crop-more-toggle" id="crop-more-toggle" aria-expanded="false">••• More</button></div>
+
 </div>
 </div>
 <input accept="image/*" class="hidden-input" id="mobile-ref-input" type="file"/>
