@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | Drawing Checker Studio 1.0 Beta RC1 | Base: Alignment Sprint Rev. 9.2 Terminology Update -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 1 | UX-001 -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 1 UX-001</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -135,7 +135,15 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-editor.open{display:flex}
 .crop-header{flex:0 0 auto;padding:10px 14px;border-bottom:1px solid #2a2a31;background:#17171b;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .crop-header strong{font-size:14px}.crop-header span{font-size:11px;color:var(--muted)}
-.crop-header-actions{display:flex;gap:7px;align-items:center}.crop-header-actions button{min-width:72px}.crop-header-actions button:disabled{opacity:.3}
+/* UX-001: Image Preparation actions live in the bottom More menu. */
+.crop-header-actions{display:none}
+.crop-more-row{display:flex;justify-content:flex-end}
+.crop-more-toggle{min-width:92px}
+.crop-more-popover{display:none;position:absolute;left:8px;right:8px;bottom:calc(54px + env(safe-area-inset-bottom));z-index:45;background:rgba(26,26,30,.98);border:1px solid var(--border);border-radius:14px;padding:10px;box-shadow:0 -10px 28px rgba(0,0,0,.45)}
+.crop-more-popover.open{display:block}
+.crop-more-popover .pop-grid{grid-template-columns:repeat(3,1fr)}
+.crop-more-popover button{min-height:42px;border-radius:10px;font-size:12px}
+.crop-more-popover button:disabled{opacity:.35}
 .crop-stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;background:#101014}
 .crop-stage::before{content:"";position:absolute;inset:2.5%;border:1px solid rgba(255,255,255,.045);border-radius:10px;pointer-events:none}
 .crop-preview{position:absolute;left:50%;top:50%;transform-origin:center center;user-select:none;-webkit-user-drag:none;pointer-events:none;max-width:none;max-height:none;box-shadow:0 10px 34px rgba(0,0,0,.45)}
@@ -166,7 +174,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-precision-overlay{position:absolute;inset:0;z-index:30;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 62px,rgba(0,0,0,.22) 63px 100%)}.crop-precision-overlay.active{display:block}.crop-precision-crosshair{position:absolute;left:50%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%)}.crop-precision-crosshair::before,.crop-precision-crosshair::after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000,0 0 6px rgba(0,0,0,.8)}.crop-precision-crosshair::before{left:50%;top:0;width:1px;height:100%}.crop-precision-crosshair::after{top:50%;left:0;height:1px;width:100%}.crop-precision-dot{position:absolute;left:50%;top:50%;width:8px;height:8px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 3px #000}.crop-precision-caption{position:absolute;left:50%;top:calc(50% + 48px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.12);font-size:10px;font-weight:700;white-space:nowrap}
 @media(max-width:768px){
   .mobile-only-hint{display:inline}
-  .crop-header{padding:6px 10px;min-height:52px}.crop-header>div:first-child{min-width:0}.crop-header strong{font-size:13px}.crop-header br,.crop-header span{display:none}.crop-header-actions{gap:5px}.crop-header-actions button{min-width:58px;min-height:36px;padding:6px 8px}
+  .crop-header{padding:6px 10px;min-height:52px}.crop-header>div:first-child{min-width:0}.crop-header strong{font-size:13px}.crop-header br,.crop-header span{display:none}.crop-more-popover .pop-grid{grid-template-columns:1fr 1fr}.crop-more-toggle{width:100%;min-height:40px}
   .crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:74px;min-height:34px;padding:4px 9px}.crop-controls{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}.crop-guidance{display:none}.crop-format-head{min-height:16px}.crop-format-head strong{font-size:10px}.crop-format-head span{font-size:9px}.ratio-strip{gap:5px;padding-bottom:2px}.crop-row{gap:5px}.crop-controls button{min-height:36px}.crop-note{display:none}.ratio-feedback{padding:5px 7px;font-size:10px}.corner-help{top:7px;left:8px;right:8px;font-size:9px;padding:4px 8px}.corner-actions{gap:5px}.corner-commit,.corner-secondary{gap:5px}.crop-precision-caption{font-size:9px}
 }
 
@@ -321,7 +329,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div aria-hidden="true" class="crop-editor" id="crop-editor">
 <div class="crop-header">
 <div><strong id="crop-title">Prepare Image</strong><br/><span id="crop-subtitle">Set the image area you want to observe.</span></div>
-<div class="crop-header-actions"><button disabled="" id="crop-undo">Undo</button><button id="crop-replace">Replace</button><button class="btn-danger" id="crop-cancel-top">Cancel</button></div>
+
 </div>
 <div class="crop-stage" id="crop-stage">
 <img alt="Image preparation preview" class="crop-preview" id="crop-preview"/>
@@ -355,6 +363,15 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button class="btn-primary" disabled="" id="corner-apply">Apply Free Form</button></div>
 </div>
 <div class="crop-note" id="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
+<div class="crop-more-popover" id="crop-more-popover" aria-hidden="true">
+<div class="pop-title">Image Preparation</div>
+<div class="pop-grid">
+<button disabled="" id="crop-undo">Undo</button>
+<button id="crop-replace">Replace</button>
+<button class="btn-danger" id="crop-cancel-top">Cancel</button>
+</div>
+</div>
+<div class="crop-more-row"><button class="crop-more-toggle" id="crop-more-toggle" aria-expanded="false">••• More</button></div>
 </div>
 </div>
 <input accept="image/*" class="hidden-input" id="mobile-ref-input" type="file"/>
@@ -636,6 +653,7 @@ function beginCrop(kind,file){
 }
 
 function openCropEditor(){
+  closeCropMore();
   $("#crop-editor").classList.add("open");$("#crop-editor").setAttribute("aria-hidden","false");
   $("#crop-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
   $("#crop-subtitle").textContent=cropState.kind==="ref"?"Detect the ratio, confirm the full image, or correct it with Free Form.":"Prepare the current drawing and review live ratio feedback.";
@@ -651,7 +669,7 @@ function openCropEditor(){
     resetCropHistory();
   });
 }
-function closeCropEditor(){$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");cropState.drag=null;cropState.freePointGesture=null;cropState.freeTouchGesture=null}
+function closeCropEditor(){closeCropMore();$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");cropState.drag=null;cropState.freePointGesture=null;cropState.freeTouchGesture=null}
 function cropSnapshot(){
   return{url:cropState.url,x:cropState.x,y:cropState.y,scale:cropState.scale,rotation:cropState.rotation,locked:cropState.locked,ratioKey:cropState.ratioKey,frame:{...cropState.frame},mode:cropState.mode,corners:(cropState.corners||[]).map(p=>({...p})),canvasDetected:cropState.canvasDetected,status:$("#canvas-status-text").textContent,previousRatioKey:cropState.previousRatioKey,orientation:cropState.orientation};
 }
@@ -1667,8 +1685,26 @@ $("#mobile-draw-camera").onchange=e=>{beginCrop("draw",e.target.files[0]);e.targ
 function openPopover(html){
   $("#popover-content").innerHTML=html;
   $("#mobile-popover").classList.add("open");
+  $("#m-more").setAttribute("aria-expanded","true");
 }
-function closePopover(){$("#mobile-popover").classList.remove("open")}
+function closePopover(){
+  $("#mobile-popover").classList.remove("open");
+  $("#m-more").setAttribute("aria-expanded","false");
+}
+function toggleCropMore(){
+  const menu=$("#crop-more-popover"),button=$("#crop-more-toggle");
+  const opening=!menu.classList.contains("open");
+  menu.classList.toggle("open",opening);
+  menu.setAttribute("aria-hidden",opening?"false":"true");
+  button.setAttribute("aria-expanded",opening?"true":"false");
+}
+function closeCropMore(){
+  const menu=$("#crop-more-popover"),button=$("#crop-more-toggle");
+  if(!menu||!button)return;
+  menu.classList.remove("open");
+  menu.setAttribute("aria-hidden","true");
+  button.setAttribute("aria-expanded","false");
+}
 
 function hasCompletedMobileTwoPoint(){
   const liveComplete=state.alignment==="two"&&state.aligned&&
@@ -1701,7 +1737,9 @@ function resetMobileTwoPointMatch(){
   resetAllPoints();
 }
 
+$("#m-more").setAttribute("aria-expanded","false");
 $("#m-more").onclick=()=>{
+  if($("#mobile-popover").classList.contains("open")){closePopover();return;}
   const completedTwoPoint=hasCompletedMobileTwoPoint();
   openPopover(`
     ${completedTwoPoint?`
@@ -1718,7 +1756,6 @@ $("#m-more").onclick=()=>{
       <button id="p-ref">Change Reference</button>
       <button id="p-library">Replace Drawing</button>
       <button id="p-camera">Take Drawing Photo</button>
-      <button id="p-close">Close</button>
     </div>`);
 
   if(completedTwoPoint){
@@ -1730,7 +1767,6 @@ $("#m-more").onclick=()=>{
   $("#p-ref").onclick=beginNewMobileSession;
   $("#p-library").onclick=()=>{closePopover();$("#mobile-draw-library").click()};
   $("#p-camera").onclick=()=>{closePopover();$("#mobile-draw-camera").click()};
-  $("#p-close").onclick=closePopover;
 };
 
 $("#start-free").onclick=()=>setAlignment("free");
@@ -1756,7 +1792,11 @@ $("#mobile-opacity").oninput=e=>{
 
 
 /* IMAGE PREPARATION EVENTS */
-$("#crop-cancel-top").onclick=cancelCrop;$("#crop-undo").onclick=undoCrop;$("#crop-replace").onclick=()=>{const kind=cropState.kind;cancelCrop();setTimeout(()=>{if(kind==="ref")$("#mobile-ref-input").click();else $("#mobile-draw-library").click()},0)};$("#crop-use").onclick=commitCrop;$("#crop-reset-frame").onclick=()=>{pushCropHistory();resetCropFrame()};
+$("#crop-more-toggle").onclick=toggleCropMore;
+$("#crop-cancel-top").onclick=()=>{closeCropMore();cancelCrop()};
+$("#crop-undo").onclick=()=>{undoCrop()};
+$("#crop-replace").onclick=()=>{closeCropMore();const kind=cropState.kind;cancelCrop();setTimeout(()=>{if(kind==="ref")$("#mobile-ref-input").click();else $("#mobile-draw-library").click()},0)};
+$("#crop-use").onclick=()=>{closeCropMore();commitCrop()};$("#crop-reset-frame").onclick=()=>{pushCropHistory();resetCropFrame()};
 document.querySelectorAll(".ratio-option[data-ratio]").forEach(btn=>btn.onclick=()=>{if(btn.dataset.ratio!=="free")pushCropHistory();chooseRatio(btn.dataset.ratio)});
 $("#canvas-adjust").onclick=()=>enterFreeForm();$("#corner-clear").onclick=()=>{if(!cropState.corners.length)return;pushCropHistory();cropState.corners=[];renderCrop()};$("#corner-remove").onclick=()=>{if(!cropState.corners.length)return;pushCropHistory();cropState.corners.pop();renderCrop()};$("#corner-cancel").onclick=()=>{if(cropState.fineTuneBaseline){const snap={...cropState.fineTuneBaseline,mode:"crop",ratioKey:cropState.fineTuneBaseline.previousRatioKey||cropState.previousRatioKey||cropState.detectedKey,locked:true};restoreCropSnapshot(snap);cropState.fineTuneBaseline=null}else{cropState.ratioKey=cropState.previousRatioKey||cropState.detectedKey;cropState.locked=true;setCornerMode(false)}};$("#corner-apply").onclick=()=>{if(cropState.corners.length!==4)return;pushCropHistory();applyCornerCorrection()};
 const cropStage=$("#crop-stage");function cropPointerPosition(e){const r=cropStage.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
