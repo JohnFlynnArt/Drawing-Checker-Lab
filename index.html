@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 1 UX-001</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 1 UX-002</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -188,9 +188,16 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .precision-dot{position:absolute;left:50%;top:50%;width:7px;height:7px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 3px #000}
 .precision-label{position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.72);font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
 
+
+/* UX-002 Static Workspace Header */
+.workspace-header{position:fixed;top:0;left:0;right:0;z-index:1500;background:#17171b;border-bottom:1px solid #34343d;padding:8px 12px;text-align:center}
+.workspace-app{font-size:14px;font-weight:700}
+.workspace-name{font-size:12px;font-weight:600;color:#d6d6dc}
+.workspace-instruction{font-size:11px;color:#9ba1a6}
+body.has-workspace-header .crop-editor,body.has-workspace-header .foundation-start{padding-top:56px}
 </style>
 </head>
-<body>
+<body class="has-workspace-header"><div class="workspace-header" id="workspace-header"><div class="workspace-app">Drawing Checker Studio</div><div class="workspace-name" id="workspace-name">Image Preparation</div><div class="workspace-instruction" id="workspace-instruction">Prepare your image before alignment.</div></div>
 <div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <div class="desktop-header"><h1 id="desktop-status">Alignment Sprint Rev. 9.2 Terminology Update</h1></div>
@@ -370,7 +377,6 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <button class="btn-danger" id="crop-cancel-top">Cancel</button>
 </div>
 </div>
-
 </div>
 </div>
 <input accept="image/*" class="hidden-input" id="mobile-ref-input" type="file"/>
