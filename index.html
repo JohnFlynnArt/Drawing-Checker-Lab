@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 1 | UX-002 | Base: UX-001A -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 2 | UX-002 -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<meta name="application-name" content="Drawing Checker Studio"/>
-<meta name="dcs-version" content="1.0 Beta RC1"/>
-<meta name="dcs-sprint" content="UX Foundation Sprint Rev. 1"/>
-<meta name="dcs-work-order" content="UX-002A"/>
-<meta name="dcs-build-base" content="UX-001A"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Sprint Rev. 1 — UX-002A</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 2 UX-002</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -25,8 +20,14 @@ button{touch-action:manipulation}
 
 /* DESKTOP */
 .desktop-sidebar{width:320px;height:100%;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--border);flex:0 0 auto}
-.desktop-header{padding:16px;border-bottom:1px solid var(--border)}
-.desktop-header h1{font-size:14px;margin:0;font-weight:700}
+/* UX-002 — STANDARDIZED HEADER */
+.ux-header{display:flex;flex-direction:column;justify-content:center;min-width:0;text-align:left}
+.ux-header-title{margin:0;color:var(--text);font-weight:800;line-height:1.12;min-width:0}
+.ux-header-context{margin:0;color:var(--muted);font-weight:500;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.desktop-header{height:104px;flex:0 0 104px;padding:14px 16px;border-bottom:1px solid var(--border);background:#17171b}
+.desktop-header .ux-header-title{font-size:15px;margin-bottom:7px}
+.desktop-header .ux-header-context{font-size:11px;max-width:100%}
+.desktop-workflow-card{display:none!important}
 .desktop-scroll{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
 .desktop-bottom{padding:16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:12px;background:#17171b}
 .card{padding:12px;border-radius:8px;background:var(--card);border:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
@@ -71,8 +72,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
 /* MOBILE */
 .mobile-ui{display:none}
-.mobile-topbar{position:absolute;top:0;left:0;right:0;z-index:20;padding:8px 10px;background:linear-gradient(to bottom,rgba(0,0,0,.78),rgba(0,0,0,0));pointer-events:none}
-.mobile-status{pointer-events:auto;margin:auto;max-width:95%;padding:7px 10px;border-radius:999px;background:rgba(26,26,30,.86);border:1px solid rgba(255,255,255,.1);font-size:11px;text-align:left;backdrop-filter:blur(8px)}
+.mobile-topbar{position:absolute;top:0;left:0;right:0;z-index:20;height:86px;padding:10px 12px;background:rgba(23,23,27,.96);border-bottom:1px solid rgba(255,255,255,.1);pointer-events:none;backdrop-filter:blur(10px)}
+.mobile-header{height:100%;justify-content:center;pointer-events:auto}
+.mobile-header .ux-header-title{font-size:14px;margin-bottom:5px}
+.mobile-status{font-size:10px;line-height:1.25;color:#d7d9de;text-align:left;overflow-wrap:anywhere}
 .mobile-toolbar{position:absolute;left:0;right:0;bottom:0;z-index:25;background:rgba(18,18,20,.94);border-top:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px);padding:7px 8px calc(7px + env(safe-area-inset-bottom));display:none;flex-direction:column;gap:6px}
 .mobile-next{display:none;width:100%;min-height:44px;border-radius:11px;background:var(--blue);border-color:#60a5fa;color:#fff;font-size:13px;font-weight:800}
 .mobile-next.show{display:flex}
@@ -103,7 +106,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .mobile-opacity{display:flex;align-items:center;gap:8px;margin-top:8px}
 .mobile-opacity span{font-size:11px;color:var(--muted);white-space:nowrap}
 .mobile-start{position:absolute;inset:0;z-index:15;display:none!important;align-items:center;justify-content:center;padding:22px;pointer-events:none}
-.mobile-start-card{pointer-events:auto;width:min(360px,92vw);padding:20px;border-radius:18px;background:rgba(26,26,30,.93);border:1px solid rgba(255,255,255,.12);text-align:left;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.mobile-start-card{pointer-events:auto;width:min(360px,92vw);padding:20px;border-radius:18px;background:rgba(26,26,30,.93);border:1px solid rgba(255,255,255,.12);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .mobile-start-card h2{font-size:18px;margin:0 0 8px}
 .mobile-start-card p{font-size:12px;color:var(--muted);margin:0 0 14px}
 .mobile-start-card button{width:100%;min-height:48px;border-radius:12px;font-size:14px;background:var(--blue);border-color:transparent}
@@ -130,7 +133,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .foundation-start.hidden{display:none}
 .foundation-card{width:min(560px,94vw);max-height:92vh;overflow:auto;padding:24px;border-radius:20px;background:rgba(26,26,30,.97);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 70px rgba(0,0,0,.55)}
 .foundation-card h2{margin:0 0 8px;font-size:24px}.foundation-card p{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.45}
-.foundation-progress{display:none;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.foundation-step{padding:8px;border-radius:10px;border:1px solid var(--border);font-size:10px;text-align:left;color:var(--muted)}.foundation-step.active{background:rgba(59,130,246,.18);border-color:#60a5fa;color:#fff}.foundation-step.done{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.5);color:#9ae6c8}
+.foundation-progress{display:none;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.foundation-step{padding:8px;border-radius:10px;border:1px solid var(--border);font-size:10px;text-align:center;color:var(--muted)}.foundation-step.active{background:rgba(59,130,246,.18);border-color:#60a5fa;color:#fff}.foundation-step.done{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.5);color:#9ae6c8}
 .foundation-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.foundation-actions.one{grid-template-columns:1fr}.foundation-actions.three{grid-template-columns:repeat(3,1fr)}.foundation-actions button{min-height:48px;border-radius:12px;font-size:13px}.foundation-primary{background:var(--blue);border-color:#60a5fa}.foundation-secondary{background:#26262d}.foundation-note{margin-top:12px;font-size:11px;color:var(--muted);text-align:center}
 .ratio-feedback{display:none;padding:8px 10px;border-radius:9px;border:1px solid var(--border);font-size:11px;color:var(--muted);justify-content:space-between;gap:8px}.ratio-feedback.show{display:flex}.ratio-feedback.match{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08);color:#9ae6c8}.ratio-feedback strong{color:inherit}
 @media(max-width:768px){.foundation-start{padding:16px}.foundation-card{padding:20px}.foundation-card h2{font-size:21px}.foundation-actions.three{grid-template-columns:1fr}.foundation-progress{gap:5px}.foundation-step{font-size:9px;padding:7px 4px}}
@@ -138,8 +141,8 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 /* IMAGE PREPARATION — CALM ARTIST WORKFLOW */
 .crop-editor{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;background:#0b0b0d;color:var(--text)}
 .crop-editor.open{display:flex}
-.crop-header{flex:0 0 auto;padding:10px 14px;border-bottom:1px solid #2a2a31;background:#17171b;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.crop-header strong{font-size:14px}.crop-header span{font-size:11px;color:var(--muted)}
+.crop-header{flex:0 0 82px;height:82px;padding:10px 14px;border-bottom:1px solid #2a2a31;background:#17171b;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.crop-header .ux-header-title{font-size:14px;margin-bottom:6px}.crop-header .ux-header-context{font-size:11px}
 /* UX-001: Image Preparation actions live in the bottom More menu. */
 .crop-header-actions{display:none}
 .crop-more-row{display:none}
@@ -166,20 +169,20 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .ratio-strip::-webkit-scrollbar{display:none}.ratio-option{flex:0 0 auto;min-width:72px;min-height:38px;border-radius:9px;padding:5px 10px;font-size:11px;scroll-snap-align:start}
 .ratio-option.active{background:var(--blue);border-color:#60a5fa;color:#fff}.ratio-option[disabled]{display:none}
 .crop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.crop-row.two{grid-template-columns:1fr 1fr auto}.crop-controls button{min-height:40px;border-radius:9px}
-.crop-note{font-size:10px;color:var(--muted);text-align:left;min-height:14px}
-.crop-guidance{font-size:11px;color:#d5d9e0;text-align:left;padding:2px 6px 0;line-height:1.35}.crop-guidance strong{color:#fff}
+.crop-note{font-size:10px;color:var(--muted);text-align:center;min-height:14px}
+.crop-guidance{font-size:11px;color:#d5d9e0;text-align:center;padding:2px 6px 0;line-height:1.35}.crop-guidance strong{color:#fff}
 .canvas-status{display:none;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;border:1px solid rgba(16,185,129,.35);background:rgba(16,185,129,.08);border-radius:9px}
 .canvas-status.show{display:flex}.canvas-status-text{font-size:11px;font-weight:750;color:#9ae6c8}.canvas-status button{min-height:32px;padding:5px 9px;font-size:10px;background:transparent}
 .corner-layer{position:absolute;inset:0;z-index:9;display:none;pointer-events:auto;touch-action:none}.corner-layer.active{display:block}
 .corner-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}.corner-polygon{fill:rgba(59,130,246,.08);stroke:#60a5fa;stroke-width:1.5;vector-effect:non-scaling-stroke}
 .corner-handle{display:none;position:absolute;width:22px;height:22px;border-radius:50%;background:#3b82f6;border:3px solid #dbeafe;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.65)}.corner-handle.placed{display:block}
-.corner-help{position:absolute;left:12px;right:12px;top:10px;padding:6px 10px;border-radius:10px;background:rgba(10,10,12,.80);border:1px solid rgba(255,255,255,.1);font-size:10px;line-height:1.3;text-align:left;color:#fff;white-space:normal;pointer-events:none}
+.corner-help{position:absolute;left:12px;right:12px;top:10px;padding:6px 10px;border-radius:10px;background:rgba(10,10,12,.80);border:1px solid rgba(255,255,255,.1);font-size:10px;line-height:1.3;text-align:center;color:#fff;white-space:normal;pointer-events:none}
 .corner-actions{display:none;flex-direction:column;gap:7px}.corner-actions.show{display:flex}.corner-commit{display:grid;grid-template-columns:1fr 1fr;gap:7px}.corner-secondary{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .crop-main-actions.hidden,.crop-format.hidden,.crop-guidance.hidden{display:none}
 .crop-precision-overlay{position:absolute;inset:0;z-index:30;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 62px,rgba(0,0,0,.22) 63px 100%)}.crop-precision-overlay.active{display:block}.crop-precision-crosshair{position:absolute;left:50%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%)}.crop-precision-crosshair::before,.crop-precision-crosshair::after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000,0 0 6px rgba(0,0,0,.8)}.crop-precision-crosshair::before{left:50%;top:0;width:1px;height:100%}.crop-precision-crosshair::after{top:50%;left:0;height:1px;width:100%}.crop-precision-dot{position:absolute;left:50%;top:50%;width:8px;height:8px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 3px #000}.crop-precision-caption{position:absolute;left:50%;top:calc(50% + 48px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.12);font-size:10px;font-weight:700;white-space:nowrap}
 @media(max-width:768px){
   .mobile-only-hint{display:inline}
-  .crop-header{padding:6px 10px;min-height:52px}.crop-header>div:first-child{min-width:0}.crop-header strong{font-size:13px}.crop-header br,.crop-header span{display:none}.crop-more-popover .pop-grid{grid-template-columns:1fr 1fr}.crop-more-toggle{width:100%;min-height:40px}
+  .crop-header{height:78px;flex-basis:78px;padding:8px 10px}.crop-header>div:first-child{min-width:0}.crop-header .ux-header-title{font-size:13px;margin-bottom:4px}.crop-header .ux-header-context{display:block;font-size:9.5px;line-height:1.22}.crop-more-popover .pop-grid{grid-template-columns:1fr 1fr}.crop-more-toggle{width:100%;min-height:40px}
   .crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:74px;min-height:34px;padding:4px 9px}.crop-controls{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}.crop-guidance{display:none}.crop-format-head{min-height:16px}.crop-format-head strong{font-size:10px}.crop-format-head span{font-size:9px}.ratio-strip{gap:5px;padding-bottom:2px}.crop-row{gap:5px}.crop-controls button{min-height:36px}.crop-note{display:none}.ratio-feedback{padding:5px 7px;font-size:10px}.corner-help{top:7px;left:8px;right:8px;font-size:9px;padding:4px 8px}.corner-actions{gap:5px}.corner-commit,.corner-secondary{gap:5px}.crop-precision-caption{font-size:9px}
 }
 
@@ -193,42 +196,16 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .precision-dot{position:absolute;left:50%;top:50%;width:7px;height:7px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 3px #000}
 .precision-label{position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.72);font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
 
-
-/* UX-002 — Integrated Standard Workspace Header
-   Standardizes the existing Desktop, Mobile, and Image Preparation header areas.
-   Existing contextual status behavior is preserved. */
-:root{--workspace-header-bg:#17171b;--workspace-header-border:#34343d;--workspace-header-app-size:10px;--workspace-header-name-size:14px;--workspace-header-copy-size:11px;--workspace-header-pad-y:8px;--workspace-header-pad-x:12px}
-.workspace-header{flex:0 0 auto;height:56px;padding:var(--workspace-header-pad-y) var(--workspace-header-pad-x);background:var(--workspace-header-bg);border-bottom:1px solid var(--workspace-header-border);display:flex;flex-direction:column;justify-content:center;gap:2px}
-.workspace-header-app{font-size:var(--workspace-header-app-size);line-height:1.15;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
-.workspace-header-name{
-text-align:left;font-size:var(--workspace-header-name-size);line-height:1.2;font-weight:750;color:var(--text)}
-.workspace-header-copy{
-text-align:left;min-width:0;font-size:var(--workspace-header-copy-size);line-height:1.25;font-weight:500;color:var(--muted);overflow-wrap:anywhere}
-.desktop-header.workspace-header{padding:10px 16px}.desktop-header h1{margin:0}
-.mobile-topbar.workspace-header{position:absolute;top:0;left:0;right:0;z-index:20;pointer-events:none;text-align:left;background:rgba(23,23,27,.96);backdrop-filter:blur(10px)}
-.mobile-topbar .workspace-header-copy{
-text-align:left;pointer-events:auto;max-width:100%}
-.crop-header.workspace-header{padding:8px 14px;align-items:flex-start;justify-content:center}.crop-header .workspace-header-copy{
-text-align:left;max-width:100%}
-@media(max-width:768px){.workspace-header{min-height:64px;padding:7px 10px}.workspace-header-app{font-size:9px}.workspace-header-name{
-text-align:left;font-size:13px}.workspace-header-copy{
-text-align:left;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.crop-header.workspace-header{min-height:64px;padding:7px 10px}.crop-header strong,.crop-header span{display:block}.crop-header br{display:none}}
-
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta RC1</h3>
-<p style="margin:-4px 0 12px;color:#9ba1a6;font-size:11px">UX Foundation Sprint Rev. 1 • UX-002A</p><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-002</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
-<div class="desktop-header workspace-header">
-<div class="workspace-header-name">Alignment</div>
-<h1 class="workspace-header-copy" id="desktop-status">Upload a reference to begin.</h1>
-</div>
-<div class="card desktop-workflow-card" id="desktop-workflow-card">
-<div class="card-title">Current Step</div>
-<strong id="desktop-workflow-title">Upload Reference</strong>
-<div class="small-label" id="desktop-workflow-copy">Choose a reference image. Image Prep opens next.</div>
-</div>
+<header class="desktop-header ux-header" aria-live="polite">
+<h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
+<p class="ux-header-context" id="desktop-workflow-copy">Choose a reference image. Image Prep opens next.</p>
+</header>
+<div class="card desktop-workflow-card" id="desktop-workflow-card" aria-hidden="true"></div>
 <div class="desktop-scroll">
 <section class="card" id="desktop-source-card">
 <div class="disclosure-head"><div class="card-title">Source Images</div><button aria-expanded="true" aria-label="Collapse Source Images" class="disclosure-toggle" id="desktop-source-toggle">▴</button></div>
@@ -309,10 +286,7 @@ text-align:left;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:
 <div class="foundation-note" id="foundation-note">Choose an image first. Image Prep opens next.</div>
 </div>
 </div>
-<div class="mobile-ui mobile-topbar workspace-header">
-<div class="workspace-header-name">Alignment</div>
-<div class="workspace-header-copy" id="mobile-status">Upload a reference to begin.</div>
-</div>
+<header class="mobile-ui mobile-topbar" aria-live="polite"><div class="mobile-header ux-header"><h1 class="ux-header-title" id="mobile-header-title">Upload Reference</h1><p class="mobile-status ux-header-context" id="mobile-status">Upload a reference to begin.</p></div></header>
 <div class="mobile-ui mobile-start" id="mobile-start">
 <div class="mobile-start-card">
 <h2 id="start-title">Alignment</h2>
@@ -360,10 +334,9 @@ text-align:left;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:
 </div>
 </div>
 <div aria-hidden="true" class="crop-editor" id="crop-editor">
-<div class="crop-header workspace-header">
-<strong class="workspace-header-name" id="crop-title">Prepare Image</strong>
-<span class="workspace-header-copy" id="crop-subtitle">Set the image area you want to observe.</span>
-</div>
+<header class="crop-header">
+<div class="ux-header"><h1 class="ux-header-title" id="crop-title">Prepare Image</h1><p class="ux-header-context" id="crop-subtitle">Set the image area you want to observe.</p></div>
+</header>
 <div class="crop-stage" id="crop-stage">
 <img alt="Image preparation preview" class="crop-preview" id="crop-preview"/>
 <div class="crop-shade" id="crop-shade-top"></div><div class="crop-shade" id="crop-shade-left"></div><div class="crop-shade" id="crop-shade-right"></div><div class="crop-shade" id="crop-shade-bottom"></div>
@@ -413,7 +386,6 @@ text-align:left;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* DCS BUILD: 1.0 Beta RC1 | UX Foundation Sprint Rev. 1 | UX-002A | Base UX-001A */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -1510,8 +1482,8 @@ function renderDesktopWorkflow(){
     title.textContent="Alignment";
     copy.textContent="Both images are ready. Select Ratio Matching, 2-Point, or Free Align.";
   }else{
-    title.textContent="Alignment Workspace";
-    copy.textContent="Images ready. Alignment and observation tools are available.";
+    title.textContent=currentHeaderTitle();
+    copy.textContent=statusText();
   }
 }
 
@@ -1578,9 +1550,20 @@ function renderMobileWorkflow(){
   next.classList.add("show");
   next.onclick=computeTwoPoint;
 }
+function currentHeaderTitle(){
+  if(state.loadingKind==="ref")return "Prepare Reference";
+  if(state.loadingKind==="draw")return "Prepare Drawing";
+  if(!hasRef())return "Upload Reference";
+  if(!hasDraw())return "Upload Drawing";
+  if(state.phase==="point-ref")return "2-Point · Reference";
+  if(state.phase==="point-draw")return "2-Point · Drawing";
+  if(state.alignment==="two")return "2-Point Alignment";
+  if(state.alignment==="free")return "Free Align";
+  return "Ratio Matching";
+}
 function render(){
   renderVisuals();
-  $("#desktop-status").textContent=statusText();
+  $("#mobile-header-title").textContent=currentHeaderTitle();
   $("#mobile-status").textContent=statusText();
 
   $("#desktop-free").classList.toggle("active",state.alignment==="free");
@@ -2213,4 +2196,3 @@ render();
 document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('beta-begin');const s=document.getElementById('beta-splash');if(b)b.onclick=()=>s.remove();});</script>
 </body>
 </html>
-
