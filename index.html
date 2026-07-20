@@ -2266,23 +2266,18 @@ window.addEventListener("resize",()=>{
 if(!isMobileLayout()) state.mobileStrategyChosen=true;
 render();
 });
-document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('beta-begin');const s=document.getElementById('beta-splash');if(b)b.onclick=()=>s.remove();});</script>
-<script>
 document.addEventListener('DOMContentLoaded',()=>{
- const btn=document.getElementById('beta-begin');
- if(btn){
-  btn.addEventListener('click',()=>{
-    const splash=document.getElementById('beta-splash');
-    if(splash) splash.style.display='none';
-    const app=document.getElementById('app');
-    if(app) app.classList.add('desktop-prep-active');
-    const title=document.getElementById('desktop-workflow-title');
-    if(title) title.textContent='Prepare Reference';
-    const copy=document.getElementById('desktop-workflow-copy');
-    if(copy) copy.textContent='Choose a reference image to begin.';
-  });
- }
-});
-</script>
+const b=document.getElementById('beta-begin');
+const s=document.getElementById('beta-splash');
+const app=document.getElementById('app');
+if(b)b.onclick=()=>{
+ if(s)s.remove();
+ if(app)app.classList.add('desktop-prep-active');
+ const t=document.getElementById('desktop-workflow-title');
+ const c=document.getElementById('desktop-workflow-copy');
+ if(t)t.textContent='Prepare Reference';
+ if(c)c.textContent='Choose a reference image to begin.';
+};
+});</script>
 </body>
 </html>
