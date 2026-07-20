@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 2 | UX-002 -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 3 | UX-003 -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 2 UX-002</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 3 UX-003</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -186,6 +186,34 @@ input[type=range]{width:100%;accent-color:var(--blue)}
   .crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:74px;min-height:34px;padding:4px 9px}.crop-controls{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}.crop-guidance{display:none}.crop-format-head{min-height:16px}.crop-format-head strong{font-size:10px}.crop-format-head span{font-size:9px}.ratio-strip{gap:5px;padding-bottom:2px}.crop-row{gap:5px}.crop-controls button{min-height:36px}.crop-note{display:none}.ratio-feedback{padding:5px 7px;font-size:10px}.corner-help{top:7px;left:8px;right:8px;font-size:9px;padding:4px 8px}.corner-actions{gap:5px}.corner-commit,.corner-secondary{gap:5px}.crop-precision-caption{font-size:9px}
 }
 
+
+
+/* UX-003 — DESKTOP WORKSPACE CONTINUITY */
+.desktop-prep-sidebar{display:none;flex:1;min-height:0;overflow:auto;padding:16px;background:var(--panel)}
+.desktop-prep-canvas{display:none;position:relative;flex:1;min-height:0;overflow:hidden;border:2px solid var(--border);border-radius:9px;background:#101014;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#app.desktop-prep-active .desktop-scroll,
+#app.desktop-prep-active .desktop-bottom{display:none!important}
+#app.desktop-prep-active .desktop-prep-sidebar{display:flex;flex-direction:column}
+#app.desktop-prep-active .viewport,
+#app.desktop-prep-active .desktop-help{display:none}
+#app.desktop-prep-active .desktop-prep-canvas{display:flex}
+.desktop-prep-sidebar .crop-controls{flex:1;overflow:auto;border:0;background:transparent;padding:0;gap:12px}
+.desktop-prep-sidebar .crop-format-head{padding-top:2px}
+.desktop-prep-sidebar .ratio-strip{display:grid;grid-template-columns:1fr 1fr;overflow:visible;gap:7px;padding:0}
+.desktop-prep-sidebar .ratio-option{min-width:0;width:100%}
+.desktop-prep-sidebar .crop-row{grid-template-columns:1fr 1fr}
+.desktop-prep-sidebar .crop-row.two{grid-template-columns:1fr 1fr}
+.desktop-prep-sidebar .crop-more-toggle{grid-column:1/-1;width:100%;min-height:40px}
+.desktop-prep-sidebar .crop-more-popover{position:static;left:auto;right:auto;bottom:auto;box-shadow:none;margin-top:2px}
+.desktop-prep-sidebar .crop-more-popover .pop-grid{grid-template-columns:1fr}
+.desktop-prep-sidebar .crop-guidance{text-align:left;padding:0;line-height:1.45}
+.desktop-prep-sidebar .crop-note{text-align:left;line-height:1.4;min-height:0}
+.desktop-prep-sidebar .canvas-status{align-items:flex-start;flex-direction:column}
+.desktop-prep-canvas .crop-stage{width:100%;height:100%;flex:1}
+@media(max-width:768px){
+  .desktop-prep-sidebar,.desktop-prep-canvas{display:none!important}
+}
+
 /* PRECISION POINT PLACEMENT */
 .precision-overlay{position:absolute;inset:0;z-index:110;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 52px,rgba(0,0,0,.18) 53px 100%)}
 .precision-overlay.active{display:block}
@@ -199,12 +227,13 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-002</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <header class="desktop-header ux-header" aria-live="polite">
 <h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
 <p class="ux-header-context" id="desktop-workflow-copy">Choose a reference image. Image Prep opens next.</p>
 </header>
+<div class="desktop-prep-sidebar" id="desktop-prep-sidebar" aria-hidden="true"></div>
 <div class="card desktop-workflow-card" id="desktop-workflow-card" aria-hidden="true"></div>
 <div class="desktop-scroll">
 <section class="card" id="desktop-source-card">
@@ -259,6 +288,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </div>
 </aside>
 <main class="main">
+<div class="desktop-prep-canvas" id="desktop-prep-canvas" aria-hidden="true"></div>
 <div class="viewport" id="viewport">
 <div class="world" id="world">
 <img alt="Reference" class="layer" id="ref-image"/>
@@ -337,6 +367,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <header class="crop-header">
 <div class="ux-header"><h1 class="ux-header-title" id="crop-title">Prepare Image</h1><p class="ux-header-context" id="crop-subtitle">Set the image area you want to observe.</p></div>
 </header>
+<div id="crop-stage-anchor"></div>
 <div class="crop-stage" id="crop-stage">
 <img alt="Image preparation preview" class="crop-preview" id="crop-preview"/>
 <div class="crop-shade" id="crop-shade-top"></div><div class="crop-shade" id="crop-shade-left"></div><div class="crop-shade" id="crop-shade-right"></div><div class="crop-shade" id="crop-shade-bottom"></div>
@@ -353,29 +384,27 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div class="crop-precision-caption">Move image under crosshair • Release to place</div>
 </div>
 </div>
-<div class="crop-controls">
+<div id="crop-controls-anchor"></div>
+<div class="crop-controls" id="crop-controls">
 <div class="canvas-status" id="canvas-status"><span class="canvas-status-text" id="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
-<div class="crop-guidance" id="crop-guidance"><strong>Choose a format.</strong> Resize the frame or position the image. Free Form corrects perspective.</div>
+<div class="crop-guidance" id="crop-guidance"><strong>Choose a format.</strong> Resize the frame or position the image. 4-Point removes the background and corrects perspective.</div>
 <div class="crop-format" id="crop-format">
 <div class="crop-format-head"><strong>Canvas Format</strong><span class="mobile-only-hint">Swipe left or right</span></div>
 <div class="ratio-strip" id="ratio-strip">
-<button class="ratio-option" data-ratio="free">Free Form</button><button class="ratio-option active" data-ratio="original" id="ratio-original">Detected</button><button class="ratio-option" data-ratio="reference" id="ratio-reference">Match Ref</button><button class="ratio-option" data-ratio="1:1">1 : 1</button><button class="ratio-option" data-ratio="4:5">4 : 5</button><button class="ratio-option" data-ratio="8.5:11">8.5 : 11</button><button class="ratio-option" data-ratio="5:7">5 : 7</button><button class="ratio-option" data-ratio="2:3">2 : 3</button><button class="ratio-option" data-ratio="3:4">3 : 4</button><button class="ratio-option" data-ratio="3:5">3 : 5</button><button class="ratio-option" data-ratio="16:9">16 : 9</button>
+<button class="ratio-option" data-ratio="free">4-Point</button><button class="ratio-option active" data-ratio="original" id="ratio-original">Detected</button><button class="ratio-option" data-ratio="reference" id="ratio-reference">Match Ref</button><button class="ratio-option" data-ratio="1:1">1 : 1</button><button class="ratio-option" data-ratio="4:5">4 : 5</button><button class="ratio-option" data-ratio="8.5:11">8.5 : 11</button><button class="ratio-option" data-ratio="5:7">5 : 7</button><button class="ratio-option" data-ratio="2:3">2 : 3</button><button class="ratio-option" data-ratio="3:4">3 : 4</button><button class="ratio-option" data-ratio="3:5">3 : 5</button><button class="ratio-option" data-ratio="16:9">16 : 9</button>
 </div>
 </div>
 <div class="ratio-feedback" id="ratio-feedback"><span id="ratio-feedback-label">Drawing ratio</span><strong id="ratio-feedback-value">—</strong></div>
-<div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button><button aria-expanded="false" aria-label="More" class="crop-more-toggle" id="crop-more-toggle">•••</button></div>
+<div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button></div>
 <div class="corner-actions" id="corner-actions">
 <div class="corner-secondary"><button id="corner-clear">Clear Points</button><button id="corner-remove">Remove Last</button></div>
-<div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button class="btn-primary" disabled="" id="corner-apply">Apply Free Form</button></div>
+<div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button class="btn-primary" disabled="" id="corner-apply">Apply 4-Point</button></div>
 </div>
 <div class="crop-note" id="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
-<div aria-hidden="true" class="crop-more-popover" id="crop-more-popover">
-<div class="pop-title">Image Preparation</div>
-<div class="pop-grid">
-<button disabled="" id="crop-undo">Undo</button>
+<div class="crop-row">
+<button disabled id="crop-undo">Undo</button>
 <button id="crop-replace">Replace</button>
 <button class="btn-danger" id="crop-cancel-top">Cancel</button>
-</div>
 </div>
 
 </div>
@@ -658,11 +687,40 @@ function beginCrop(kind,file){
   preview.src=cropState.url;
 }
 
+function mountDesktopImagePrep(){
+  if(isMobileLayout())return false;
+  const app=$("#app"),sidebar=$("#desktop-prep-sidebar"),canvas=$("#desktop-prep-canvas");
+  const stage=$("#crop-stage"),controls=$("#crop-controls");
+  if(!app||!sidebar||!canvas||!stage||!controls)return false;
+  sidebar.appendChild(controls);
+  canvas.appendChild(stage);
+  app.classList.add("desktop-prep-active");
+  sidebar.setAttribute("aria-hidden","false");
+  canvas.setAttribute("aria-hidden","false");
+  return true;
+}
+function unmountDesktopImagePrep(){
+  const app=$("#app"),editor=$("#crop-editor"),stage=$("#crop-stage"),controls=$("#crop-controls");
+  const stageAnchor=$("#crop-stage-anchor"),controlsAnchor=$("#crop-controls-anchor");
+  if(editor&&stage&&stageAnchor)editor.insertBefore(stage,stageAnchor.nextSibling);
+  if(editor&&controls&&controlsAnchor)editor.insertBefore(controls,controlsAnchor.nextSibling);
+  if(app)app.classList.remove("desktop-prep-active");
+  const sidebar=$("#desktop-prep-sidebar"),canvas=$("#desktop-prep-canvas");
+  if(sidebar)sidebar.setAttribute("aria-hidden","true");
+  if(canvas)canvas.setAttribute("aria-hidden","true");
+}
+
 function openCropEditor(){
   closeCropMore();
-  $("#crop-editor").classList.add("open");$("#crop-editor").setAttribute("aria-hidden","false");
+  const desktopMounted=mountDesktopImagePrep();
+  $("#crop-editor").classList.toggle("open",!desktopMounted);
+  $("#crop-editor").setAttribute("aria-hidden",desktopMounted?"true":"false");
   $("#crop-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
-  $("#crop-subtitle").textContent=cropState.kind==="ref"?"Detect the ratio, confirm the full image, or correct it with Free Form.":"Prepare the current drawing and review live ratio feedback.";
+  $("#crop-subtitle").textContent=cropState.kind==="ref"?"Detect the ratio, confirm the full image, or correct it with 4-Point.":"Prepare the current drawing and review live ratio feedback.";
+  if(!isMobileLayout()){
+    $("#desktop-workflow-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
+    $("#desktop-workflow-copy").textContent=cropState.kind==="ref"?"Choose the canvas format, adjust the crop, then accept the Reference.":"Prepare the current Drawing using the same guided workspace.";
+  }
   $("#crop-use").textContent=cropState.kind==="ref"?"Accept Reference":"Accept Drawing";
   $("#crop-replace").textContent=cropState.kind==="ref"?"Replace Reference":"Replace Drawing";
   $("#canvas-status").classList.remove("show");
@@ -675,7 +733,7 @@ function openCropEditor(){
     resetCropHistory();
   });
 }
-function closeCropEditor(){closeCropMore();$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");cropState.drag=null;cropState.freePointGesture=null;cropState.freeTouchGesture=null}
+function closeCropEditor(){closeCropMore();$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");unmountDesktopImagePrep();cropState.drag=null;cropState.freePointGesture=null;cropState.freeTouchGesture=null}
 function cropSnapshot(){
   return{url:cropState.url,x:cropState.x,y:cropState.y,scale:cropState.scale,rotation:cropState.rotation,locked:cropState.locked,ratioKey:cropState.ratioKey,frame:{...cropState.frame},mode:cropState.mode,corners:(cropState.corners||[]).map(p=>({...p})),canvasDetected:cropState.canvasDetected,status:$("#canvas-status-text").textContent,previousRatioKey:cropState.previousRatioKey,orientation:cropState.orientation};
 }
@@ -747,7 +805,7 @@ function ratioValue(key){
   if(key.includes(":"))return orientedStandardRatio(key,cropState.orientation);
   return null
 }
-function ratioLabel(key){return key==="free"?"Free Form":key==="original"?cropState.detectedLabel:key==="reference"?"Reference":key.replace(":"," : ")}
+function ratioLabel(key){return key==="free"?"4-Point":key==="original"?cropState.detectedLabel:key==="reference"?"Reference":key.replace(":"," : ")}
 function updateRatioButtons(){
   const ob=$("#ratio-original");if(ob)ob.textContent=cropState.detectedLabel||"Detected";
   $("#ratio-reference").disabled=!(cropState.kind==="draw"&&hasRef());
@@ -852,7 +910,7 @@ function renderCorners(){
   const help=$("#corner-help");
   if(help){
     help.style.display=cropState.freeInstructionDismissed?"none":"block";
-    help.textContent=imagePts.length<4?`Press and hold inside the image to place a corner. ${imagePts.length} of 4 placed. Order does not matter.`:"Four corners selected. Review the connected shape, replace any point if needed, then Apply Free Form.";
+    help.textContent=imagePts.length<4?`Press and hold inside the image to place a corner. ${imagePts.length} of 4 placed. Order does not matter.`:"Four corners selected. Review the connected shape, replace any point if needed, then Apply 4-Point.";
   }
 }
 function showCropPrecision(){const o=$("#crop-precision-overlay");o.classList.add("active");o.setAttribute("aria-hidden","false")}
@@ -893,7 +951,7 @@ function setCornerMode(on,announce=true){
   $("#crop-format").classList.toggle("hidden",on);$("#crop-guidance").classList.toggle("hidden",on);$("#crop-main-actions").classList.toggle("hidden",on);$("#corner-actions").classList.toggle("show",on);
   if(on)cropState.ratioKey="free";
   updateRatioButtons();
-  if(announce)$("#crop-note").textContent=on?"Free Form: press and hold to place four corners. Order does not matter.":"Choose a ratio, resize the frame, or use Free Form again at any time.";renderCrop();
+  if(announce)$("#crop-note").textContent=on?"4-Point: press and hold to place four corners. Order does not matter.":"Choose a ratio, resize the frame, or use 4-Point again at any time.";renderCrop();
 }
 function stageToImagePoint(pt){
   const stage=$("#crop-stage").getBoundingClientRect(),cx=stage.width/2+cropState.x,cy=stage.height/2+cropState.y,a=-cropState.rotation*Math.PI/180;
@@ -2190,9 +2248,41 @@ window.addEventListener("keydown",e=>{
   }
 });
 
+window.addEventListener("resize",()=>{
+  const active=$("#crop-editor").classList.contains("open")||$("#app").classList.contains("desktop-prep-active");
+  if(!active)return;
+  if(isMobileLayout()){
+    unmountDesktopImagePrep();
+    $("#crop-editor").classList.add("open");
+    $("#crop-editor").setAttribute("aria-hidden","false");
+  }else{
+    $("#crop-editor").classList.remove("open");
+    $("#crop-editor").setAttribute("aria-hidden","true");
+    mountDesktopImagePrep();
+  }
+  requestAnimationFrame(()=>{fitImageInsideStage();setFrameToVisibleImage();renderCrop()});
+});
+
 if(!isMobileLayout()) state.mobileStrategyChosen=true;
 render();
 });
 document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('beta-begin');const s=document.getElementById('beta-splash');if(b)b.onclick=()=>s.remove();});</script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const btn=document.getElementById('beta-begin');
+ if(btn){
+  btn.addEventListener('click',()=>{
+    const splash=document.getElementById('beta-splash');
+    if(splash) splash.style.display='none';
+    const app=document.getElementById('app');
+    if(app) app.classList.add('desktop-prep-active');
+    const title=document.getElementById('desktop-workflow-title');
+    if(title) title.textContent='Prepare Reference';
+    const copy=document.getElementById('desktop-workflow-copy');
+    if(copy) copy.textContent='Choose a reference image to begin.';
+  });
+ }
+});
+</script>
 </body>
 </html>
