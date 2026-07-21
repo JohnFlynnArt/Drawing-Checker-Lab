@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX Foundation Sprint Rev. 3 | UX-003 -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2 | Splash Begin hotfix -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX Foundation Rev. 3 UX-003</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -188,7 +188,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 
 
 
-/* UX-003 — DESKTOP WORKSPACE CONTINUITY */
+/* UX-003A — DESKTOP WORKSPACE CONTINUITY */
 .desktop-prep-sidebar{display:none;flex:1;min-height:0;overflow:auto;padding:16px;background:var(--panel)}
 .desktop-prep-canvas{display:none;position:relative;flex:1;min-height:0;overflow:hidden;border:2px solid var(--border);border-radius:9px;background:#101014;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 #app.desktop-prep-active .desktop-scroll,
@@ -214,6 +214,116 @@ input[type=range]{width:100%;accent-color:var(--blue)}
   .desktop-prep-sidebar,.desktop-prep-canvas{display:none!important}
 }
 
+
+
+/* UX-003A REV 2 — STANDARD DESKTOP IMAGE PREPARATION TOOLBOX
+   Presentation-only refinement. Existing controls, IDs, event bindings,
+   workflow, crop engine, and 4-Point engine remain unchanged. */
+@media(min-width:769px){
+  .desktop-prep-sidebar .crop-controls{
+    flex:0 0 auto;
+    overflow:visible;
+    padding:12px;
+    gap:8px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+  }
+  .desktop-prep-sidebar .crop-controls::before{
+    content:"IMAGE PREPARATION";
+    display:block;
+    margin:0 0 2px;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.8px;
+    line-height:1.2;
+    text-transform:uppercase;
+  }
+  .desktop-prep-sidebar .crop-guidance{
+    margin:0 0 2px;
+    padding:0 0 10px;
+    border-bottom:1px solid var(--border);
+    color:var(--muted);
+    font-size:11px;
+  }
+  .desktop-prep-sidebar .crop-format{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .desktop-prep-sidebar .crop-format-head{
+    padding:0;
+  }
+  .desktop-prep-sidebar .crop-format-head strong{
+    color:var(--muted);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+  }
+  .desktop-prep-sidebar .ratio-strip::before{
+    content:"Ratio Selection";
+    grid-column:1/-1;
+    color:var(--muted);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.8px;
+    line-height:1.2;
+    text-transform:uppercase;
+  }
+  .desktop-prep-sidebar .ratio-strip .ratio-option[data-ratio="free"]{
+    grid-column:1/-1;
+  }
+  .desktop-prep-sidebar .crop-row,
+  .desktop-prep-sidebar .crop-row.two{
+    gap:8px;
+  }
+  .desktop-prep-sidebar .crop-main-actions{
+    padding-top:4px;
+    border-top:1px solid var(--border);
+  }
+  .desktop-prep-sidebar .crop-main-actions #crop-reset-frame,
+  .desktop-prep-sidebar .crop-main-actions #crop-use{
+    min-height:40px;
+  }
+  .desktop-prep-sidebar .crop-more-popover{
+    display:block!important;
+    position:static;
+    margin:0;
+    padding:0;
+    background:transparent;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+  }
+  .desktop-prep-sidebar .crop-more-popover .pop-title,
+  .desktop-prep-sidebar #crop-undo{
+    display:none!important;
+  }
+  .desktop-prep-sidebar .crop-more-popover .pop-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .desktop-prep-sidebar .crop-more-popover button{
+    min-height:40px;
+    border-radius:7px;
+    font-size:12px;
+  }
+  .desktop-prep-sidebar .crop-note{
+    margin:0;
+    padding-top:2px;
+    color:var(--muted);
+    font-size:11px;
+  }
+  .desktop-prep-sidebar .canvas-status,
+  .desktop-prep-sidebar .ratio-feedback,
+  .desktop-prep-sidebar .corner-actions{
+    border-radius:7px;
+  }
+}
+
 /* PRECISION POINT PLACEMENT */
 .precision-overlay{position:absolute;inset:0;z-index:110;display:none;pointer-events:none;background:radial-gradient(circle at center,transparent 0 52px,rgba(0,0,0,.18) 53px 100%)}
 .precision-overlay.active{display:block}
@@ -227,7 +337,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <header class="desktop-header ux-header" aria-live="polite">
 <h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
@@ -395,16 +505,19 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </div>
 </div>
 <div class="ratio-feedback" id="ratio-feedback"><span id="ratio-feedback-label">Drawing ratio</span><strong id="ratio-feedback-value">—</strong></div>
-<div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button></div>
+<div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button><button aria-expanded="false" aria-label="More" class="crop-more-toggle" id="crop-more-toggle" style="display:none">•••</button></div>
 <div class="corner-actions" id="corner-actions">
 <div class="corner-secondary"><button id="corner-clear">Clear Points</button><button id="corner-remove">Remove Last</button></div>
 <div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button class="btn-primary" disabled="" id="corner-apply">Apply 4-Point</button></div>
 </div>
 <div class="crop-note" id="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
-<div class="crop-row">
-<button disabled id="crop-undo">Undo</button>
+<div aria-hidden="true" class="crop-more-popover" id="crop-more-popover">
+<div class="pop-title">Image Preparation</div>
+<div class="pop-grid">
+<button disabled="" id="crop-undo">Undo</button>
 <button id="crop-replace">Replace</button>
 <button class="btn-danger" id="crop-cancel-top">Cancel</button>
+</div>
 </div>
 
 </div>
@@ -2267,17 +2380,9 @@ if(!isMobileLayout()) state.mobileStrategyChosen=true;
 render();
 });
 document.addEventListener('DOMContentLoaded',()=>{
-const b=document.getElementById('beta-begin');
-const s=document.getElementById('beta-splash');
-const app=document.getElementById('app');
-if(b)b.onclick=()=>{
- if(s)s.remove();
- if(app)app.classList.add('desktop-prep-active');
- const t=document.getElementById('desktop-workflow-title');
- const c=document.getElementById('desktop-workflow-copy');
- if(t)t.textContent='Prepare Reference';
- if(c)c.textContent='Choose a reference image to begin.';
-};
+  const b=document.getElementById('beta-begin');
+  const s=document.getElementById('beta-splash');
+  if(b)b.onclick=()=>{if(s)s.remove();};
 });</script>
 </body>
 </html>
