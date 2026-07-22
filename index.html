@@ -263,7 +263,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     text-transform:uppercase;
   }
   .desktop-prep-sidebar .ratio-strip::before{
-    content:"Ratio Selection";
+    content:"Reference Ratio Selection";
     grid-column:1/-1;
     color:var(--muted);
     font-size:10px;
@@ -497,7 +497,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div id="crop-controls-anchor"></div>
 <div class="crop-controls" id="crop-controls">
 <div class="canvas-status" id="canvas-status"><span class="canvas-status-text" id="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
-<div class="crop-guidance" id="crop-guidance"><strong>Choose a format.</strong> Resize the frame or position the image. 4-Point removes the background and corrects perspective.</div>
+<div class="crop-guidance" id="crop-guidance"><strong>Confirm or choose a ratio.</strong> Resize the frame or position the image. Use 4-Point to remove the background or correct skew.</div>
 <div class="crop-format" id="crop-format">
 <div class="crop-format-head"><strong>Canvas Format</strong><span class="mobile-only-hint">Swipe left or right</span></div>
 <div class="ratio-strip" id="ratio-strip">
@@ -832,7 +832,7 @@ function openCropEditor(){
   $("#crop-subtitle").textContent=cropState.kind==="ref"?"Detect the ratio, confirm the full image, or correct it with 4-Point.":"Prepare the current drawing and review live ratio feedback.";
   if(!isMobileLayout()){
     $("#desktop-workflow-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
-    $("#desktop-workflow-copy").textContent=cropState.kind==="ref"?"Choose the canvas format, adjust the crop, then accept the Reference.":"Prepare the current Drawing using the same guided workspace.";
+    $("#desktop-workflow-copy").textContent=cropState.kind==="ref"?"Confirm the detected Reference image ratio or adjust the crop then accept the Reference":"Prepare the current Drawing using the same guided workspace.";
   }
   $("#crop-use").textContent=cropState.kind==="ref"?"Accept Reference":"Accept Drawing";
   $("#crop-replace").textContent=cropState.kind==="ref"?"Replace Reference":"Replace Drawing";
