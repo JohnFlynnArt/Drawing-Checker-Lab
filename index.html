@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2 4pt| Splash Begin hotfix -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.009 | 4-Point Modal State -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.009</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -1063,7 +1063,13 @@ function finishFreePointPrecision(commit=true){
 }
 function setCornerMode(on,announce=true){
   cropState.mode=on?"corners":"crop";$("#corner-layer").classList.toggle("active",on);$("#corner-layer").setAttribute("aria-hidden",on?"false":"true");
-  $("#ratio-strip").classList.toggle("hidden",on);$("#crop-guidance").classList.toggle("hidden",on);$("#corner-actions").classList.toggle("show",on);
+  // 4-Point is a focused editing state. Keep the ratio strip available so
+  // choosing another ratio can intentionally abandon 4-Point, while hiding
+  // Reset and image acceptance until the image area is applied or abandoned.
+  $("#ratio-strip").classList.remove("hidden");
+  $("#crop-guidance").classList.toggle("hidden",on);
+  $("#corner-actions").classList.toggle("show",on);
+  $("#crop-main-actions").classList.toggle("hidden",on);
   $("#crop-ratio-heading").textContent=on?"4-POINT PLACEMENT":(cropState.kind==="ref"?"REFERENCE RATIO SELECTION":"DRAWING RATIO SELECTION");
   if(on)cropState.ratioKey="free";
   updateRatioButtons();
