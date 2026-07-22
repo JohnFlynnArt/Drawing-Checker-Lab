@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.009 | 4-Point Modal State -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.010 | Cross-Platform Corner Refinement -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.009</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.010</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -1028,6 +1028,19 @@ function renderCorners(){
   if(apply)apply.disabled=imagePts.length!==4;if(remove)remove.disabled=imagePts.length===0;if(clear)clear.disabled=imagePts.length===0;
   updateRatioContextMessage();
 }
+function beginCornerHandleDrag(index,stagePoint){
+  if(index===null||index<0||index>=cropState.corners.length)return false;
+  pushCropHistory();
+  cropState.drag={type:"corner-handle",index,start:{...stagePoint}};
+  return true;
+}
+function moveCornerHandleDrag(stagePoint){
+  const d=cropState.drag;if(!d||d.type!=="corner-handle")return false;
+  cropState.corners[d.index]=clampImagePoint(stageToImagePoint(stagePoint));
+  cropState.freeInstructionDismissed=true;
+  renderCrop();
+  return true;
+}
 function showCropPrecision(){const o=$("#crop-precision-overlay");o.classList.add("active");o.setAttribute("aria-hidden","false")}
 function hideCropPrecision(){const o=$("#crop-precision-overlay");o.classList.remove("active");o.setAttribute("aria-hidden","true")}
 function stagePointInsideImage(p){
@@ -2004,9 +2017,13 @@ cropStage.addEventListener("pointerdown",e=>{
   e.preventDefault();const p=cropPointerPosition(e);
   if(cropState.mode==="corners"){
     if(cropState.freePointGesture||!stagePointInsideImage(p))return;
-    const corner=e.target?.dataset?.corner,replaceIndex=corner!==undefined?+corner:null;
+    const corner=e.target?.dataset?.corner;
     cropStage.setPointerCapture(e.pointerId);
-    cropState.freePointGesture={active:false,pending:true,pointerId:e.pointerId,start:p,last:p,replaceIndex,timer:setTimeout(()=>{if(!beginFreePointPrecision(p,replaceIndex))cropState.freePointGesture=null},320)};
+    if(corner!==undefined){
+      beginCornerHandleDrag(+corner,p);
+      return;
+    }
+    cropState.freePointGesture={active:false,pending:true,pointerId:e.pointerId,start:p,last:p,replaceIndex:null,timer:setTimeout(()=>{if(!beginFreePointPrecision(p,null))cropState.freePointGesture=null},320)};
     return;
   }
   pushCropHistory();cropStage.setPointerCapture(e.pointerId);const handle=e.target?.dataset?.handle;cropState.drag=handle?{type:"locked-handle",handle,start:p,frame:{...cropState.frame}}:{type:"image",start:p,x:cropState.x,y:cropState.y};
@@ -2014,14 +2031,17 @@ cropStage.addEventListener("pointerdown",e=>{
 cropStage.addEventListener("pointermove",e=>{
   if(e.pointerType==="touch")return;
   const p=cropPointerPosition(e),g=cropState.freePointGesture;
-  if(cropState.mode==="corners"&&g){
-    if(g.pending&&!g.active&&Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){clearTimeout(g.timer);cropState.freePointGesture=null;return}
-    if(g.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}
-    return;
+  if(cropState.mode==="corners"){
+    if(moveCornerHandleDrag(p))return;
+    if(g){
+      if(g.pending&&!g.active&&Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){clearTimeout(g.timer);cropState.freePointGesture=null;return}
+      if(g.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}
+      return;
+    }
   }
   if(!cropState.drag)return;const dx=p.x-cropState.drag.start.x,dy=p.y-cropState.drag.start.y;if(cropState.drag.type==="image"){cropState.x=cropState.drag.x+dx;cropState.y=cropState.drag.y+dy}else if(cropState.drag.type==="locked-handle"){resizeLockedCrop(cropState.drag.handle,p,cropState.drag.frame)}renderCrop();
 });
-function endCropPointer(){const g=cropState.freePointGesture;if(g){if(g.timer)clearTimeout(g.timer);if(g.active)finishFreePointPrecision(true);else cropState.freePointGesture=null;return}cropState.drag=null}
+function endCropPointer(){if(cropState.drag?.type==="corner-handle"){cropState.drag=null;return}const g=cropState.freePointGesture;if(g){if(g.timer)clearTimeout(g.timer);if(g.active)finishFreePointPrecision(true);else cropState.freePointGesture=null;return}cropState.drag=null}
 cropStage.addEventListener("pointerup",endCropPointer);cropStage.addEventListener("pointercancel",()=>{const g=cropState.freePointGesture;if(g?.timer)clearTimeout(g.timer);if(g?.active)finishFreePointPrecision(false);else cropState.freePointGesture=null;cropState.drag=null});
 
 function touchStagePoint(t){const r=cropStage.getBoundingClientRect();return{x:t.clientX-r.left,y:t.clientY-r.top}}
@@ -2035,8 +2055,13 @@ cropStage.addEventListener("touchstart",e=>{
     }
     if(e.touches.length===1){
       const t=e.touches[0],p=touchStagePoint(t);if(!stagePointInsideImage(p))return;
-      let replaceIndex=null;const target=document.elementFromPoint(t.clientX,t.clientY);if(target?.dataset?.corner!==undefined)replaceIndex=+target.dataset.corner;
-      cropState.freeTouchGesture={start:p,last:p,moved:false,replaceIndex,timer:setTimeout(()=>{const g=cropState.freeTouchGesture;if(!g)return;if(beginFreePointPrecision(g.start,g.replaceIndex)){g.precision=true;g.last={...g.start}}},350)};
+      const target=document.elementFromPoint(t.clientX,t.clientY)||e.target;
+      if(target?.dataset?.corner!==undefined){
+        beginCornerHandleDrag(+target.dataset.corner,p);
+        cropState.freeTouchGesture={start:p,last:p,moved:false,cornerDrag:true};
+        return;
+      }
+      cropState.freeTouchGesture={start:p,last:p,moved:false,replaceIndex:null,timer:setTimeout(()=>{const g=cropState.freeTouchGesture;if(!g)return;if(beginFreePointPrecision(g.start,null)){g.precision=true;g.last={...g.start}}},350)};
     }
     return;
   }
@@ -2064,7 +2089,7 @@ cropStage.addEventListener("touchmove",e=>{
   if(cropState.mode==="corners"){
     e.preventDefault();
     if(e.touches.length===2&&cropTouches){const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop();return}
-    const g=cropState.freeTouchGesture;if(e.touches.length===1&&g){const p=touchStagePoint(e.touches[0]);if(g.precision&&cropState.freePointGesture?.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}else if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){g.moved=true;clearTimeout(g.timer)}}return;
+    const g=cropState.freeTouchGesture;if(e.touches.length===1&&g){const p=touchStagePoint(e.touches[0]);if(g.cornerDrag&&cropState.drag?.type==="corner-handle"){g.last=p;moveCornerHandleDrag(p)}else if(g.precision&&cropState.freePointGesture?.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}else if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){g.moved=true;clearTimeout(g.timer)}}return;
   }
   if(e.touches.length===2&&cropTouches?.type==="pinch"){
     e.preventDefault();
@@ -2085,7 +2110,7 @@ cropStage.addEventListener("touchmove",e=>{
 },{passive:false});
 cropStage.addEventListener("touchend",e=>{
   if(cropState.mode==="corners"){
-    if(e.touches.length===0){const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(true);cropState.freeTouchGesture=null;cropTouches=null}
+    if(e.touches.length===0){const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(true);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null}
     return;
   }
   if(e.touches.length===0){cropState.drag=null;cropTouches=null;}
