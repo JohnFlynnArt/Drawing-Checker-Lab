@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.010 | Cross-Platform Corner Refinement -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.011 | 4-Point Modal UX Restoration -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.010</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.011</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -497,6 +497,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div class="corner-actions" id="corner-actions">
 <div class="corner-secondary"><button id="corner-remove">Remove Last</button><button id="corner-clear">Clear Points</button></div>
 <div class="corner-commit"><button class="btn-primary" disabled="" id="corner-apply">Apply Image Area</button></div>
+<div class="corner-commit"><button class="btn-danger" id="corner-cancel">Cancel/Start Over</button></div>
 </div>
 <div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button><button aria-expanded="false" aria-label="More" class="crop-more-toggle" id="crop-more-toggle" style="display:none">•••</button></div>
 <div aria-hidden="true" class="crop-more-popover" id="crop-more-popover">
@@ -936,9 +937,9 @@ function updateRatioContextMessage(){
   const note=$("#crop-note");if(!note)return;
   if(cropState.mode==="corners"||cropState.ratioKey==="free"){
     const count=(cropState.corners||[]).length;
-    if(count===0)note.textContent="Press and hold inside the image to place each corner of the image area. Corners may be placed in any order.";
-    else if(count<4)note.textContent="Continue placing corners until the image area is defined. Existing corners may be adjusted at any time.";
-    else note.textContent="Review the outlined image area. Drag any corner to refine it, then choose Apply Image Area.";
+    if(count===0)note.innerHTML="<strong>Place first point.</strong> Press and hold inside the image to place the first corner. Then continue placing the remaining corners in any order.";
+    else if(count<4)note.textContent="Place the remaining corners of the image area in any order.";
+    else note.textContent="Drag any corner to refine the image area, then choose Apply Image Area.";
     return;
   }
   note.textContent=`${ratioLabel(cropState.ratioKey)} selected. Drag a corner to resize the crop while keeping this ratio, or reposition the image inside it.`;
@@ -1076,13 +1077,20 @@ function finishFreePointPrecision(commit=true){
 }
 function setCornerMode(on,announce=true){
   cropState.mode=on?"corners":"crop";$("#corner-layer").classList.toggle("active",on);$("#corner-layer").setAttribute("aria-hidden",on?"false":"true");
-  // 4-Point is a focused editing state. Keep the ratio strip available so
-  // choosing another ratio can intentionally abandon 4-Point, while hiding
-  // Reset and image acceptance until the image area is applied or abandoned.
+  // 4-Point is a focused editing state. Keep Ratio Selection and
+  // Cancel/Start Over available, while preventing Reset or image acceptance
+  // until the image area is applied or 4-Point is abandoned.
   $("#ratio-strip").classList.remove("hidden");
   $("#crop-guidance").classList.toggle("hidden",on);
   $("#corner-actions").classList.toggle("show",on);
   $("#crop-main-actions").classList.toggle("hidden",on);
+  $("#crop-reset-frame").style.display=on?"none":"";
+  $("#crop-use").style.display=on?"none":"";
+  $("#crop-reset-frame").disabled=on;
+  $("#crop-use").disabled=on;
+  const cancel=$("#crop-cancel-top"),cornerCancel=$("#corner-cancel");
+  if(cancel){cancel.style.display=on?"none":"";cancel.disabled=false;}
+  if(cornerCancel)cornerCancel.disabled=false;
   $("#crop-ratio-heading").textContent=on?"4-POINT PLACEMENT":(cropState.kind==="ref"?"REFERENCE RATIO SELECTION":"DRAWING RATIO SELECTION");
   if(on)cropState.ratioKey="free";
   updateRatioButtons();
@@ -2005,6 +2013,7 @@ $("#mobile-opacity").oninput=e=>{
 /* IMAGE PREPARATION EVENTS */
 $("#crop-more-toggle").onclick=toggleCropMore;
 $("#crop-cancel-top").onclick=()=>{closeCropMore();cancelCrop()};
+$("#corner-cancel").onclick=()=>{closeCropMore();cancelCrop()};
 $("#crop-undo").onclick=()=>{undoCrop()};
 $("#crop-replace").onclick=()=>{closeCropMore();const kind=cropState.kind;cancelCrop();setTimeout(()=>{if(kind==="ref")$("#mobile-ref-input").click();else $("#mobile-draw-library").click()},0)};
 $("#crop-use").onclick=()=>{closeCropMore();commitCrop()};$("#crop-reset-frame").onclick=()=>{pushCropHistory();resetCropFrame()};
