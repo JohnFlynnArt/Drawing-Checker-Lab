@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.011 | 4-Point Modal UX Restoration -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.012 | Mobile Contextual Instruction Synchronization -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.011</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.012</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -464,7 +464,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </div>
 <div aria-hidden="true" class="crop-editor" id="crop-editor">
 <header class="crop-header">
-<div class="ux-header"><h1 class="ux-header-title" id="crop-title">Prepare Image</h1><p class="ux-header-context" id="crop-subtitle">Set the image area you want to observe.</p></div>
+<div class="ux-header"><h1 class="ux-header-title" id="crop-title">Prepare Image</h1><p class="ux-header-context" id="crop-subtitle"><strong>Confirm or choose a ratio.</strong> Resize the frame or position the image. Use 4-Point to remove the background or correct skew.</p></div>
 </header>
 <div id="crop-stage-anchor"></div>
 <div class="crop-stage" id="crop-stage">
@@ -818,7 +818,7 @@ function openCropEditor(){
   $("#crop-editor").classList.toggle("open",!desktopMounted);
   $("#crop-editor").setAttribute("aria-hidden",desktopMounted?"true":"false");
   $("#crop-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
-  $("#crop-subtitle").textContent=cropState.kind==="ref"?"Detect the ratio, confirm the full image, or correct it with 4-Point.":"Prepare the current drawing and review live ratio feedback.";
+  updateCropInstructionContext();
   if(!isMobileLayout()){
     $("#desktop-workflow-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
     $("#desktop-workflow-copy").textContent=cropState.kind==="ref"?"Confirm the detected Reference image ratio or adjust the crop then accept the Reference":"Prepare the current Drawing using the same guided workspace.";
@@ -933,8 +933,21 @@ function fitImageInsideStage(){
 }
 function setFrameToVisibleImage(){const b=visibleImageBounds();cropState.frame={x:b.x,y:b.y,w:b.w,h:b.h};clampCropFrame()}
 function applyDefaultRatio(){detectAndSelectRatio()}
+function updateCropInstructionContext(){
+  const subtitle=$("#crop-subtitle");if(!subtitle)return;
+  if(cropState.mode==="corners"||cropState.ratioKey==="free"){
+    const count=(cropState.corners||[]).length;
+    if(count===0)subtitle.innerHTML="<strong>Place first point.</strong> Press and hold inside the image to place the first corner. Then continue placing the remaining corners in any order.";
+    else if(count<4)subtitle.textContent="Place the remaining corners of the image area in any order.";
+    else subtitle.innerHTML="Drag any corner to refine the image area, then choose <strong>Apply Image Area</strong>.";
+    return;
+  }
+  subtitle.innerHTML="<strong>Confirm or choose a ratio.</strong> Resize the frame or position the image. Use 4-Point to remove the background or correct skew.";
+}
 function updateRatioContextMessage(){
-  const note=$("#crop-note");if(!note)return;
+  const note=$("#crop-note");
+  updateCropInstructionContext();
+  if(!note)return;
   if(cropState.mode==="corners"||cropState.ratioKey==="free"){
     const count=(cropState.corners||[]).length;
     if(count===0)note.innerHTML="<strong>Place first point.</strong> Press and hold inside the image to place the first corner. Then continue placing the remaining corners in any order.";
