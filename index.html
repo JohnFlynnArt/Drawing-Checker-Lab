@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2 1-5| Splash Begin hotfix -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2 | Splash Begin hotfix -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2 1-5</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -167,7 +167,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .crop-format-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.crop-format-head strong{font-size:11px}.crop-format-head span{font-size:10px;color:var(--muted)}.mobile-only-hint{display:none}
 .ratio-strip{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding:1px 1px 4px}
 .ratio-strip::-webkit-scrollbar{display:none}.ratio-option{flex:0 0 auto;min-width:72px;min-height:38px;border-radius:9px;padding:5px 10px;font-size:11px;scroll-snap-align:start}
-.ratio-option.active{background:var(--blue);border-color:#60a5fa;color:#fff}.ratio-option[disabled]{display:none}
+.ratio-option.active{background:var(--blue);border-color:#60a5fa;color:#fff}.ratio-option.detected-match{box-shadow:inset 0 0 0 2px rgba(96,165,250,.85)}.ratio-option[disabled]{display:none}
 .crop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.crop-row.two{grid-template-columns:1fr 1fr auto}.crop-controls button{min-height:40px;border-radius:9px}
 .crop-note{font-size:10px;color:var(--muted);text-align:center;min-height:14px}
 .crop-guidance{font-size:11px;color:#d5d9e0;text-align:center;padding:2px 6px 0;line-height:1.35}.crop-guidance strong{color:#fff}
@@ -260,16 +260,6 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     font-size:10px;
     font-weight:800;
     letter-spacing:.8px;
-    text-transform:uppercase;
-  }
-  .desktop-prep-sidebar .ratio-strip::before{
-    content:"Reference Ratio Selection";
-    grid-column:1/-1;
-    color:var(--muted);
-    font-size:10px;
-    font-weight:800;
-    letter-spacing:.8px;
-    line-height:1.2;
     text-transform:uppercase;
   }
   .desktop-prep-sidebar .ratio-strip .ratio-option[data-ratio="free"]{
@@ -499,10 +489,11 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div class="canvas-status" id="canvas-status"><span class="canvas-status-text" id="canvas-status-text">✓ Canvas Aligned</span><button id="canvas-adjust">Fine Tune</button></div>
 <div class="crop-guidance" id="crop-guidance"><strong>Confirm or choose a ratio.</strong> Resize the frame or position the image. Use 4-Point to remove the background or correct skew.</div>
 <div class="crop-format" id="crop-format">
-<div class="crop-format-head"><strong>Canvas Format</strong><span class="mobile-only-hint">Swipe left or right</span></div>
+<div class="crop-format-head"><strong id="crop-ratio-heading">REFERENCE RATIO SELECTION</strong><span class="mobile-only-hint">Swipe left or right</span></div>
 <div class="ratio-strip" id="ratio-strip">
 <button class="ratio-option" data-ratio="free">4-Point</button><button class="ratio-option active" data-ratio="original" id="ratio-original">Detected</button><button class="ratio-option" data-ratio="reference" id="ratio-reference">Match Ref</button><button class="ratio-option" data-ratio="1:1">1 : 1</button><button class="ratio-option" data-ratio="4:5">4 : 5</button><button class="ratio-option" data-ratio="8.5:11">8.5 : 11</button><button class="ratio-option" data-ratio="5:7">5 : 7</button><button class="ratio-option" data-ratio="2:3">2 : 3</button><button class="ratio-option" data-ratio="3:4">3 : 4</button><button class="ratio-option" data-ratio="3:5">3 : 5</button><button class="ratio-option" data-ratio="16:9">16 : 9</button>
 </div>
+<div class="crop-note" id="crop-note">Detected ratio selected. Drag a corner to resize the crop while keeping this ratio, or reposition the image inside it.</div>
 </div>
 <div class="ratio-feedback" id="ratio-feedback"><span id="ratio-feedback-label">Drawing ratio</span><strong id="ratio-feedback-value">—</strong></div>
 <div class="crop-row two" id="crop-main-actions"><button id="crop-reset-frame">Reset</button><button class="btn-primary" id="crop-use">Accept Image</button><button aria-expanded="false" aria-label="More" class="crop-more-toggle" id="crop-more-toggle" style="display:none">•••</button></div>
@@ -510,7 +501,6 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div class="corner-secondary"><button id="corner-clear">Clear Points</button><button id="corner-remove">Remove Last</button></div>
 <div class="corner-commit"><button id="corner-cancel">Cancel Adjust</button><button class="btn-primary" disabled="" id="corner-apply">Apply 4-Point</button></div>
 </div>
-<div class="crop-note" id="crop-note">Choose a canvas format. Drag a corner to resize the crop, or position the image inside the frame.</div>
 <div aria-hidden="true" class="crop-more-popover" id="crop-more-popover">
 <div class="pop-title">Image Preparation</div>
 <div class="pop-grid">
@@ -836,6 +826,7 @@ function openCropEditor(){
   }
   $("#crop-use").textContent=cropState.kind==="ref"?"Accept Reference":"Accept Drawing";
   $("#crop-replace").textContent=cropState.kind==="ref"?"Replace Reference":"Replace Drawing";
+  $("#crop-ratio-heading").textContent=cropState.kind==="ref"?"REFERENCE RATIO SELECTION":"DRAWING RATIO SELECTION";
   $("#canvas-status").classList.remove("show");
   setCornerMode(false);
   requestAnimationFrame(()=>{
@@ -896,9 +887,11 @@ function detectAndSelectRatio(){
   cropState.detectedKey=known||"original";
   cropState.detectedLabel=known?`Detected ${known} · ${orientationLabel(orientation)}`:`Detected ${pair[0]}:${pair[1]} · ${orientationLabel(orientation)}`;
   const originalBtn=$("#ratio-original");if(originalBtn)originalBtn.textContent=cropState.detectedLabel;
-  if(known){cropState.ratioKey=known;cropState.locked=true;applyLockedFrame(orientedStandardRatio(known,orientation));}
-  else{cropState.ratioKey="original";cropState.locked=true;applyLockedFrame(value);}
-  updateRatioButtons();updateRatioFeedback();
+  cropState.ratioKey="original";
+  cropState.locked=true;
+  if(known)applyLockedFrame(orientedStandardRatio(known,orientation));
+  else applyLockedFrame(value);
+  updateRatioButtons();updateRatioContextMessage();updateRatioFeedback();
 }
 function currentPreparationRatio(){return cropState.frame.h?cropState.frame.w/cropState.frame.h:originalCropRatio()}
 function updateRatioFeedback(){
@@ -922,7 +915,11 @@ function ratioLabel(key){return key==="free"?"4-Point":key==="original"?cropStat
 function updateRatioButtons(){
   const ob=$("#ratio-original");if(ob)ob.textContent=cropState.detectedLabel||"Detected";
   $("#ratio-reference").disabled=!(cropState.kind==="draw"&&hasRef());
-  document.querySelectorAll(".ratio-option[data-ratio]").forEach(b=>b.classList.toggle("active",b.dataset.ratio===(cropState.mode==="corners"?"free":cropState.ratioKey)));
+  const activeKey=cropState.mode==="corners"?"free":cropState.ratioKey;
+  document.querySelectorAll(".ratio-option[data-ratio]").forEach(b=>{
+    b.classList.toggle("active",b.dataset.ratio===activeKey);
+    b.classList.toggle("detected-match",activeKey==="original"&&cropState.detectedKey!=="original"&&b.dataset.ratio===cropState.detectedKey);
+  });
 }
 function visibleImageBounds(){
   const stage=$("#crop-stage").getBoundingClientRect(),img=cropState.image;if(!img)return{x:0,y:0,w:0,h:0};
@@ -937,6 +934,14 @@ function fitImageInsideStage(){
 }
 function setFrameToVisibleImage(){const b=visibleImageBounds();cropState.frame={x:b.x,y:b.y,w:b.w,h:b.h};clampCropFrame()}
 function applyDefaultRatio(){detectAndSelectRatio()}
+function updateRatioContextMessage(){
+  const note=$("#crop-note");if(!note)return;
+  if(cropState.mode==="corners"||cropState.ratioKey==="free"){
+    note.textContent="Place any four canvas corners with Precision Placement. Order does not matter.";
+    return;
+  }
+  note.textContent=`${ratioLabel(cropState.ratioKey)} selected. Drag a corner to resize the crop while keeping this ratio, or reposition the image inside it.`;
+}
 function enterFreeForm(){
   pushCropHistory();
   cropState.previousRatioKey=cropState.ratioKey==="free"?(cropState.previousRatioKey||cropState.detectedKey):cropState.ratioKey;
@@ -947,7 +952,7 @@ function enterFreeForm(){
   cropState.locked=false;
   setCornerMode(true);
   updateRatioButtons();
-  $("#crop-note").textContent="Place any four canvas corners with Precision Placement. Order does not matter.";
+  updateRatioContextMessage();
   renderCrop();
 }
 function chooseRatio(key,refit=true){
@@ -955,7 +960,7 @@ function chooseRatio(key,refit=true){
   if(cropState.mode==="corners")setCornerMode(false,false);
   cropState.ratioKey=key;cropState.previousRatioKey=key;cropState.locked=true;updateRatioButtons();
   applyLockedFrame(ratioValue(key));
-  $("#crop-note").textContent=`${ratioLabel(key)} selected. Drag a corner to resize the crop while keeping this ratio, or reposition the image inside it.`;
+  updateRatioContextMessage();
   updateRatioFeedback();renderCrop();
 }
 function applyLockedFrame(ratio){
