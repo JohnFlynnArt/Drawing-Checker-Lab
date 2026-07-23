@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.013 | Mobile Precision Crop Handle Refinement -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.014 | Mobile 4-Point Precision Corner Refinement -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.013</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.014</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -182,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 @media(max-width:768px){
   .mobile-only-hint{display:inline}
   .crop-header{height:78px;flex-basis:78px;padding:8px 10px}.crop-header>div:first-child{min-width:0}.crop-header .ux-header-title{font-size:13px;margin-bottom:4px}.crop-header .ux-header-context{display:block;font-size:9.5px;line-height:1.22}.crop-more-popover .pop-grid{grid-template-columns:1fr 1fr}.crop-more-toggle{width:100%;min-height:40px}
-  .crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.crop-handle::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);border-radius:50%}.crop-frame.precision-hidden,.crop-stage.crop-handle-precision .crop-shade{visibility:hidden}.corner-handle{width:28px;height:28px}.ratio-option{min-width:74px;min-height:34px;padding:4px 9px}.crop-controls{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}.crop-guidance{display:none}.crop-format-head{min-height:16px}.crop-format-head strong{font-size:10px}.crop-format-head span{font-size:9px}.ratio-strip{gap:5px;padding-bottom:2px}.crop-row{gap:5px}.crop-controls button{min-height:36px}.crop-note{display:block;font-size:9.5px;line-height:1.3;text-align:left}.ratio-feedback{padding:5px 7px;font-size:10px}.corner-actions{gap:5px}.corner-commit,.corner-secondary{gap:5px}.crop-precision-caption{font-size:9px}
+  .crop-stage::before{inset:3%}.crop-handle{width:18px;height:18px}.corner-handle{width:28px;height:28px}.ratio-option{min-width:74px;min-height:34px;padding:4px 9px}.crop-controls{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}.crop-guidance{display:none}.crop-format-head{min-height:16px}.crop-format-head strong{font-size:10px}.crop-format-head span{font-size:9px}.ratio-strip{gap:5px;padding-bottom:2px}.crop-row{gap:5px}.crop-controls button{min-height:36px}.crop-note{display:block;font-size:9.5px;line-height:1.3;text-align:left}.ratio-feedback{padding:5px 7px;font-size:10px}.corner-actions{gap:5px}.corner-commit,.corner-secondary{gap:5px}.crop-precision-caption{font-size:9px}
 }
 
 
@@ -517,7 +517,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.013 — Mobile Precision Crop Handle Refinement */
+/* UX-003A Rev 2.014 — Mobile 4-Point Precision Corner Refinement */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -774,14 +774,14 @@ function beginNewMobileSession(){
 const cropState={
   kind:null,file:null,url:null,image:null,x:0,y:0,scale:1,rotation:0,
   locked:false,ratioKey:"free",frame:{x:0,y:0,w:100,h:100},drag:null,
-  mode:"crop",corners:[],freePointGesture:null,freeTouchGesture:null,freeInstructionDismissed:false,lockedHandlePrecision:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],wheelHistoryTimer:null,detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original",orientation:"portrait"
+  mode:"crop",corners:[],freePointGesture:null,freeTouchGesture:null,freeInstructionDismissed:false,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],wheelHistoryTimer:null,detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original",orientation:"portrait"
 };
 
 function beginCrop(kind,file){
   if(!file)return;
   closePopover();
   cropState.ownedUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});
-  Object.assign(cropState,{kind,file,locked:false,ratioKey:"free",rotation:0,x:0,y:0,mode:"crop",drag:null,freePointGesture:null,freeTouchGesture:null,freeInstructionDismissed:false,lockedHandlePrecision:null,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original",orientation:"portrait"});
+  Object.assign(cropState,{kind,file,locked:false,ratioKey:"free",rotation:0,x:0,y:0,mode:"crop",drag:null,freePointGesture:null,freeTouchGesture:null,freeInstructionDismissed:false,canvasDetected:false,history:[],fineTuneBaseline:null,ownedUrls:[],detectedKey:"original",detectedLabel:"Detected",acceptedRatio:null,previousRatioKey:"original",orientation:"portrait"});
   cropState.url=URL.createObjectURL(file);
   cropState.ownedUrls.push(cropState.url);
   const preview=$("#crop-preview");
@@ -837,7 +837,7 @@ function openCropEditor(){
     resetCropHistory();
   });
 }
-function closeCropEditor(){closeCropMore();$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");unmountDesktopImagePrep();cropState.drag=null;cropState.freePointGesture=null;cropState.freeTouchGesture=null;cropState.lockedHandlePrecision=null;hideCropPrecision();$("#crop-frame")?.classList.remove("precision-hidden");$("#crop-stage")?.classList.remove("crop-handle-precision")}
+function closeCropEditor(){closeCropMore();$("#crop-editor").classList.remove("open");$("#crop-editor").setAttribute("aria-hidden","true");unmountDesktopImagePrep();cropState.drag=null;cropState.freePointGesture=null;cropState.freeTouchGesture=null}
 function cropSnapshot(){
   return{url:cropState.url,x:cropState.x,y:cropState.y,scale:cropState.scale,rotation:cropState.rotation,locked:cropState.locked,ratioKey:cropState.ratioKey,frame:{...cropState.frame},mode:cropState.mode,corners:(cropState.corners||[]).map(p=>({...p})),canvasDetected:cropState.canvasDetected,status:$("#canvas-status-text").textContent,previousRatioKey:cropState.previousRatioKey,orientation:cropState.orientation};
 }
@@ -940,7 +940,7 @@ function updateCropInstructionContext(){
     const count=(cropState.corners||[]).length;
     if(count===0)subtitle.innerHTML="<strong>Place first point.</strong> Press and hold inside the image to place the first corner. Then continue placing the remaining corners in any order.";
     else if(count<4)subtitle.textContent="Place the remaining corners of the image area in any order.";
-    else subtitle.innerHTML="Drag any corner to refine the image area, then choose <strong>Apply Image Area</strong>.";
+    else subtitle.innerHTML="Quick drag any corner for coarse adjustment, or press and hold for precision placement. Then choose <strong>Apply Image Area</strong>.";
     return;
   }
   subtitle.innerHTML="<strong>Confirm or choose a ratio.</strong> Resize the frame or position the image. Use 4-Point to remove the background or correct skew.";
@@ -953,7 +953,7 @@ function updateRatioContextMessage(){
     const count=(cropState.corners||[]).length;
     if(count===0)note.innerHTML="<strong>Place first point.</strong> Press and hold inside the image to place the first corner. Then continue placing the remaining corners in any order.";
     else if(count<4)note.textContent="Place the remaining corners of the image area in any order.";
-    else note.textContent="Drag any corner to refine the image area, then choose Apply Image Area.";
+    else note.textContent="Quick drag any corner for coarse adjustment, or press and hold for precision placement. Then choose Apply Image Area.";
     return;
   }
   note.textContent=`${ratioLabel(cropState.ratioKey)} selected. Drag a corner to resize the crop while keeping this ratio, or reposition the image inside it.`;
@@ -1058,32 +1058,6 @@ function moveCornerHandleDrag(stagePoint){
 }
 function showCropPrecision(){const o=$("#crop-precision-overlay");o.classList.add("active");o.setAttribute("aria-hidden","false")}
 function hideCropPrecision(){const o=$("#crop-precision-overlay");o.classList.remove("active");o.setAttribute("aria-hidden","true")}
-function beginLockedHandlePrecision(handle,stagePoint,startFrame){
-  if(!isMobileLayout()||!handle||!stagePointInsideImage(stagePoint))return false;
-  const saved={x:cropState.x,y:cropState.y,scale:cropState.scale,rotation:cropState.rotation,frame:{...(startFrame||cropState.frame)}};
-  const ip=clampImagePoint(stageToImagePoint(stagePoint)),targetScale=Math.min(saved.scale*1.75,saved.scale+2.5);
-  cropState.lockedHandlePrecision={active:true,handle,saved,last:{...stagePoint}};
-  cropState.drag=null;
-  setImagePointAtStageCenter(ip,targetScale);
-  $("#crop-frame").classList.add("precision-hidden");
-  $("#crop-stage").classList.add("crop-handle-precision");
-  showCropPrecision();renderCrop();return true;
-}
-function finishLockedHandlePrecision(commit=true){
-  const g=cropState.lockedHandlePrecision;if(!g)return;
-  const stage=$("#crop-stage").getBoundingClientRect();
-  const ip=clampImagePoint(stageToImagePoint({x:stage.width/2,y:stage.height/2}));
-  Object.assign(cropState,{x:g.saved.x,y:g.saved.y,scale:g.saved.scale,rotation:g.saved.rotation,frame:{...g.saved.frame}});
-  hideCropPrecision();
-  $("#crop-frame").classList.remove("precision-hidden");
-  $("#crop-stage").classList.remove("crop-handle-precision");
-  cropState.lockedHandlePrecision=null;
-  if(commit){
-    const restoredStagePoint=imageToStagePoint(ip);
-    resizeLockedCrop(g.handle,restoredStagePoint,g.saved.frame);
-  }
-  renderCrop();
-}
 function stagePointInsideImage(p){
   const b=visibleImageBounds();return p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h;
 }
@@ -2099,15 +2073,21 @@ cropStage.addEventListener("touchstart",e=>{
   if(cropState.mode==="corners"){
     e.preventDefault();
     if(e.touches.length===2){
-      const pending=cropState.freeTouchGesture;if(pending?.timer)clearTimeout(pending.timer);if(cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;
-      pushCropHistory();const a=e.touches[0],b=e.touches[1];cropTouches={dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y};return;
+      const pending=cropState.freeTouchGesture;if(pending?.timer)clearTimeout(pending.timer);
+      const precisionActive=!!cropState.freePointGesture?.active;
+      if(!precisionActive){cropState.freeTouchGesture=null;pushCropHistory()}
+      const a=e.touches[0],b=e.touches[1];cropTouches={type:precisionActive?"corner-precision-pinch":"corner-pinch",dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y};return;
     }
     if(e.touches.length===1){
       const t=e.touches[0],p=touchStagePoint(t);if(!stagePointInsideImage(p))return;
       const target=document.elementFromPoint(t.clientX,t.clientY)||e.target;
       if(target?.dataset?.corner!==undefined){
-        beginCornerHandleDrag(+target.dataset.corner,p);
-        cropState.freeTouchGesture={start:p,last:p,moved:false,cornerDrag:true};
+        const index=+target.dataset.corner;
+        cropState.freeTouchGesture={start:p,last:p,moved:false,cornerIndex:index,cornerPending:true,timer:setTimeout(()=>{
+          const g=cropState.freeTouchGesture;if(!g||!g.cornerPending||g.moved)return;
+          cropState.drag=null;
+          if(beginFreePointPrecision(g.start,index)){g.precision=true;g.cornerPending=false;g.last={...g.start}}
+        },350)};
         return;
       }
       cropState.freeTouchGesture={start:p,last:p,moved:false,replaceIndex:null,timer:setTimeout(()=>{const g=cropState.freeTouchGesture;if(!g)return;if(beginFreePointPrecision(g.start,null)){g.precision=true;g.last={...g.start}}},350)};
@@ -2116,10 +2096,10 @@ cropStage.addEventListener("touchstart",e=>{
   }
   if(e.touches.length===2){
     e.preventDefault();
-    const pending=cropTouches;if(pending?.timer)clearTimeout(pending.timer);
-    if(!cropState.lockedHandlePrecision?.active){cropState.drag=null;pushCropHistory()}
+    cropState.drag=null;
+    pushCropHistory();
     const a=e.touches[0],b=e.touches[1];
-    cropTouches={type:cropState.lockedHandlePrecision?.active?"locked-precision-pinch":"pinch",dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y};
+    cropTouches={type:"pinch",dist:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),scale:cropState.scale,cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,x:cropState.x,y:cropState.y};
     return;
   }
   if(e.touches.length===1){
@@ -2128,42 +2108,23 @@ cropStage.addEventListener("touchstart",e=>{
     const target=document.elementFromPoint(t.clientX,t.clientY)||e.target;
     const handle=target?.dataset?.handle;
     pushCropHistory();
-    if(handle){
-      const startFrame={...cropState.frame};
-      cropState.drag={type:"locked-handle",handle,start:p,frame:startFrame};
-      cropTouches={type:"locked-handle-pending",start:p,last:p,moved:false,handle,timer:setTimeout(()=>{const g=cropTouches;if(!g||g.type!=="locked-handle-pending"||g.moved)return;if(beginLockedHandlePrecision(handle,p,startFrame)){g.type="locked-handle-precision";g.last={...p}}},350)};
-    }else{
-      cropTouches={type:"drag"};
-      cropState.drag={type:"image",start:p,x:cropState.x,y:cropState.y};
-    }
+    cropTouches={type:"drag"};
+    cropState.drag=handle
+      ?{type:"locked-handle",handle,start:p,frame:{...cropState.frame}}
+      :{type:"image",start:p,x:cropState.x,y:cropState.y};
   }
 },{passive:false});
 cropStage.addEventListener("touchmove",e=>{
   if(cropState.mode==="corners"){
     e.preventDefault();
     if(e.touches.length===2&&cropTouches){const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop();return}
-    const g=cropState.freeTouchGesture;if(e.touches.length===1&&g){const p=touchStagePoint(e.touches[0]);if(g.cornerDrag&&cropState.drag?.type==="corner-handle"){g.last=p;moveCornerHandleDrag(p)}else if(g.precision&&cropState.freePointGesture?.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}else if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){g.moved=true;clearTimeout(g.timer)}}return;
+    const g=cropState.freeTouchGesture;if(e.touches.length===1&&g){const p=touchStagePoint(e.touches[0]);if(g.precision&&cropState.freePointGesture?.active){const dx=p.x-g.last.x,dy=p.y-g.last.y;g.last=p;cropState.x+=dx;cropState.y+=dy;renderCrop()}else if(g.cornerPending){if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){g.moved=true;g.cornerPending=false;clearTimeout(g.timer);beginCornerHandleDrag(g.cornerIndex,g.start)}if(cropState.drag?.type==="corner-handle"){g.last=p;moveCornerHandleDrag(p)}}else if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>10){g.moved=true;clearTimeout(g.timer)}}return;
   }
-  if(e.touches.length===2&&(cropTouches?.type==="pinch"||cropTouches?.type==="locked-precision-pinch")){
+  if(e.touches.length===2&&cropTouches?.type==="pinch"){
     e.preventDefault();
     const a=e.touches[0],b=e.touches[1],d=Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY),cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;
     cropState.scale=Math.max(.01,cropTouches.scale*(d/Math.max(1,cropTouches.dist)));
     cropState.x=cropTouches.x+(cx-cropTouches.cx);cropState.y=cropTouches.y+(cy-cropTouches.cy);renderCrop();return;
-  }
-  if(e.touches.length===1&&cropState.lockedHandlePrecision?.active){
-    e.preventDefault();
-    const p=touchStagePoint(e.touches[0]),g=cropState.lockedHandlePrecision;
-    const last=cropTouches?.last||g.last||p,dx=p.x-last.x,dy=p.y-last.y;
-    cropState.x+=dx;cropState.y+=dy;g.last={...p};
-    if(cropTouches)cropTouches.last={...p};
-    renderCrop();return;
-  }
-  if(e.touches.length===1&&cropTouches?.type==="locked-handle-pending"&&cropState.drag){
-    e.preventDefault();
-    const p=touchStagePoint(e.touches[0]);
-    if(Math.hypot(p.x-cropTouches.start.x,p.y-cropTouches.start.y)>10){cropTouches.moved=true;if(cropTouches.timer)clearTimeout(cropTouches.timer);cropTouches.type="drag"}
-    if(cropTouches.type==="drag"){resizeLockedCrop(cropState.drag.handle,p,cropState.drag.frame);renderCrop()}
-    return;
   }
   if(e.touches.length===1&&cropTouches?.type==="drag"&&cropState.drag){
     e.preventDefault();
@@ -2178,17 +2139,17 @@ cropStage.addEventListener("touchmove",e=>{
 },{passive:false});
 cropStage.addEventListener("touchend",e=>{
   if(cropState.mode==="corners"){
-    if(e.touches.length===0){const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(true);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null}
+    if(cropState.freePointGesture?.active){
+      if(e.touches.length===0){finishFreePointPrecision(true);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null}
+      else if(e.touches.length===1){const p=touchStagePoint(e.touches[0]);if(cropState.freeTouchGesture)cropState.freeTouchGesture.last={...p};cropTouches=null}
+      return;
+    }
+    if(e.touches.length===0){const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null}
     return;
   }
-  if(cropState.lockedHandlePrecision?.active){
-    if(e.touches.length===0){finishLockedHandlePrecision(true);cropState.drag=null;cropTouches=null}
-    else if(e.touches.length===1){const p=touchStagePoint(e.touches[0]);cropState.lockedHandlePrecision.last={...p};cropTouches={type:"locked-handle-precision",last:{...p}}}
-    return;
-  }
-  if(e.touches.length===0){if(cropTouches?.timer)clearTimeout(cropTouches.timer);cropState.drag=null;cropTouches=null;}
+  if(e.touches.length===0){cropState.drag=null;cropTouches=null;}
 },{passive:false});
-cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(false);if(cropTouches?.timer)clearTimeout(cropTouches.timer);if(cropState.lockedHandlePrecision?.active)finishLockedHandlePrecision(false);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null},{passive:false});
+cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null},{passive:false});
 cropStage.addEventListener("wheel",e=>{e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
 let alignmentResizeTimer=null;
 window.addEventListener("resize",()=>{
