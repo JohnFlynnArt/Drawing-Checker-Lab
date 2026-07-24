@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.014 | Mobile 4-Point Precision Corner Refinement -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.022 | Outline Opacity + 2-Point Counter Repair -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.014</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.022</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -46,6 +46,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .audit.active{background:var(--amber);border-color:#fbbf24;color:#111}
 .upload-box{border:1px dashed var(--border);background:rgba(0,0,0,.15);border-radius:7px;padding:8px;display:flex;gap:8px;align-items:center;justify-content:space-between}
 .upload-box input{width:100%;font-size:11px;color:var(--muted)}
+.source-filename{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .disclosure-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.disclosure-toggle{min-width:34px;padding:4px 8px;font-size:15px;line-height:1}.source-body{display:flex;flex-direction:column;gap:8px}.source-body.collapsed{display:none}
 .two-point-body{display:flex;flex-direction:column;gap:8px}.two-point-body.collapsed{display:none}
 .small-label{font-size:11px;color:var(--muted)}
@@ -239,12 +240,16 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     line-height:1.2;
     text-transform:uppercase;
   }
-  .desktop-prep-sidebar .crop-guidance{
+  .desktop-prep-sidebar .crop-guidance,
+  #desktop-alignment-card .crop-guidance,
+  #desktop-pins-card .crop-guidance{
     margin:0 0 2px;
     padding:0 0 10px;
     border-bottom:1px solid var(--border);
     color:var(--muted);
     font-size:11px;
+    text-align:left;
+    line-height:1.45;
   }
   .desktop-prep-sidebar .crop-format{
     display:flex;
@@ -345,9 +350,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </div>
 </section>
 <section class="card" id="desktop-alignment-card">
-<div class="card-title">Alignment Strategy</div>
+<div class="card-title">Image Alignment</div>
+<div class="crop-guidance" id="desktop-alignment-instruction"><strong>Reference and drawing ratios match.</strong> Fine tune with micro adjustments if needed.</div>
 <div class="row3">
-<button class="active" id="desktop-sight">Ratio Matching</button>
+<button class="active" id="desktop-sight">Matching Ratios</button>
 <button id="desktop-two">2-Point</button>
 <button id="desktop-free">Free Align</button>
 </div>
@@ -355,9 +361,8 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <section class="card" id="desktop-pins-card" style="display:none">
 <div class="disclosure-head"><div class="card-title">2-Point Alignment</div><button aria-expanded="true" aria-label="Collapse 2-Point Alignment" class="disclosure-toggle" id="desktop-two-toggle">▴</button></div>
 <div class="two-point-body" id="desktop-two-body">
-<strong id="desktop-two-title">Set Reference Points</strong>
-<div class="small-label" id="desktop-two-status">Point 1 of 2</div>
-<button class="btn-primary" id="desktop-two-action">Set Reference Points (0/2)</button>
+<div class="crop-guidance" id="desktop-two-instruction"><strong>Place Alignment Point 1 of 2</strong> — Press and hold for Precision Placement, move the image under the crosshair, then release.</div>
+<button class="btn-primary" id="desktop-two-action">Set Alignment Points (0/2)</button>
 <div class="row2">
 <button id="desktop-undo-point" style="display:none">Undo Last Point</button>
 <button id="desktop-reset-points" style="display:none">Reset All Points</button>
@@ -376,8 +381,8 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </div>
 <div class="desktop-bottom" id="desktop-bottom-controls">
 <div class="row2">
-<button id="desktop-target-ref">Target Ref</button>
-<button class="active" id="desktop-target-draw">Target Draw</button>
+<button id="desktop-target-ref">Reference</button>
+<button class="active" id="desktop-target-draw">Drawing</button>
 </div>
 <div class="slider-wrap">
 <div class="slider-head"><span id="desktop-opacity-label">Drawing Opacity</span></div>
@@ -517,7 +522,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.014 — Mobile 4-Point Precision Corner Refinement */
+/* UX-003A Rev 2.022 — Outline Opacity + 2-Point Counter Repair */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -546,6 +551,7 @@ const state={
   setupComplete:false,
   referenceRatio:null,
   drawingRatio:null,
+  sourceFilenames:{ref:"",draw:""},
   sourceImagesCollapsed:false,
   twoPointCollapsed:false,
   desktopIndependentBase:{refScale:1,drawScale:1},
@@ -767,7 +773,7 @@ function beginNewMobileSession(){
   state.aligned=false;
   state.aspectMismatch=false;
   state.mobileStrategyChosen=false;
-  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;state.mobilePresentationMemory={sight:null,free:null};state.mobileViewportReserve={top:0,bottom:0};
+  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceFilenames={ref:"",draw:""};state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;state.mobilePresentationMemory={sight:null,free:null};state.mobileViewportReserve={top:0,bottom:0};
   closePopover();
   render();
 }
@@ -1148,12 +1154,13 @@ function applyCornerCorrection(){
 function releaseCropUrls(){cropState.ownedUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});cropState.ownedUrls=[];cropState.url=null}
 function cancelCrop(){closeCropEditor();releaseCropUrls()}
 function commitCrop(){
+  const sourceFilename=cropState.file?.name||"Prepared image";
   cropState.acceptedRatio=currentPreparationRatio();
   const stage=$("#crop-stage").getBoundingClientRect(),f=cropState.frame,img=cropState.image;if(!img||!f.w||!f.h)return;const maxOutput=2000,pixelRatio=Math.min(2,devicePixelRatio||1);let outW=Math.round(f.w*pixelRatio),outH=Math.round(f.h*pixelRatio),shrink=Math.min(1,maxOutput/Math.max(outW,outH));outW=Math.max(1,Math.round(outW*shrink));outH=Math.max(1,Math.round(outH*shrink));
-  const factor=outW/f.w,canvas=document.createElement("canvas");canvas.width=outW;canvas.height=outH;const ctx=canvas.getContext("2d",{alpha:false});ctx.fillStyle="#fff";ctx.fillRect(0,0,outW,outH);const centerX=stage.width/2+cropState.x,centerY=stage.height/2+cropState.y;ctx.save();ctx.scale(factor,factor);ctx.translate(-f.x,-f.y);ctx.translate(centerX,centerY);ctx.rotate(cropState.rotation*Math.PI/180);ctx.scale(cropState.scale,cropState.scale);ctx.drawImage(img,-img.naturalWidth/2,-img.naturalHeight/2);ctx.restore();canvas.toBlob(blob=>{if(!blob){alert("The image could not be prepared. Please try again.");return}closeCropEditor();releaseCropUrls();loadPreparedImage(cropState.kind,blob)},"image/jpeg",.94)
+  const factor=outW/f.w,canvas=document.createElement("canvas");canvas.width=outW;canvas.height=outH;const ctx=canvas.getContext("2d",{alpha:false});ctx.fillStyle="#fff";ctx.fillRect(0,0,outW,outH);const centerX=stage.width/2+cropState.x,centerY=stage.height/2+cropState.y;ctx.save();ctx.scale(factor,factor);ctx.translate(-f.x,-f.y);ctx.translate(centerX,centerY);ctx.rotate(cropState.rotation*Math.PI/180);ctx.scale(cropState.scale,cropState.scale);ctx.drawImage(img,-img.naturalWidth/2,-img.naturalHeight/2);ctx.restore();canvas.toBlob(blob=>{if(!blob){alert("The image could not be prepared. Please try again.");return}closeCropEditor();releaseCropUrls();loadPreparedImage(cropState.kind,blob,sourceFilename)},"image/jpeg",.94)
 }
 
-function loadPreparedImage(kind,blob){
+function loadPreparedImage(kind,blob,sourceFilename){
   closePopover();
   state.loadingKind=kind;
   render();
@@ -1163,7 +1170,7 @@ function loadPreparedImage(kind,blob){
     refImg.classList.remove("loaded");drawImg.classList.remove("loaded");
     refImg.removeAttribute("src");drawImg.removeAttribute("src");
     removeMarkers("all");resetWorkspace();resetLayer("ref");resetLayer("draw");
-    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;state.sourceImagesCollapsed=false;
+    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;state.sourceFilenames={ref:"",draw:""};state.sourceImagesCollapsed=false;
   }else{
     revoke(drawImg);drawImg.classList.remove("loaded");drawImg.removeAttribute("src");
     removeMarkers("draw");resetLayer("draw");
@@ -1176,6 +1183,7 @@ function loadPreparedImage(kind,blob){
   img.onload=async()=>{
     try{if(img.decode)await img.decode()}catch(_){}
     img.classList.add("loaded");
+    state.sourceFilenames[kind]=sourceFilename||"Prepared image";
     state.loadingKind=null;
     if(kind==="ref"){state.referenceRatio=cropState.acceptedRatio||img.naturalWidth/img.naturalHeight;state.setupStage="drawing";}
     else{
@@ -1257,8 +1265,7 @@ function autoSight(){
   });
 }
 
-function resetMobileObservationToOverlay(){
-  if(!isMobileLayout())return;
+function resetObservationToOverlay(){
   if(state.blinkTimer){
     clearInterval(state.blinkTimer);
     state.blinkTimer=null;
@@ -1266,10 +1273,18 @@ function resetMobileObservationToOverlay(){
   state.blinkOn=true;
   state.compare="overlay";
 }
+function resetMobileObservationToOverlay(){
+  if(!isMobileLayout())return;
+  resetObservationToOverlay();
+}
 function setAlignment(type){
   if(isMobileLayout()){
     state.mobileStrategyChosen=true;
     resetMobileObservationToOverlay();
+  }else if(state.alignment!==type){
+    // Every Desktop alignment method begins from the default Compare baseline.
+    // Preserve alignment, layer, opacity, and view state; reset only Compare.
+    resetObservationToOverlay();
   }
 
   if(state.alignment===type){
@@ -1582,7 +1597,8 @@ function renderVisuals(){
   }else if(state.phase==="point-draw"){
     refImg.style.opacity=.2;drawImg.style.opacity=1;
   }else if(state.compare==="outline"){
-    refImg.style.opacity=1;drawImg.style.opacity=1;
+    refImg.style.opacity=state.layers.ref.opacity;
+    drawImg.style.opacity=state.layers.draw.opacity;
     state.layers[state.target].el.classList.add("difference");
   }else{
     refImg.style.opacity=state.layers.ref.opacity;
@@ -1603,13 +1619,18 @@ function statusText(){
   if(state.alignment==="sight"&&state.aspectMismatch)return"Aspect ratios differ. Try 2-Point, Free Align, or manual adjustment.";
   return mobile?"Workspace locked. Drag to pan and pinch to zoom.":"Ratio Matching alignment active.";
 }
+function escapeHTML(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]))}
 function renderDesktopSlots(){
   const rs=$("#desktop-ref-slot"),ds=$("#desktop-draw-slot");
-  if(hasRef())rs.innerHTML=`<span class="small-label" style="color:var(--green);font-weight:700">✓ Reference Ready</span><button id="desktop-change-ref" class="btn-danger">Change</button>`;
-  else rs.innerHTML=`<input id="desktop-ref-input" type="file" accept="image/*">`;
+  if(hasRef()){
+    const filename=state.sourceFilenames.ref||"Prepared image";
+    rs.innerHTML=`<span class="small-label source-filename" style="color:var(--green);font-weight:700" title="${escapeHTML(filename)}">✓ ${escapeHTML(filename)}</span><button id="desktop-change-ref" class="btn-danger">Start Over</button>`;
+  }else rs.innerHTML=`<input id="desktop-ref-input" type="file" accept="image/*">`;
 
-  if(hasDraw())ds.innerHTML=`<span class="small-label" style="color:var(--green);font-weight:700">✓ Drawing Ready</span><button id="desktop-change-draw" class="btn-danger">Replace</button>`;
-  else ds.innerHTML=`<input id="desktop-draw-input" type="file" accept="image/*">`;
+  if(hasDraw()){
+    const filename=state.sourceFilenames.draw||"Prepared image";
+    ds.innerHTML=`<span class="small-label source-filename" style="color:var(--green);font-weight:700" title="${escapeHTML(filename)}">✓ ${escapeHTML(filename)}</span><button id="desktop-change-draw" class="btn-danger">New Drawing</button>`;
+  }else ds.innerHTML=`<input id="desktop-draw-input" type="file" accept="image/*">`;
 
   const ri=$("#desktop-ref-input");
   if(ri)ri.onchange=e=>{beginCrop("ref",e.target.files[0]);e.target.value=""};
@@ -1670,6 +1691,8 @@ function renderDesktopWorkflow(){
   const bottom=$("#desktop-bottom-controls");
   const title=$("#desktop-workflow-title");
   const copy=$("#desktop-workflow-copy");
+  const alignmentInstruction=$("#desktop-alignment-instruction");
+  const twoPointInstruction=$("#desktop-two-instruction");
   const drawSlot=$("#desktop-draw-slot");
   const sourceBody=$("#desktop-source-body");
   const sourceToggle=$("#desktop-source-toggle");
@@ -1698,8 +1721,37 @@ function renderDesktopWorkflow(){
     title.textContent="Alignment";
     copy.textContent="Both images are ready. Select Ratio Matching, 2-Point, or Free Align.";
   }else{
-    title.textContent=currentHeaderTitle();
-    copy.textContent=statusText();
+    title.textContent="Image Align and Compare";
+    copy.textContent="";
+  }
+
+  if(state.setupComplete){
+    const instruction=statusText();
+    if(alignmentInstruction){
+      if(state.alignment==="sight"){
+        alignmentInstruction.innerHTML=state.aspectMismatch
+          ? "<strong>Ratio mismatch detected.</strong> Try 2-Point or Free Align manual adjustments for best match."
+          : "<strong>Reference and drawing ratios match.</strong> Fine tune with micro adjustments if needed.";
+      }else if(state.alignment==="two"){
+        alignmentInstruction.innerHTML="<strong>Images have different proportions.</strong> Use 2-Point Alignment below to register the images using two matching reference points.";
+      }else{
+        alignmentInstruction.innerHTML="<strong>Drawing layer unlocked for manual adjustment.</strong> Use pan, rotate and scale to visually align the drawing.";
+      }
+      alignmentInstruction.style.display="block";
+    }
+    if(twoPointInstruction){
+      if(state.alignment==="two"&&!state.aligned&&state.points.ref.length<2){
+        const pointNumber=state.points.ref.length+1;
+        twoPointInstruction.innerHTML=`<strong>Place Reference Point ${pointNumber} of 2</strong> — Select and place 2 points on the Reference you want to match up with on the Drawing. Press and hold for Precision Placement, move the image under the crosshair, then release.`;
+      }else if(state.alignment==="two"&&!state.aligned&&state.points.draw.length<2){
+        const pointNumber=state.points.draw.length+1;
+        twoPointInstruction.innerHTML=`<strong>Place Drawing Point ${pointNumber} of 2</strong> — Select and place 2 points on Drawing that matches up with the points set on the Reference. Press and hold for Precision Placement, move the image under the crosshair, then release.`;
+      }else if(state.alignment==="two"&&!state.aligned){
+        twoPointInstruction.innerHTML="<strong>Points ready.</strong> Execute Match.";
+      }else{
+        twoPointInstruction.textContent=instruction;
+      }
+    }
   }
 }
 
@@ -1747,7 +1799,7 @@ function renderMobileWorkflow(){
 
   if(state.points.ref.length<2){
     next.disabled=false;
-    next.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
+    next.textContent=`Set Reference Points (1/2)`;
     next.classList.add("show");
     next.onclick=()=>beginPointPhase("ref");
     return;
@@ -1755,7 +1807,7 @@ function renderMobileWorkflow(){
 
   if(state.points.draw.length<2){
     next.disabled=false;
-    next.textContent=`Set Drawing Points (${state.points.draw.length}/2)`;
+    next.textContent=`Set Drawing Points (2/2)`;
     next.classList.add("show");
     next.onclick=()=>beginPointPhase("draw");
     return;
@@ -1797,8 +1849,6 @@ function render(){
     desktopTwoToggle.setAttribute("aria-label",state.twoPointCollapsed?"Expand 2-Point Alignment":"Collapse 2-Point Alignment");
   }
 
-  const desktopTwoTitle=$("#desktop-two-title");
-  const desktopTwoStatus=$("#desktop-two-status");
   const desktopTwoAction=$("#desktop-two-action");
   const desktopUndoPoint=$("#desktop-undo-point");
   const desktopResetPoints=$("#desktop-reset-points");
@@ -1807,22 +1857,16 @@ function render(){
     const refDone=state.points.ref.length===2;
     const drawDone=state.points.draw.length===2;
     if(!refDone){
-      desktopTwoTitle.textContent="Set Reference Points";
-      desktopTwoStatus.textContent=`Point ${state.points.ref.length+1} of 2`;
-      desktopTwoAction.textContent=`Set Reference Points (${state.points.ref.length}/2)`;
+      desktopTwoAction.textContent=`Set Reference Point (1/2)`;
       desktopTwoAction.style.display="block";
       desktopTwoAction.classList.remove("active","two-draw-state");
       desktopTwoAction.classList.add("two-ref-state");
     }else if(!drawDone){
-      desktopTwoTitle.textContent="Set Drawing Points";
-      desktopTwoStatus.textContent=`Point ${state.points.draw.length+1} of 2`;
-      desktopTwoAction.textContent=`Set Drawing Points (${state.points.draw.length}/2)`;
+      desktopTwoAction.textContent=`Set Drawing Point (2/2)`;
       desktopTwoAction.style.display="block";
       desktopTwoAction.classList.remove("active","two-ref-state");
       desktopTwoAction.classList.add("two-draw-state");
     }else{
-      desktopTwoTitle.textContent="Ready to Execute Match";
-      desktopTwoStatus.textContent="2 Reference points and 2 Drawing points selected";
       desktopTwoAction.style.display="none";
       desktopTwoAction.classList.remove("active","two-ref-state","two-draw-state");
     }
