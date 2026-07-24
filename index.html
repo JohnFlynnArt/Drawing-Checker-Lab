@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.022 | Outline Opacity + 2-Point Counter Repair -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.023 | Desktop Image Lock Synchronization -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.022</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.023</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -34,6 +34,8 @@ button{touch-action:manipulation}
 .card-title{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.layer-interaction-row{display:grid;grid-template-columns:.82fr .82fr 1.36fr;gap:8px}
+.layer-interaction-row #desktop-image-lock{font-size:11px;padding-left:7px;padding-right:7px;white-space:nowrap}
 button{border:1px solid var(--border);background:#2d2d34;color:var(--text);border-radius:7px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer}
 button.active{background:var(--blue);border-color:#60a5fa;color:#fff}
 button:disabled{opacity:.35;cursor:not-allowed}
@@ -380,9 +382,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </section>
 </div>
 <div class="desktop-bottom" id="desktop-bottom-controls">
-<div class="row2">
+<div class="layer-interaction-row">
 <button id="desktop-target-ref">Reference</button>
 <button class="active" id="desktop-target-draw">Drawing</button>
+<button class="active" id="desktop-image-lock" aria-pressed="true">🔒 Images Locked</button>
 </div>
 <div class="slider-wrap">
 <div class="slider-head"><span id="desktop-opacity-label">Drawing Opacity</span></div>
@@ -522,7 +525,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.022 — Outline Opacity + 2-Point Counter Repair */
+/* UX-003A Rev 2.023 — Desktop Image Lock Synchronization */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -544,6 +547,7 @@ const state={
   blinkOn:true,
   blinkTimer:null,
   markersHidden:false,
+  desktopImagesLocked:true,
   mobileStrategyChosen:false,
   loadingKind:null,
   returnPhase:"workspace",
@@ -686,6 +690,7 @@ function captureDesktopTwoPointState(){
     returnPhase:state.returnPhase,
     aligned:state.aligned,
     markersHidden:state.markersHidden,
+    desktopImagesLocked:state.desktopImagesLocked,
     twoPointCollapsed:state.twoPointCollapsed,
     target:state.target,
     workspace:{...state.workspace},
@@ -707,6 +712,7 @@ function restoreDesktopTwoPointState(){
   state.returnPhase=saved.returnPhase;
   state.aligned=saved.aligned;
   state.markersHidden=saved.markersHidden;
+  state.desktopImagesLocked=saved.desktopImagesLocked!==undefined?saved.desktopImagesLocked:true;
   state.twoPointCollapsed=saved.twoPointCollapsed;
   state.target=saved.target;
   state.workspace={...saved.workspace};
@@ -1335,6 +1341,7 @@ function setAlignment(type){
   }
 
   state.alignment=type;
+  if(!isMobileLayout()) state.desktopImagesLocked=type!=="free";
   state.markersHidden=false;
   state.phase="workspace";
   state.returnPhase="workspace";
@@ -1544,6 +1551,7 @@ function computeTwoPoint(){
   d.x=R1.x-((D1.x*cos-D1.y*sin)*scale);
   d.y=R1.y-((D1.x*sin+D1.y*cos)*scale);
   state.aligned=true;
+  if(!isMobileLayout())state.desktopImagesLocked=true;
   state.returnPhase="workspace";
   state.phase="workspace";
   state.target="draw";
@@ -1883,6 +1891,12 @@ function render(){
 
   $("#desktop-target-ref").classList.toggle("active",state.target==="ref");
   $("#desktop-target-draw").classList.toggle("active",state.target==="draw");
+  const desktopImageLock=$("#desktop-image-lock");
+  if(desktopImageLock){
+    desktopImageLock.classList.toggle("active",state.desktopImagesLocked);
+    desktopImageLock.setAttribute("aria-pressed",String(state.desktopImagesLocked));
+    desktopImageLock.textContent=state.desktopImagesLocked?"🔒 Images Locked":"🔓 Images Unlocked";
+  }
   const unlocked=state.phase==="adjust";
   $("#m-nav").classList.toggle("active",!unlocked);
   $("#m-nav").innerHTML=unlocked
@@ -1931,6 +1945,7 @@ $("#desktop-blink").onclick=()=>setCompare("blink");
 $("#desktop-outline").onclick=()=>setCompare("outline");
 $("#desktop-target-ref").onclick=()=>setTarget("ref");
 $("#desktop-target-draw").onclick=()=>setTarget("draw");
+$("#desktop-image-lock").onclick=()=>{state.desktopImagesLocked=!state.desktopImagesLocked;render();};
 $("#desktop-opacity").oninput=e=>{state.layers[state.target].opacity=+e.target.value;renderVisuals()};
 $("#desktop-reset").onclick=()=>{
   state.aligned=false;
@@ -2292,13 +2307,16 @@ window.addEventListener("mousemove",e=>{
   const dx=e.clientX-mousePan.x,dy=e.clientY-mousePan.y;
   mousePan={x:e.clientX,y:e.clientY};
 
-  if(state.phase==="adjust"){
+  if(state.desktopImagesLocked){
+    const stepX=dx/state.workspace.zoom,stepY=dy/state.workspace.zoom;
+    state.layers.ref.x+=stepX;
+    state.layers.ref.y+=stepY;
+    state.layers.draw.x+=stepX;
+    state.layers.draw.y+=stepY;
+  }else{
     const l=state.layers[state.target];
     l.x+=dx/state.workspace.zoom;
     l.y+=dy/state.workspace.zoom;
-  }else{
-    state.workspace.x+=dx;
-    state.workspace.y+=dy;
   }
   renderVisuals();
 });
