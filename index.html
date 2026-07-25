@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.023 | Desktop Image Lock Synchronization -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.024A | Workflow Hub Refinement -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.023</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.024A</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -392,6 +392,10 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input id="desktop-opacity" max="1" min="0" step="0.01" type="range" value="1"/>
 </div>
 <button class="btn-danger" id="desktop-reset">Reset View</button>
+<div class="row2" id="desktop-master-workflow-actions">
+<button id="desktop-new-drawing">New Drawing</button>
+<button class="btn-danger" id="desktop-start-over">Start Over</button>
+</div>
 </div>
 </aside>
 <main class="main">
@@ -525,7 +529,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.023 — Desktop Image Lock Synchronization */
+/* UX-003A Rev 2.024A — Workflow Hub Refinement */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -560,6 +564,7 @@ const state={
   twoPointCollapsed:false,
   desktopIndependentBase:{refScale:1,drawScale:1},
   desktopTwoPointMemory:null,
+  desktopTwoPointPreMatch:null,
   mobileTwoPointMemory:null,
   mobilePresentationMemory:{sight:null,free:null},
   mobileViewportReserve:{top:0,bottom:0}
@@ -781,6 +786,74 @@ function beginNewMobileSession(){
   state.mobileStrategyChosen=false;
   state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceFilenames={ref:"",draw:""};state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;state.mobilePresentationMemory={sight:null,free:null};state.mobileViewportReserve={top:0,bottom:0};
   closePopover();
+  render();
+}
+function beginNewDesktopSession(){
+  if(isMobileLayout())return;
+  closePopover();
+  closeCropEditor();
+  revoke(refImg);revoke(drawImg);
+  refImg.removeAttribute("src");drawImg.removeAttribute("src");
+  refImg.classList.remove("loaded");drawImg.classList.remove("loaded");
+  removeMarkers("all");
+  resetWorkspace();resetLayer("ref");resetLayer("draw");
+  resetObservationToOverlay();
+  state.phase="workspace";
+  state.returnPhase="workspace";
+  state.alignment="sight";
+  state.target="draw";
+  state.layers.ref.z=1;state.layers.draw.z=2;
+  state.aligned=false;
+  state.aspectMismatch=false;
+  state.desktopImagesLocked=true;
+  state.setupStage="reference";
+  state.setupComplete=false;
+  state.referenceRatio=null;
+  state.drawingRatio=null;
+  state.sourceFilenames={ref:"",draw:""};
+  state.sourceImagesCollapsed=false;
+  state.twoPointCollapsed=false;
+  state.desktopIndependentBase={refScale:1,drawScale:1};
+  state.desktopTwoPointMemory=null;
+  state.desktopTwoPointPreMatch=null;
+  state.loadingKind=null;
+  render();
+}
+function beginNewDesktopDrawing(){
+  if(isMobileLayout()||!hasRef())return;
+  closePopover();
+  closeCropEditor();
+
+  // Rev 2.024A: Image Upload is the workflow hub. Preserve the prepared
+  // Reference, clear only the Drawing, and wait for the user to choose the
+  // next Drawing from the normal upload screen. Do not open a file picker.
+  revoke(drawImg);
+  drawImg.removeAttribute("src");
+  drawImg.classList.remove("loaded");
+  removeMarkers("all");
+  resetWorkspace();
+  resetLayer("ref");
+  resetLayer("draw");
+  resetObservationToOverlay();
+  state.phase="workspace";
+  state.returnPhase="workspace";
+  state.alignment="sight";
+  state.target="draw";
+  state.layers.ref.z=1;
+  state.layers.draw.z=2;
+  state.aligned=false;
+  state.aspectMismatch=false;
+  state.desktopImagesLocked=true;
+  state.setupStage="drawing";
+  state.setupComplete=false;
+  state.drawingRatio=null;
+  state.sourceFilenames.draw="";
+  state.sourceImagesCollapsed=false;
+  state.twoPointCollapsed=false;
+  state.desktopIndependentBase={refScale:1,drawScale:1};
+  state.desktopTwoPointMemory=null;
+  state.desktopTwoPointPreMatch=null;
+  state.loadingKind=null;
   render();
 }
 const cropState={
@@ -1176,11 +1249,11 @@ function loadPreparedImage(kind,blob,sourceFilename){
     refImg.classList.remove("loaded");drawImg.classList.remove("loaded");
     refImg.removeAttribute("src");drawImg.removeAttribute("src");
     removeMarkers("all");resetWorkspace();resetLayer("ref");resetLayer("draw");
-    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;state.sourceFilenames={ref:"",draw:""};state.sourceImagesCollapsed=false;
+    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;state.sourceFilenames={ref:"",draw:""};state.sourceImagesCollapsed=false;state.desktopTwoPointMemory=null;state.desktopTwoPointPreMatch=null;
   }else{
     revoke(drawImg);drawImg.classList.remove("loaded");drawImg.removeAttribute("src");
     removeMarkers("draw");resetLayer("draw");
-    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;
+    state.aligned=false;state.phase="workspace";state.aspectMismatch=false;state.desktopTwoPointMemory=null;state.desktopTwoPointPreMatch=null;
   }
 
   const img=kind==="ref"?refImg:drawImg;
@@ -1502,6 +1575,7 @@ function resetAllPoints(){
     beginPointPhase("ref");
   }else{
     state.desktopTwoPointMemory=null;
+    state.desktopTwoPointPreMatch=null;
     initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
   }
 }
@@ -1532,6 +1606,17 @@ function placePoint(clientX,clientY){
 
 function computeTwoPoint(){
   if(state.points.ref.length<2||state.points.draw.length<2)return;
+  if(!isMobileLayout()){
+    state.desktopTwoPointPreMatch={
+      points:{ref:state.points.ref.map(p=>({...p})),draw:state.points.draw.map(p=>({...p}))},
+      workspace:{...state.workspace},
+      layers:{ref:snapshotLayer("ref"),draw:snapshotLayer("draw")},
+      target:state.target,
+      phase:state.phase,
+      returnPhase:state.returnPhase,
+      desktopIndependentBase:{...state.desktopIndependentBase}
+    };
+  }
   const [R1,R2]=state.points.ref,[D1,D2]=state.points.draw;
   const distR=Math.hypot(R2.x-R1.x,R2.y-R1.y),distD=Math.hypot(D2.x-D1.x,D2.y-D1.y);
   if(!distD)return;
@@ -1645,9 +1730,9 @@ function renderDesktopSlots(){
   const di=$("#desktop-draw-input");
   if(di)di.onchange=e=>{beginCrop("draw",e.target.files[0]);e.target.value=""};
   const cr=$("#desktop-change-ref");
-  if(cr)cr.onclick=()=>$("#mobile-ref-input").click();
+  if(cr)cr.onclick=beginNewDesktopSession;
   const cd=$("#desktop-change-draw");
-  if(cd)cd.onclick=()=>$("#mobile-draw-library").click();
+  if(cd)cd.onclick=beginNewDesktopDrawing;
 }
 function renderStart(){
   const overlay=$("#foundation-start"),title=$("#foundation-title"),copy=$("#foundation-copy"),actions=$("#foundation-actions"),note=$("#foundation-note");
@@ -1713,8 +1798,12 @@ function renderDesktopWorkflow(){
   }
 
   const atAlignment=state.setupStage==="alignment"||state.setupComplete;
-  alignmentCard.style.display=atAlignment?"flex":"none";
-  compareCard.style.display=(state.setupComplete&&!(state.alignment==="two"&&!state.aligned))?"flex":"none";
+  const activeTwoPointSetup=state.setupComplete&&state.alignment==="two"&&!state.aligned;
+  // Rev 2.024A retains the approved toolbox handoff: selecting 2-Point
+  // collapses Image Alignment so Execute Match remains in view. After Match,
+  // Image Alignment returns and the 2-Point toolbox collapses.
+  alignmentCard.style.display=(atAlignment&&!activeTwoPointSetup)?"flex":"none";
+  compareCard.style.display=(state.setupComplete&&!activeTwoPointSetup)?"flex":"none";
   bottom.style.display=state.setupComplete?"flex":"none";
   if(pinsCard&&!state.setupComplete)pinsCard.style.display="none";
 
@@ -1891,6 +1980,8 @@ function render(){
 
   $("#desktop-target-ref").classList.toggle("active",state.target==="ref");
   $("#desktop-target-draw").classList.toggle("active",state.target==="draw");
+  const desktopNewDrawing=$("#desktop-new-drawing");
+  if(desktopNewDrawing)desktopNewDrawing.disabled=!hasRef();
   const desktopImageLock=$("#desktop-image-lock");
   if(desktopImageLock){
     desktopImageLock.classList.toggle("active",state.desktopImagesLocked);
@@ -1947,15 +2038,39 @@ $("#desktop-target-ref").onclick=()=>setTarget("ref");
 $("#desktop-target-draw").onclick=()=>setTarget("draw");
 $("#desktop-image-lock").onclick=()=>{state.desktopImagesLocked=!state.desktopImagesLocked;render();};
 $("#desktop-opacity").oninput=e=>{state.layers[state.target].opacity=+e.target.value;renderVisuals()};
+$("#desktop-new-drawing").onclick=beginNewDesktopDrawing;
+$("#desktop-start-over").onclick=beginNewDesktopSession;
 $("#desktop-reset").onclick=()=>{
   state.aligned=false;
   if(state.alignment==="sight"){
     resetWorkspace();
     autoSight();
   }else if(state.alignment==="two"){
-    resetWorkspace();
-    state.markersHidden=false;
-    render();
+    const saved=state.desktopTwoPointPreMatch;
+    if(saved){
+      state.points={
+        ref:saved.points.ref.map(p=>({...p})),
+        draw:saved.points.draw.map(p=>({...p}))
+      };
+      state.workspace={...saved.workspace};
+      state.desktopIndependentBase={...saved.desktopIndependentBase};
+      restoreLayer("ref",saved.layers.ref);
+      restoreLayer("draw",saved.layers.draw);
+      state.target=saved.target;
+      state.phase="workspace";
+      state.returnPhase="workspace";
+      state.aligned=false;
+      state.markersHidden=false;
+      state.desktopImagesLocked=true;
+      state.twoPointCollapsed=false;
+      rebuildMarkers();
+      render();
+    }else{
+      resetWorkspace();
+      state.markersHidden=false;
+      state.twoPointCollapsed=false;
+      render();
+    }
   }else if(state.alignment==="free"){
     initializeDesktopIndependentAlignment(()=>{
       state.phase="adjust";
