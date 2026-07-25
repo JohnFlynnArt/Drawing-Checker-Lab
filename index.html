@@ -910,7 +910,7 @@ function openCropEditor(){
     $("#desktop-workflow-copy").textContent=cropState.kind==="ref"?"Confirm the detected Reference image ratio or adjust the crop then accept the Reference":"Prepare the current Drawing using the same guided workspace.";
   }
   $("#crop-use").textContent=cropState.kind==="ref"?"Accept Reference":"Accept Drawing";
-  $("#crop-replace").textContent=cropState.kind==="ref"?"Replace Reference":"Replace Drawing";
+  $("#crop-replace").textContent=cropState.kind==="ref"?"Replace Reference":"New Drawing";
   $("#crop-ratio-heading").textContent=cropState.kind==="ref"?"REFERENCE RATIO SELECTION":"DRAWING RATIO SELECTION";
   $("#canvas-status").classList.remove("show");
   setCornerMode(false);
@@ -1760,7 +1760,7 @@ function renderStart(){
   }else if(state.setupStage==="drawing"){
     title.textContent="Upload Drawing";
     copy.textContent="Reference ready. Choose or photograph the current drawing. Image Prep opens next.";
-    actions.innerHTML='<button id="foundation-draw-library" class="foundation-primary">Choose Drawing</button><button id="foundation-draw-camera" class="foundation-secondary">Take Drawing Photo</button><button id="foundation-replace-ref" class="foundation-secondary">Replace Reference</button>';
+    actions.innerHTML='<button id="foundation-draw-library" class="foundation-primary">Choose Drawing</button><button id="foundation-draw-camera" class="foundation-secondary">Start Over</button><button id="foundation-replace-ref" class="foundation-secondary">Replace Reference</button>';
     $("#foundation-draw-library").onclick=()=>$("#mobile-draw-library").click();
     $("#foundation-draw-camera").onclick=()=>$("#mobile-draw-camera").click();
     $("#foundation-replace-ref").onclick=()=>$("#mobile-ref-input").click();
@@ -2160,9 +2160,9 @@ $("#m-more").onclick=()=>{
     <div class="pop-grid two">
       <button id="p-hide">${state.markersHidden?"Show":"Hide"} Pins</button>
       <button id="p-reset">Reset View</button>
-      <button id="p-ref">Change Reference</button>
-      <button id="p-library">Replace Drawing</button>
-      <button id="p-camera">Take Drawing Photo</button>
+      <button id="p-ref">New Drawing</button>
+      <button id="p-library">New Drawing</button>
+      <button id="p-camera">Start Over</button>
     </div>`);
 
   if(completedTwoPoint){
