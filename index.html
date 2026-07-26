@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.026 | Mobile Source Images Parity -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.027 | Mobile 2-Point Cancel + Reset Parity -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.026</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.027</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -83,7 +83,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .mobile-next{display:none;width:100%;min-height:44px;border-radius:11px;background:var(--blue);border-color:#60a5fa;color:#fff;font-size:13px;font-weight:800}
 .mobile-next.show{display:flex}
 .mobile-next.secondary{background:transparent;border-color:var(--border);color:var(--text)}
-.mobile-point-actions{display:none;grid-template-columns:1fr 1fr;gap:6px;width:100%}.mobile-point-actions.show{display:grid}.mobile-point-actions .mobile-next{display:block;margin:0}
+.mobile-point-actions{display:none;grid-template-columns:1fr 1fr;gap:6px;width:100%}.mobile-point-actions.show{display:grid}.mobile-point-actions .mobile-next{display:block;margin:0}.mobile-point-actions #mobile-cancel-two-point{grid-column:1/-1}
 .mobile-alignment-methods{display:none;grid-template-columns:repeat(3,1fr);gap:6px;width:100%}.mobile-alignment-methods.show{display:grid}.mobile-alignment-methods button{min-height:40px;border-radius:10px;font-size:11px}.mobile-alignment-methods button.active{background:var(--blue);border-color:#60a5fa;color:#fff}
 .mobile-toolbar-row{display:flex;gap:6px;align-items:center;width:100%}
 .mobile-layer-controls{display:none;width:100%;align-items:center;gap:7px;padding:2px 0 5px}
@@ -344,7 +344,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.026</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.027</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <header class="desktop-header ux-header" aria-live="polite">
 <h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
@@ -466,6 +466,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div class="mobile-point-actions" id="mobile-point-actions">
 <button class="mobile-next secondary" id="mobile-undo-point">Undo Last Point</button>
 <button class="mobile-next secondary" id="mobile-reset-points">Reset All Points</button>
+<button class="mobile-next secondary btn-danger" id="mobile-cancel-two-point">Cancel</button>
 </div>
 <div class="mobile-alignment-methods" id="mobile-alignment-methods">
 <button class="active" id="m-sight">Ratio Matching</button>
@@ -547,7 +548,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.026 — Mobile Source Images Parity */
+/* UX-003A Rev 2.027 — Mobile 2-Point Cancel + Reset Parity */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -584,6 +585,8 @@ const state={
   desktopTwoPointMemory:null,
   desktopTwoPointPreMatch:null,
   mobileTwoPointMemory:null,
+  mobileTwoPointPreMatch:null,
+  mobileTwoPointCancelled:false,
   mobilePresentationMemory:{sight:null,free:null},
   mobileViewportReserve:{top:0,bottom:0}
 };
@@ -802,7 +805,7 @@ function beginNewMobileSession(){
   state.aligned=false;
   state.aspectMismatch=false;
   state.mobileStrategyChosen=false;
-  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceFilenames={ref:"",draw:""};state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;state.mobilePresentationMemory={sight:null,free:null};state.mobileViewportReserve={top:0,bottom:0};
+  state.setupStage="reference";state.setupComplete=false;state.referenceRatio=null;state.drawingRatio=null;state.sourceFilenames={ref:"",draw:""};state.sourceImagesCollapsed=false;state.twoPointCollapsed=false;state.mobileTwoPointMemory=null;state.mobileTwoPointPreMatch=null;state.mobileTwoPointCancelled=false;state.mobilePresentationMemory={sight:null,free:null};state.mobileViewportReserve={top:0,bottom:0};
   closePopover();
   render();
 }
@@ -834,6 +837,8 @@ function beginNewMobileDrawing(){
   state.sourceImagesCollapsed=false;
   state.twoPointCollapsed=false;
   state.mobileTwoPointMemory=null;
+  state.mobileTwoPointPreMatch=null;
+  state.mobileTwoPointCancelled=false;
   state.mobilePresentationMemory={sight:null,free:null};
   state.mobileViewportReserve={top:0,bottom:0};
   state.loadingKind=null;
@@ -1438,6 +1443,7 @@ function setAlignment(type){
       }
     }else if(type==="two"){
       if(isMobileLayout()){
+        state.mobileTwoPointCancelled=false;
         if(state.points.ref.length<2)beginPointPhase("ref");
         else if(state.points.draw.length<2)beginPointPhase("draw");
         else render();
@@ -1479,6 +1485,7 @@ function setAlignment(type){
   }else if(type==="two"&&hasRef()&&hasDraw()){
     if(isMobileLayout()){
       state.twoPointCollapsed=false;
+      state.mobileTwoPointCancelled=false;
       if(!restoreMobileTwoPointState()){
         state.aligned=false;
         removeMarkers("all");
@@ -1624,12 +1631,34 @@ function resetAllPoints(){
   state.twoPointCollapsed=false;
   if(isMobileLayout()){
     state.mobileTwoPointMemory=null;
+    state.mobileTwoPointPreMatch=null;
+    state.mobileTwoPointCancelled=false;
     beginPointPhase("ref");
   }else{
     state.desktopTwoPointMemory=null;
     state.desktopTwoPointPreMatch=null;
     initializeDesktopIndependentAlignment(()=>beginPointPhase("ref"));
   }
+}
+
+function cancelMobileTwoPointWorkflow(){
+  if(!isMobileLayout()||state.alignment!=="two")return;
+  removeMarkers("all");
+  state.aligned=false;
+  state.markersHidden=false;
+  state.twoPointCollapsed=false;
+  state.mobileTwoPointMemory=null;
+  state.mobileTwoPointPreMatch=null;
+  state.mobileTwoPointCancelled=true;
+  state.phase="workspace";
+  state.returnPhase="workspace";
+  state.target="draw";
+  state.layers.ref.z=1;
+  state.layers.draw.z=2;
+  resetWorkspace();
+  resetLayer("ref");
+  resetLayer("draw");
+  render();
 }
 
 function commitPoint(pt){
@@ -1658,7 +1687,18 @@ function placePoint(clientX,clientY){
 
 function computeTwoPoint(){
   if(state.points.ref.length<2||state.points.draw.length<2)return;
-  if(!isMobileLayout()){
+  if(isMobileLayout()){
+    state.mobileTwoPointPreMatch={
+      points:{ref:state.points.ref.map(p=>({...p})),draw:state.points.draw.map(p=>({...p}))},
+      workspace:{...state.workspace},
+      layers:{ref:snapshotLayer("ref"),draw:snapshotLayer("draw")},
+      target:state.target,
+      phase:state.phase,
+      returnPhase:state.returnPhase,
+      desktopIndependentBase:{...state.desktopIndependentBase}
+    };
+    state.mobileTwoPointCancelled=false;
+  }else{
     state.desktopTwoPointPreMatch={
       points:{ref:state.points.ref.map(p=>({...p})),draw:state.points.draw.map(p=>({...p}))},
       workspace:{...state.workspace},
@@ -1758,6 +1798,7 @@ function statusText(){
   if(!hasDraw())return"Reference ready. Upload the current drawing.";
   if(state.phase==="point-ref")return mobile?`Reference Point ${state.points.ref.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Reference Point ${state.points.ref.length+1} of 2 — Press and hold for Precision Placement, move the image under the crosshair, then release.`;
   if(state.phase==="point-draw")return mobile?`Drawing Point ${state.points.draw.length+1} of 2 — Press & hold for Precision Placement • Two fingers position image • Release to place.`:`Drawing Point ${state.points.draw.length+1} of 2 — Press and hold for Precision Placement, move the image under the crosshair, then release.`;
+  if(mobile&&state.alignment==="two"&&state.mobileTwoPointCancelled)return"2-Point ready. Select 2-Point to begin point placement.";
   if(state.alignment==="two"&&!state.aligned&&state.points.ref.length===2&&state.points.draw.length===2)return"Points ready. Execute Match.";
   if(state.phase==="adjust")return mobile?`${state.target==="draw"?"Drawing":"Reference"} unlocked: drag, pinch, and twist that layer. Tap View to lock again.`:`${state.target==="draw"?"Drawing":"Reference"} layer unlocked for manual adjustment.`;
   if(state.alignment==="free")return mobile?"Free Align: manually align the selected layer with drag, pinch, and twist.":"Free Align active.";
@@ -1918,6 +1959,7 @@ function renderMobileWorkflow(){
   const next=$("#mobile-next-action");
   const undoPoint=$("#mobile-undo-point");
   const resetPoints=$("#mobile-reset-points");
+  const cancelTwoPoint=$("#mobile-cancel-two-point");
   const pointActions=$("#mobile-point-actions");
   const alignmentMethods=$("#mobile-alignment-methods");
   if(!next)return;
@@ -1927,11 +1969,12 @@ function renderMobileWorkflow(){
   if(alignmentMethods)alignmentMethods.classList.remove("show");
   if(undoPoint)undoPoint.onclick=undoLastPoint;
   if(resetPoints)resetPoints.onclick=resetAllPoints;
+  if(cancelTwoPoint)cancelTwoPoint.onclick=cancelMobileTwoPointWorkflow;
   next.disabled=false;
   next.onclick=null;
 
   const imagesReady=hasRef()&&hasDraw();
-  const activeTwoPoint=imagesReady&&state.alignment==="two"&&!state.aligned;
+  const activeTwoPoint=imagesReady&&state.alignment==="two"&&!state.aligned&&!state.mobileTwoPointCancelled;
 
   // Rev. 6: Alignment methods are primary controls whenever the workspace is idle.
   // During active 2-Point placement they yield to the point workflow.
@@ -1954,7 +1997,7 @@ function renderMobileWorkflow(){
   // Adjust Drawing action is shown.
   if(!activeTwoPoint)return;
 
-  if(pointActions&&(state.points.ref.length||state.points.draw.length))pointActions.classList.add("show");
+  if(pointActions)pointActions.classList.add("show");
 
   if(state.points.ref.length<2){
     next.disabled=false;
@@ -2218,10 +2261,56 @@ $("#m-more").onclick=()=>{
     </div>`);
 
   $("#p-reset").onclick=()=>{
-    resetWorkspace();
-    if(state.alignment==="sight")autoSight();
     closePopover();
-    render();
+    state.aligned=false;
+    if(state.alignment==="sight"){
+      resetWorkspace();
+      autoSight();
+    }else if(state.alignment==="two"){
+      const saved=state.mobileTwoPointPreMatch;
+      if(saved){
+        state.points={
+          ref:saved.points.ref.map(p=>({...p})),
+          draw:saved.points.draw.map(p=>({...p}))
+        };
+        state.workspace={...saved.workspace};
+        state.desktopIndependentBase={...saved.desktopIndependentBase};
+        restoreLayer("ref",saved.layers.ref);
+        restoreLayer("draw",saved.layers.draw);
+        state.target=saved.target;
+        state.phase="workspace";
+        state.returnPhase="workspace";
+        state.markersHidden=false;
+        state.twoPointCollapsed=false;
+        state.mobileTwoPointCancelled=false;
+        rebuildMarkers();
+        render();
+      }else{
+        removeMarkers("all");
+        resetWorkspace();
+        resetLayer("ref");
+        resetLayer("draw");
+        state.markersHidden=false;
+        state.twoPointCollapsed=false;
+        state.mobileTwoPointCancelled=false;
+        beginPointPhase("ref");
+      }
+    }else if(state.alignment==="free"){
+      resetWorkspace();
+      resetLayer("ref");
+      resetLayer("draw");
+      state.phase="adjust";
+      state.returnPhase="workspace";
+      state.target="draw";
+      state.layers.ref.z=1;
+      state.layers.draw.z=2;
+      render();
+    }else{
+      resetWorkspace();
+      resetLayer("ref");
+      resetLayer("draw");
+      render();
+    }
   };
   $("#p-new-drawing").onclick=beginNewMobileDrawing;
   $("#p-start-over").onclick=beginNewMobileSession;
