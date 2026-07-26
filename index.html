@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.024A | Workflow Hub Refinement -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.025A | Mobile Session Menu Cleanup -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.024A</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.025A</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -529,7 +529,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.024A — Workflow Hub Refinement */
+/* UX-003A Rev 2.025A — Mobile Session Menu Cleanup */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -788,6 +788,40 @@ function beginNewMobileSession(){
   closePopover();
   render();
 }
+function beginNewMobileDrawing(){
+  if(!isMobileLayout()||!hasRef())return;
+  closePopover();
+  closeCropEditor();
+  revoke(drawImg);
+  drawImg.removeAttribute("src");
+  drawImg.classList.remove("loaded");
+  removeMarkers("all");
+  resetWorkspace();
+  resetLayer("ref");
+  resetLayer("draw");
+  resetObservationToOverlay();
+  state.phase="workspace";
+  state.returnPhase="workspace";
+  state.alignment="sight";
+  state.target="draw";
+  state.layers.ref.z=1;
+  state.layers.draw.z=2;
+  state.aligned=false;
+  state.aspectMismatch=false;
+  state.mobileStrategyChosen=false;
+  state.setupStage="drawing";
+  state.setupComplete=false;
+  state.drawingRatio=null;
+  state.sourceFilenames.draw="";
+  state.sourceImagesCollapsed=false;
+  state.twoPointCollapsed=false;
+  state.mobileTwoPointMemory=null;
+  state.mobilePresentationMemory={sight:null,free:null};
+  state.mobileViewportReserve={top:0,bottom:0};
+  state.loadingKind=null;
+  render();
+}
+
 function beginNewDesktopSession(){
   if(isMobileLayout())return;
   closePopover();
@@ -2147,33 +2181,22 @@ function resetMobileTwoPointMatch(){
 $("#m-more").setAttribute("aria-expanded","false");
 $("#m-more").onclick=()=>{
   if($("#mobile-popover").classList.contains("open")){closePopover();return;}
-  const completedTwoPoint=hasCompletedMobileTwoPoint();
   openPopover(`
-    ${completedTwoPoint?`
-      <div class="pop-title">2-Point</div>
-      <div class="pop-grid two" style="margin-bottom:10px">
-        <button id="p-edit-two">Undo Last Point</button>
-        <button id="p-reset-two">Reset All Points</button>
-      </div>
-    `:""}
-    <div class="pop-title">Session, Images & View</div>
-    <div class="pop-grid two">
-      <button id="p-hide">${state.markersHidden?"Show":"Hide"} Pins</button>
+    <div class="pop-title">Session</div>
+    <div class="pop-grid">
       <button id="p-reset">Reset View</button>
-      <button id="p-ref">New Drawing</button>
-      <button id="p-library">New Drawing</button>
-      <button id="p-camera">Start Over</button>
+      <button id="p-new-drawing">New Drawing</button>
+      <button class="btn-danger" id="p-start-over">Start Over</button>
     </div>`);
 
-  if(completedTwoPoint){
-    $("#p-edit-two").onclick=editMobileTwoPointMatch;
-    $("#p-reset-two").onclick=resetMobileTwoPointMatch;
-  }
-  $("#p-hide").onclick=()=>{state.markersHidden=!state.markersHidden;closePopover();render()};
-  $("#p-reset").onclick=()=>{resetWorkspace();if(state.alignment==="sight")autoSight();closePopover();render()};
-  $("#p-ref").onclick=beginNewMobileSession;
-  $("#p-library").onclick=()=>{closePopover();$("#mobile-draw-library").click()};
-  $("#p-camera").onclick=()=>{closePopover();$("#mobile-draw-camera").click()};
+  $("#p-reset").onclick=()=>{
+    resetWorkspace();
+    if(state.alignment==="sight")autoSight();
+    closePopover();
+    render();
+  };
+  $("#p-new-drawing").onclick=beginNewMobileDrawing;
+  $("#p-start-over").onclick=beginNewMobileSession;
 };
 
 $("#start-free").onclick=()=>setAlignment("free");
