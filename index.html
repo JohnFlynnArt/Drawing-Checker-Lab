@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.026 | Mobile Upload Workflow -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.026 | Mobile Source Images Parity -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -138,7 +138,17 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .foundation-card h2{margin:0 0 8px;font-size:24px}.foundation-card p{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.45}
 .foundation-progress{display:none;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.foundation-step{padding:8px;border-radius:10px;border:1px solid var(--border);font-size:10px;text-align:center;color:var(--muted)}.foundation-step.active{background:rgba(59,130,246,.18);border-color:#60a5fa;color:#fff}.foundation-step.done{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.5);color:#9ae6c8}
 .foundation-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.foundation-actions.one{grid-template-columns:1fr}.foundation-actions.three{grid-template-columns:repeat(3,1fr)}.foundation-actions button{min-height:48px;border-radius:12px;font-size:13px}.foundation-primary{background:var(--blue);border-color:#60a5fa}.foundation-secondary{background:#26262d}.foundation-note{margin-top:12px;font-size:11px;color:var(--muted);text-align:center}
-.upload-toolbox-label{margin:0 0 12px;padding:0 0 10px;border-bottom:1px solid var(--border);font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;text-align:left}.foundation-card.upload-toolbox{width:min(390px,94vw);padding:18px;border-radius:10px;background:var(--card);border:1px solid var(--border)}.foundation-card.upload-toolbox h2{font-size:17px;margin-bottom:6px;text-align:left}.foundation-card.upload-toolbox p{text-align:left;margin-bottom:14px}.foundation-card.upload-toolbox .foundation-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.foundation-card.upload-toolbox .foundation-actions button{min-height:46px;border-radius:8px}.foundation-card.upload-toolbox .foundation-actions .upload-cancel{grid-column:1/-1;background:transparent;color:var(--red);border-color:var(--red)}.foundation-card.upload-toolbox .foundation-note{text-align:left;margin-top:10px}
+/* REV 2.026 — MOBILE SOURCE IMAGES PARITY */
+.mobile-source-workflow{width:min(430px,94vw);padding:20px;border-radius:18px;background:rgba(26,26,30,.97);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.mobile-source-workflow h2{margin:0 0 8px;font-size:22px;text-align:left}.mobile-source-workflow>p{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.45;text-align:left}
+.mobile-source-card{padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;flex-direction:column;gap:12px;text-align:left}
+.mobile-source-card-title{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.mobile-source-label{font-size:12px;color:#d7d9de}.mobile-source-slot{min-height:62px;padding:10px;border:1px dashed #4a4a55;border-radius:9px;background:rgba(0,0,0,.15);display:flex;align-items:center;gap:8px}
+.mobile-source-slot.inactive{color:var(--muted);font-size:12px}.mobile-source-slot.ready{border-style:solid;justify-content:space-between}
+.mobile-source-ready{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--green);font-size:12px;font-weight:750}
+.mobile-source-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.mobile-source-actions button{min-height:44px;border-radius:9px;font-size:12px}.mobile-source-actions .primary{background:var(--blue);border-color:#60a5fa;color:#fff}
+.mobile-source-slot .session-action{flex:0 0 auto;min-height:38px;padding:7px 10px}
+.mobile-source-note{margin-top:12px;color:var(--muted);font-size:11px;text-align:left}
 .ratio-feedback{display:none;padding:8px 10px;border-radius:9px;border:1px solid var(--border);font-size:11px;color:var(--muted);justify-content:space-between;gap:8px}.ratio-feedback.show{display:flex}.ratio-feedback.match{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08);color:#9ae6c8}.ratio-feedback strong{color:inherit}
 @media(max-width:768px){.foundation-start{padding:16px}.foundation-card{padding:20px}.foundation-card h2{font-size:21px}.foundation-actions.three{grid-template-columns:1fr}.foundation-progress{gap:5px}.foundation-step{font-size:9px;padding:7px 4px}}
 
@@ -416,17 +426,23 @@ input[type=range]{width:100%;accent-color:var(--blue)}
     </div>
 </main>
 <div class="foundation-start" id="foundation-start">
-<div class="foundation-card upload-toolbox">
-<div class="foundation-progress">
+<div class="mobile-source-workflow">
+<h2 id="foundation-title">Upload Reference</h2>
+<p id="foundation-copy">Choose a reference image. Image Prep opens automatically.</p>
+<section class="mobile-source-card" aria-label="Source Images">
+<div class="mobile-source-card-title">Source Images</div>
+<div class="mobile-source-label">Reference</div>
+<div class="mobile-source-slot" id="mobile-source-ref-slot"></div>
+<div class="mobile-source-label">Drawing</div>
+<div class="mobile-source-slot inactive" id="mobile-source-draw-slot">Available after the Reference is ready.</div>
+</section>
+<div class="mobile-source-note" id="foundation-note">Complete both source images before Alignment.</div>
+<div id="foundation-actions" hidden></div>
+<div class="foundation-progress" hidden>
 <div class="foundation-step active" id="foundation-step-ref">1 · Reference</div>
 <div class="foundation-step" id="foundation-step-draw">2 · Drawing</div>
 <div class="foundation-step" id="foundation-step-align">3 · Alignment</div>
 </div>
-<div class="upload-toolbox-label">IMAGE UPLOAD</div>
-<h2 id="foundation-title">Drawing Checker Studio</h2>
-<p id="foundation-copy">Upload the Reference and Drawing. Each image opens in Image Prep before Alignment.</p>
-<div class="foundation-actions one" id="foundation-actions"></div>
-<div class="foundation-note" id="foundation-note">Choose an image first. Image Prep opens next.</div>
 </div>
 </div>
 <header class="mobile-ui mobile-topbar" aria-live="polite"><div class="mobile-header ux-header"><h1 class="ux-header-title" id="mobile-header-title">Upload Reference</h1><p class="mobile-status ux-header-context" id="mobile-status">Upload a reference to begin.</p></div></header>
@@ -531,7 +547,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.026 — Mobile Upload Workflow */
+/* UX-003A Rev 2.026 — Mobile Source Images Parity */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -945,11 +961,8 @@ function openCropEditor(){
     $("#desktop-workflow-title").textContent=cropState.kind==="ref"?"Prepare Reference":"Prepare Drawing";
     $("#desktop-workflow-copy").textContent=cropState.kind==="ref"?"Confirm the detected Reference image ratio or adjust the crop then accept the Reference":"Prepare the current Drawing using the same guided workspace.";
   }
-  $("#crop-use").textContent="Accept Image";
-  $("#crop-replace").textContent="Replace Image";
-  $("#crop-cancel-top").textContent="Cancel";
-  $("#crop-more-toggle").style.display=isMobileLayout()?"":"none";
-  $("#crop-replace").style.display=isMobileLayout()?"":"none";
+  $("#crop-use").textContent=cropState.kind==="ref"?"Accept Reference":"Accept Drawing";
+  $("#crop-replace").textContent=cropState.kind==="ref"?"Replace Reference":"New Drawing";
   $("#crop-ratio-heading").textContent=cropState.kind==="ref"?"REFERENCE RATIO SELECTION":"DRAWING RATIO SELECTION";
   $("#canvas-status").classList.remove("show");
   setCornerMode(false);
@@ -1773,16 +1786,12 @@ function renderDesktopSlots(){
   const cd=$("#desktop-change-draw");
   if(cd)cd.onclick=beginNewDesktopDrawing;
 }
-function showWelcomeScreen(){
-  closePopover();
-  const splash=$("#beta-splash");
-  if(splash)splash.style.display="flex";
-}
 function renderStart(){
-  const overlay=$("#foundation-start"),title=$("#foundation-title"),copy=$("#foundation-copy"),actions=$("#foundation-actions"),note=$("#foundation-note");
+  const overlay=$("#foundation-start"),title=$("#foundation-title"),copy=$("#foundation-copy"),note=$("#foundation-note");
+  const refSlot=$("#mobile-source-ref-slot"),drawSlot=$("#mobile-source-draw-slot");
   if(!overlay)return;
 
-  // Desktop keeps its workspace visible. Progressive disclosure happens in the sidebar.
+  // Desktop keeps its established Source Images workflow in the sidebar.
   if(!isMobileLayout()){
     overlay.classList.add("hidden");
     return;
@@ -1790,34 +1799,42 @@ function renderStart(){
 
   overlay.classList.toggle("hidden",state.setupComplete);
   if(state.setupComplete)return;
-  actions.className="foundation-actions";actions.innerHTML="";
-
   if(state.setupStage==="home")state.setupStage="reference";
 
-  if(state.setupStage==="reference"){
-    title.textContent="Upload Reference";
-    copy.textContent="Acquire the Reference image. Image Preparation opens only after an image is selected.";
-    actions.innerHTML='<button id="foundation-ref-library" class="foundation-primary">Upload Image</button><button id="foundation-ref-camera" class="foundation-secondary">Take Photo</button><button id="foundation-ref-cancel" class="upload-cancel">Cancel</button>';
-    $("#foundation-ref-library").onclick=()=>$("#mobile-ref-input").click();
-    $("#foundation-ref-camera").onclick=()=>$("#mobile-ref-camera").click();
-    $("#foundation-ref-cancel").onclick=showWelcomeScreen;
-    note.textContent="No Image Preparation controls are shown until the Reference exists.";
-  }else if(state.setupStage==="drawing"){
-    title.textContent="Upload Drawing";
-    copy.textContent="The Reference is ready. Acquire the current Drawing image to continue.";
-    actions.innerHTML='<button id="foundation-draw-library" class="foundation-primary">Upload Image</button><button id="foundation-draw-camera" class="foundation-secondary">Take Photo</button><button id="foundation-draw-cancel" class="upload-cancel">Cancel</button>';
-    $("#foundation-draw-library").onclick=()=>$("#mobile-draw-library").click();
-    $("#foundation-draw-camera").onclick=()=>$("#mobile-draw-camera").click();
-    $("#foundation-draw-cancel").onclick=beginNewMobileSession;
-    note.textContent="Image Preparation opens after the Drawing is selected. Cancel returns to Reference upload.";
-  }else{
-    state.setupComplete=true;
-    state.mobileStrategyChosen=true;
-    state.alignment="sight";
-    overlay.classList.add("hidden");
-    autoSight();
-    return;
+  const refReady=hasRef();
+  title.textContent=refReady?"Upload Drawing":"Upload Reference";
+  copy.textContent=refReady
+    ? "Reference ready. Choose the current drawing. Image Prep opens automatically."
+    : "Choose a reference image. Image Prep opens automatically.";
+
+  if(refSlot){
+    refSlot.className="mobile-source-slot"+(refReady?" ready":"");
+    if(refReady){
+      const filename=state.sourceFilenames.ref||"Prepared image";
+      refSlot.innerHTML=`<span class="mobile-source-ready" title="${escapeHTML(filename)}">✓ ${escapeHTML(filename)}</span><button id="mobile-source-start-over" class="btn-danger session-action">Start Over</button>`;
+      $("#mobile-source-start-over").onclick=beginNewMobileSession;
+    }else{
+      refSlot.innerHTML='<div class="mobile-source-actions"><button id="mobile-source-ref-library" class="primary">Upload Image</button><button id="mobile-source-ref-camera">Take Photo</button></div>';
+      $("#mobile-source-ref-library").onclick=()=>$("#mobile-ref-input").click();
+      $("#mobile-source-ref-camera").onclick=()=>$("#mobile-ref-camera").click();
+    }
   }
+
+  if(drawSlot){
+    if(refReady){
+      drawSlot.className="mobile-source-slot";
+      drawSlot.innerHTML='<div class="mobile-source-actions"><button id="mobile-source-draw-library" class="primary">Upload Image</button><button id="mobile-source-draw-camera">Take Photo</button></div>';
+      $("#mobile-source-draw-library").onclick=()=>$("#mobile-draw-library").click();
+      $("#mobile-source-draw-camera").onclick=()=>$("#mobile-draw-camera").click();
+    }else{
+      drawSlot.className="mobile-source-slot inactive";
+      drawSlot.textContent="Available after the Reference is ready.";
+    }
+  }
+
+  note.textContent=refReady
+    ? "The prepared Reference remains in place while you add the Drawing."
+    : "Prepare the Reference first. The Drawing controls become available when it is accepted.";
   const toolbar=$("#mobile-toolbar");if(toolbar)toolbar.style.display="none";closePopover();
 }
 
@@ -2662,7 +2679,7 @@ render();
 document.addEventListener('DOMContentLoaded',()=>{
   const b=document.getElementById('beta-begin');
   const s=document.getElementById('beta-splash');
-  if(b)b.onclick=()=>{if(s)s.style.display='none';};
+  if(b)b.onclick=()=>{if(s)s.remove();};
 });</script>
 </body>
 </html>
