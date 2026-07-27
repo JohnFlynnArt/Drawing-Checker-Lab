@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.027A | Contextual Mobile 2-Point Controls -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.028 | Desktop 2-Point Workspace Panning -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.027A</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.028</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -344,7 +344,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.027A</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.028</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <header class="desktop-header ux-header" aria-live="polite">
 <h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
@@ -548,7 +548,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.027A — Contextual Mobile 2-Point Controls */
+/* UX-003A Rev 2.028 — Desktop 2-Point Workspace Panning */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -2561,9 +2561,17 @@ window.addEventListener("mousemove",e=>{
       state.workspace.x+=dx;
       state.workspace.y+=dy;
       renderVisuals();
-    }else if(g.moved&&g.timer){
-      clearTimeout(g.timer);
-      g.timer=null;
+    }else if(g.moved){
+      // Rev 2.028: During desktop 2-Point point acquisition, a normal
+      // left-drag pans the workspace camera. It does not move either image
+      // independently and it does not alter stored point coordinates.
+      if(g.timer){
+        clearTimeout(g.timer);
+        g.timer=null;
+      }
+      state.workspace.x+=dx;
+      state.workspace.y+=dy;
+      renderVisuals();
     }
     return;
   }
