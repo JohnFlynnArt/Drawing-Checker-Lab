@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.030A | Desktop 2-Point Cancel and Count Synchronization -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.030B | Desktop 2-Point Cancel and Count Synchronization -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.030A</title>
+<meta content="yes" name="mobile-web-app-capable"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.030B</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -342,7 +345,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .precision-label{position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.72);font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
 
 
-/* UX-003A REV 2.030A — MOBILE SPLASH RESPONSIVE FIT */
+/* UX-003A REV 2.030B — MOBILE SPLASH RESPONSIVE FIT */
 #beta-splash-card{transform-origin:center center;will-change:transform}
 @media(max-width:768px){
   #beta-splash{overflow:hidden;padding:8px}
@@ -352,7 +355,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div id="beta-splash-card" style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li><b>Prepare Reference</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Prepare Drawing</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Choose an Alignment Method</b><ul style="margin-top:8px"><li><b>Ratio Matching</b> — Use when image ratios match.</li><li><b>2-Point</b> — Use to compare two images with different ratios.</li><li><b>Free Align</b> — Use to manually align images.</li></ul></li><li><b>Observe</b></li></ol><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.030A</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div id="beta-splash-card" style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li><b>Prepare Reference</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Prepare Drawing</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Choose an Alignment Method</b><ul style="margin-top:8px"><li><b>Ratio Matching</b> — Use when image ratios match.</li><li><b>2-Point</b> — Use to compare two images with different ratios.</li><li><b>Free Align</b> — Use to manually align images.</li></ul></li><li><b>Observe</b></li></ol><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.030B</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <header class="desktop-header ux-header" aria-live="polite">
 <h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
@@ -557,7 +560,49 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.030A — fit the complete mobile splash inside the portrait viewport without scrolling. */
+/* UX-003A Rev 2.030B — restore phone-only portrait orientation lock.
+   Tablets and desktop remain unrestricted. No orientation message is shown. */
+(function(){
+  const PHONE_MAX_SHORT_SIDE=600;
+
+  function isPhoneClass(){
+    const vv=window.visualViewport;
+    const width=vv?vv.width:window.innerWidth;
+    const height=vv?vv.height:window.innerHeight;
+    const shortSide=Math.min(width,height);
+    const coarse=window.matchMedia("(pointer:coarse)").matches;
+    const touch=(navigator.maxTouchPoints||0)>0;
+    return shortSide<=PHONE_MAX_SHORT_SIDE && (coarse||touch);
+  }
+
+  async function lockPhonePortrait(){
+    if(!isPhoneClass())return;
+    const orientation=screen.orientation;
+    if(!orientation||typeof orientation.lock!=="function")return;
+    try{
+      await orientation.lock("portrait-primary");
+    }catch(primaryError){
+      try{await orientation.lock("portrait");}catch(_){/* Browser declined; no UI interruption. */}
+    }
+  }
+
+  function scheduleLock(){requestAnimationFrame(lockPhonePortrait);}
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",scheduleLock,{once:true});
+  else scheduleLock();
+
+  // The Begin action is a direct user gesture, which is required by some browsers.
+  document.addEventListener("click",event=>{
+    if(event.target&&event.target.id==="beta-begin")lockPhonePortrait();
+  },{passive:true});
+  document.addEventListener("touchend",lockPhonePortrait,{passive:true,once:true});
+  window.addEventListener("pageshow",scheduleLock,{passive:true});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)scheduleLock();});
+  window.addEventListener("orientationchange",scheduleLock,{passive:true});
+})();
+</script>
+<script>
+/* UX-003A Rev 2.030B — fit the complete mobile splash inside the portrait viewport without scrolling. */
 (function(){
   const MOBILE_QUERY="(max-width:768px)";
   function fitMobileSplash(){
@@ -588,7 +633,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 })();
 </script>
 <script>
-/* UX-003A Rev 2.030A — Desktop 2-Point Cancel and Count Synchronization */
+/* UX-003A Rev 2.030B — Desktop 2-Point Cancel and Count Synchronization */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
