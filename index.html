@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.028A | Desktop 2-Point Execute Preview Pan Synchronization -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.029 | Desktop 2-Point Cancel and Count Synchronization -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.028A</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.029</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -344,7 +344,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.028A</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li>Prepare Reference</li><li>Prepare Drawing</li><li>Choose an Alignment Method</li><li>Observe</li></ol><p><b>Ratio Matching</b> • Matching proportions<br/><b>2-Point</b> • Different proportions<br/><b>Free Align</b> • Manual alignment</p><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.029</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <header class="desktop-header ux-header" aria-live="polite">
 <h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
@@ -375,12 +375,13 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <div class="disclosure-head"><div class="card-title">2-Point Alignment</div><button aria-expanded="true" aria-label="Collapse 2-Point Alignment" class="disclosure-toggle" id="desktop-two-toggle">▴</button></div>
 <div class="two-point-body" id="desktop-two-body">
 <div class="crop-guidance" id="desktop-two-instruction"><strong>Place Alignment Point 1 of 2</strong> — Press and hold for Precision Placement, move the image under the crosshair, then release.</div>
-<button class="btn-primary" id="desktop-two-action">Set Alignment Points (0/2)</button>
+<button class="btn-primary" id="desktop-two-action">Set Reference Point (1/2)</button>
 <div class="row2">
 <button id="desktop-undo-point" style="display:none">Undo Last Point</button>
 <button id="desktop-reset-points" style="display:none">Reset All Points</button>
 </div>
 <button class="btn-primary" id="desktop-compute" style="display:none">Execute Match</button>
+<button class="btn-danger" id="desktop-cancel-two-point">Cancel</button>
 </div>
 </section>
 <section class="card" id="desktop-compare-card">
@@ -548,7 +549,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.028A — Desktop 2-Point Execute Preview Pan Synchronization */
+/* UX-003A Rev 2.029 — Desktop 2-Point Cancel and Count Synchronization */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -1649,6 +1650,25 @@ function resetAllPoints(){
   }
 }
 
+function cancelDesktopTwoPointWorkflow(){
+  if(isMobileLayout()||state.alignment!=="two")return;
+  removeMarkers("all");
+  state.aligned=false;
+  state.markersHidden=false;
+  state.twoPointCollapsed=false;
+  state.desktopTwoPointMemory=null;
+  state.desktopTwoPointPreMatch=null;
+  state.phase="workspace";
+  state.returnPhase="workspace";
+  state.target="draw";
+  state.layers.ref.z=1;
+  state.layers.draw.z=2;
+  state.alignment="sight";
+  state.desktopImagesLocked=true;
+  resetObservationToOverlay();
+  autoSight();
+}
+
 function cancelMobileTwoPointWorkflow(){
   if(!isMobileLayout()||state.alignment!=="two")return;
   removeMarkers("all");
@@ -2072,16 +2092,17 @@ function render(){
   const desktopUndoPoint=$("#desktop-undo-point");
   const desktopResetPoints=$("#desktop-reset-points");
   const desktopCompute=$("#desktop-compute");
+  const desktopCancelTwoPoint=$("#desktop-cancel-two-point");
   if(state.alignment==="two"){
     const refDone=state.points.ref.length===2;
     const drawDone=state.points.draw.length===2;
     if(!refDone){
-      desktopTwoAction.textContent=`Set Reference Point (1/2)`;
+      desktopTwoAction.textContent=`Set Reference Point (${state.points.ref.length+1}/2)`;
       desktopTwoAction.style.display="block";
       desktopTwoAction.classList.remove("active","two-draw-state");
       desktopTwoAction.classList.add("two-ref-state");
     }else if(!drawDone){
-      desktopTwoAction.textContent=`Set Drawing Point (2/2)`;
+      desktopTwoAction.textContent=`Set Drawing Point (${state.points.draw.length+1}/2)`;
       desktopTwoAction.style.display="block";
       desktopTwoAction.classList.remove("active","two-ref-state");
       desktopTwoAction.classList.add("two-draw-state");
@@ -2093,6 +2114,7 @@ function render(){
     desktopUndoPoint.style.display=hasAnyPoints?"block":"none";
     desktopResetPoints.style.display=(hasAnyPoints||state.aligned)?"block":"none";
     desktopCompute.style.display=(!state.aligned&&refDone&&drawDone)?"block":"none";
+    if(desktopCancelTwoPoint)desktopCancelTwoPoint.style.display=!state.aligned?"block":"none";
   }
 
   for(const mode of ["overlay","blink","outline"]){
@@ -2153,6 +2175,7 @@ $("#desktop-two-action").onclick=()=>{
 $("#desktop-undo-point").onclick=undoLastPoint;
 $("#desktop-reset-points").onclick=resetAllPoints;
 $("#desktop-compute").onclick=computeTwoPoint;
+$("#desktop-cancel-two-point").onclick=cancelDesktopTwoPointWorkflow;
 $("#desktop-overlay").onclick=()=>setCompare("overlay");
 $("#desktop-blink").onclick=()=>setCompare("blink");
 $("#desktop-outline").onclick=()=>setCompare("outline");
