@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.030C | Desktop 2-Point Cancel and Count Synchronization -->
+<!-- Drawing Checker Studio | 1.0 Beta RC1 | UX-003A Rev 2.031 | Desktop Touchpad Optimization -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -8,7 +8,7 @@
 <meta content="yes" name="mobile-web-app-capable"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
-<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.030C</title>
+<title>Drawing Checker Studio 1.0 Beta RC1 — UX-003A Rev 2.031</title>
 <style>
 :root{
   --bg:#121214;--panel:#1a1a1e;--card:#222227;--border:#34343d;
@@ -360,7 +360,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div id="beta-splash-card" style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li><b>Prepare Reference</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Prepare Drawing</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Choose an Alignment Method</b><ul style="margin-top:8px"><li><b>Ratio Matching</b> — Use when image ratios match.</li><li><b>2-Point</b> — Use to compare two images with different ratios.</li><li><b>Free Align</b> — Use to manually align images.</li></ul></li><li><b>Observe</b></li></ol><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.030C</p><button id="beta-begin">Begin</button></div></div>
+<div id="app"><div id="beta-splash" style="position:fixed;inset:0;z-index:5000;background:#111d;display:flex;align-items:center;justify-content:center;"><div id="beta-splash-card" style="background:#1a1a1e;padding:28px;border-radius:16px;max-width:620px;color:white"><h1>Drawing Checker Studio</h1><h3>Version 1.0 Beta</h3><h2>Observation First™</h2><p>Drawing Checker Studio helps artists quickly and easily compare a drawing with a reference image.</p><p><b>Workflow</b></p><ol><li><b>Prepare Reference</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Prepare Drawing</b><br/><span style="color:#9ba1a6;font-size:13px">Includes Crop and Skew Correction</span></li><li><b>Choose an Alignment Method</b><ul style="margin-top:8px"><li><b>Ratio Matching</b> — Use when image ratios match.</li><li><b>2-Point</b> — Use to compare two images with different ratios.</li><li><b>Free Align</b> — Use to manually align images.</li></ul></li><li><b>Observe</b></li></ol><p>This is a Beta. Your feedback is encouraged and appreciated.</p><p style="font-size:12px">© 2026 John Flynn • Drawing Checker Studio 1.0 Beta • UX-003A Rev 2.031</p><button id="beta-begin">Begin</button></div></div>
 <aside class="desktop-sidebar">
 <header class="desktop-header ux-header" aria-live="polite">
 <h1 class="ux-header-title" id="desktop-workflow-title">Upload Reference</h1>
@@ -565,7 +565,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 <input accept="image/*" capture="environment" class="hidden-input" id="mobile-draw-camera" type="file"/>
 </div>
 <script>
-/* UX-003A Rev 2.030C — restore phone-only portrait orientation lock.
+/* UX-003A Rev 2.031 — restore phone-only portrait orientation lock.
    Tablets and desktop remain unrestricted. No orientation message is shown. */
 (function(){
   const PHONE_MAX_SHORT_SIDE=600;
@@ -607,7 +607,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 })();
 </script>
 <script>
-/* UX-003A Rev 2.030C — fit the complete mobile splash inside the portrait viewport without scrolling. */
+/* UX-003A Rev 2.031 — fit the complete mobile splash inside the portrait viewport without scrolling. */
 (function(){
   const MOBILE_QUERY="(max-width:768px)";
   function fitMobileSplash(){
@@ -638,7 +638,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 })();
 </script>
 <script>
-/* UX-003A Rev 2.030C — Desktop 2-Point Cancel and Count Synchronization */
+/* UX-003A Rev 2.031 — Desktop Touchpad Optimization */
 document.addEventListener("DOMContentLoaded",()=>{
 const $=s=>document.querySelector(s);
 const viewport=$("#viewport"), world=$("#world");
@@ -1247,7 +1247,7 @@ function renderCrop(){
   const stage=$("#crop-stage").getBoundingClientRect(),f=cropState.frame,p=$("#crop-preview");if(!stage.width||!p||!cropState.image)return;
   p.style.width=cropState.image.naturalWidth+"px";p.style.height=cropState.image.naturalHeight+"px";
   if(isMobileLayout()){
-    // Rev 2.030C mobile-only registration fix: use the same stage-local origin
+    // Rev 2.031 mobile-only registration fix: use the same stage-local origin
     // as the crop frame and 4-Point overlay instead of combining a percentage
     // origin with a separate translation. This does not alter crop geometry.
     p.style.left=(stage.width/2+cropState.x)+"px";
@@ -2605,7 +2605,39 @@ cropStage.addEventListener("touchend",e=>{
   if(e.touches.length===0){cropState.drag=null;cropTouches=null;}
 },{passive:false});
 cropStage.addEventListener("touchcancel",()=>{const g=cropState.freeTouchGesture;if(g?.timer)clearTimeout(g.timer);if(g?.precision&&cropState.freePointGesture?.active)finishFreePointPrecision(false);cropState.freeTouchGesture=null;cropState.drag=null;cropTouches=null},{passive:false});
-cropStage.addEventListener("wheel",e=>{e.preventDefault();if(!cropState.wheelHistoryTimer)pushCropHistory();clearTimeout(cropState.wheelHistoryTimer);cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);cropState.scale*=e.deltaY<0?1.06:.94;cropState.scale=Math.max(.01,cropState.scale);renderCrop()},{passive:false});
+/* UX-003A Rev 2.031 — Desktop touchpad optimization.
+   Trackpad pinch (Ctrl+wheel) uses a damped continuous scale. Two-finger
+   scrolling pans the Image Preparation canvas. Conventional mouse-wheel
+   input retains the existing stepped zoom behavior. */
+function isLikelyTrackpadScroll(e){
+  return e.deltaMode===0&&(Math.abs(e.deltaX)>0||Math.abs(e.deltaY)<50);
+}
+function continuousZoomFactor(deltaY,sensitivity=.0025){
+  return Math.exp(-deltaY*sensitivity);
+}
+cropStage.addEventListener("wheel",e=>{
+  e.preventDefault();
+  if(isMobileLayout())return;
+  if(!cropState.wheelHistoryTimer)pushCropHistory();
+  clearTimeout(cropState.wheelHistoryTimer);
+  cropState.wheelHistoryTimer=setTimeout(()=>cropState.wheelHistoryTimer=null,250);
+
+  if(e.ctrlKey){
+    // Native touchpad pinch: damp the high-frequency pixel deltas.
+    const factor=continuousZoomFactor(e.deltaY,.0022);
+    cropState.scale=Math.max(.01,Math.min(20,cropState.scale*factor));
+  }else if(isLikelyTrackpadScroll(e)){
+    // Native two-finger scroll: pan rather than zoom.
+    const panSensitivity=.72;
+    cropState.x-=e.deltaX*panSensitivity;
+    cropState.y-=e.deltaY*panSensitivity;
+  }else{
+    // Preserve conventional mouse-wheel zoom.
+    cropState.scale*=e.deltaY<0?1.06:.94;
+    cropState.scale=Math.max(.01,Math.min(20,cropState.scale));
+  }
+  renderCrop();
+},{passive:false});
 let alignmentResizeTimer=null;
 window.addEventListener("resize",()=>{
   if(isMobileLayout()){
@@ -2746,9 +2778,24 @@ window.addEventListener("blur",()=>{
 
 viewport.addEventListener("wheel",e=>{
   e.preventDefault();
+  if(isMobileLayout())return;
+
+  if(!e.ctrlKey&&isLikelyTrackpadScroll(e)){
+    // Native two-finger scroll pans the locked workspace smoothly.
+    const panSensitivity=.72;
+    state.workspace.x-=e.deltaX*panSensitivity;
+    state.workspace.y-=e.deltaY*panSensitivity;
+    renderVisuals();
+    return;
+  }
+
   const r=viewport.getBoundingClientRect();
   const cx=e.clientX-r.left-r.width/2,cy=e.clientY-r.top-r.height/2;
-  const factor=e.deltaY<0?1.06:.94;
+  // Touchpad pinch produces frequent Ctrl+wheel pixel deltas. Mouse wheels
+  // retain the established 6% stepped zoom.
+  const factor=e.ctrlKey
+    ?continuousZoomFactor(e.deltaY,.0022)
+    :(e.deltaY<0?1.06:.94);
   const next=Math.max(.1,Math.min(8,state.workspace.zoom*factor));
   const wx=(cx-state.workspace.x)/state.workspace.zoom;
   const wy=(cy-state.workspace.y)/state.workspace.zoom;
